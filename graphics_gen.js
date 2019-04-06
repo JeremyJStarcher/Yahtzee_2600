@@ -36,7 +36,7 @@ DigitGfx:
 !   X   X!
 !   X   X!
 !   X   X!
-!   X   X!       
+!   X   X!
 !   X   X!
         
 ! XXX XXX!

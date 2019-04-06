@@ -15,7 +15,7 @@ NAME=yahtzee
 ROM_SIZE=2048
 
 
-# node graphics_gen.js
+node graphics_gen.js
 
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -f3
 if [ -e build/${NAME}.bin ] &&  [ `wc -c < build/${NAME}.bin` -eq $ROM_SIZE ]
