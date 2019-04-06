@@ -39,6 +39,23 @@
 
     PROCESSOR 6502
     INCLUDE "vcs.h"
+
+    SEG.U vars
+    ORG $80
+
+GameMode:                   ; One or Two players
+    ds 1
+
+GameState
+    ds 1
+
+CurrentPlayer:             ; 0 for P0 or 1 for P1
+    ds 1
+
+LastSWCHB:               ; Avoid multiple detection of console switches
+    ds 1
+
+    SEG code
     ORG $F800          ; It's a 2K cart, meaning it has 2048 bytes! #mindblow
 
 ;;;;;;;;;;;;;;;;;
@@ -99,17 +116,6 @@ GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
 
 ; Some positions are shared between different coroutines
 ; (think of them as local variables)
-
-GameMode = $A4               ; One or Two players
-
-TempVar1 = $A6               ; General use variable
-TempVar2 = $A7               ; General use variable
-
-GameState = $A8;
-
-CurrentPlayer = $C7          ; 0 for P0 or 1 for P1
-
-LastSWCHB = $C8              ; Avoid multiple detection of console switches
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
