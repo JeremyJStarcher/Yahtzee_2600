@@ -1,4 +1,3 @@
-;
 ; Yahtzee 2600
 ; ============
 ;
@@ -40,22 +39,68 @@
     PROCESSOR 6502
     INCLUDE "vcs.h"
 
-    SEG.U vars
+;===============================================================================
+; Define RAM Usage
+;===============================================================================
+
+; define a segment for variables
+; .U means uninitialized, does not end up in ROM
+    SEG.U VARS
+
+; RAM starts at $80
     ORG $80
 
-GameMode:                   ; One or Two players
+; Some positions are shared between different coroutines
+; (think of them as local variables)
+
+GameMode: ds 1              ; One or Two players
+
+TempVar1: ds 0              ; General use variable
+LineCounter: ds 0           ; Counts lines while drawing the score
+DidShift:                   ; True if a shift happened
     ds 1
 
-GameState
+TempVar2: ds 0              ; General use variable
+TempDigitBmp:               ; Stores intermediate part of 6-digit score
     ds 1
 
-CurrentPlayer:             ; 0 for P0 or 1 for P1
-    ds 1
+GameState: ds 1
 
-LastSWCHB:               ; Avoid multiple detection of console switches
-    ds 1
+; Address of the graphic for for each digit (6x2 bytes)
+; or tile (4x2 bytes) currently being drawn
+DigitBmpPtr: ds 0
+TileBmpPtr: ;  (2 per wasted)
+    ds 6 * 2
 
-    SEG code
+; Store each player score separatedly and copy
+; from/to ScoreBCD as needed to display, add, etc.
+; Note: P1 score will store (and show) the high-score in single-player games
+P0ScoreBCD:  ds 3
+P1ScoreBCD:  ds 3
+
+; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
+ScoreBCD: ds 3
+
+ScoreBeingDrawn: ds 1           ; 0 for P0 or 1 for P1
+CurrentPlayer: ds 1             ; 0 for P0 or 1 for P1
+
+TurnIndicatorCounter: ds 1      ; Controls the time spent changing player turn
+CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
+
+;===============================================================================
+; free space check before End of Cartridge
+;===============================================================================
+
+    if (* & $FF)
+        echo "------", [$FF - *]d, "bytes free before End of Ram"
+        ; align 256
+    endif
+
+;===============================================================================
+; Start ROM
+;===============================================================================
+
+    SEG CODE
     ORG $F800          ; It's a 2K cart, meaning it has 2048 bytes! #mindblow
 
 ;;;;;;;;;;;;;;;;;
@@ -65,9 +110,8 @@ LastSWCHB:               ; Avoid multiple detection of console switches
 ; Tile and digit graphics go in the beginning of the cart to keep page-aligned
 ; (that is, the address' MSB never changes and we only calculate the LSB)
 
-    INCLUDE "build/graphics.asm"                                                            ;
+    INCLUDE "build/graphics.asm"
 
-; Values that change if we are on PAL mode (TV TYPE switch "B•W" position)
 ; Order: NTSC, PAL. (thanks @SvOlli)
 VBlankTime64T:
     .byte 44,74
@@ -78,25 +122,22 @@ OverscanTime64T:
 ;; CONSTANTS ;;
 ;;;;;;;;;;;;;;;
 
-
 ; Values of GameState (it's a state machine!)
 TitleScreen       = 0  ; => AddingRandomTitle
 AddingRandomTile  = 1  ; => WaitingJoyRelease
 WaitingJoyRelease = 2  ; => WaitingJoyPress
 WaitingJoyPress   = 3  ; => Shifting
-Shifting          = 4  ; => ShowingMerged OR WaitingJoyRelease
-ShowingMerged     = 5  ; => AddingRandomTile OR GameOverFX
-GameOverFX        = 6  ; => GameOver
-GameOver          = 7  ; => TitleScreen
-
-; Values of GameMode
-OnePlayerGame = 0
-TwoPlayerGame = 1
 
 ScoreColor         = $28 ; Colors were chosen to get equal or equally nice
 InactiveScoreColor = $04 ; on both PAL and NTSC, avoiding adjust branches
-GridColor          = $04
 BackgroundColor    = $00
+
+TileHeight = 11          ; Tiles have 11 scanlines (and are in graphics.asm)
+
+
+PlayerTwoCopiesWide = $02 ; P0 and P1 drawing tiles: 0 1 0 1
+PlayerThreeCopies   = $03 ; P0 and P1 drawing score: 010101
+VerticalDelay       = $01 ; Delays writing of GRP0/GRP1 for 6-digit score
 
 JoyUp    = %11100000      ; Masks to test SWCHA for joystick movement
 JoyDown  = %11010000      ; (we'll shift P1's bits into P0s on his turn, so
@@ -108,14 +149,6 @@ ColSwitchMask   = %00001000  ; Mask to test SWCHB for TV TYPE switch
 SelectResetMask = %00000011  ; Mask to test SWCHB for GAME SELECT/RESET switches
 GameSelect      = %00000001  ; Value for GAME SELECT pressed (after mask)
 GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
-
-
-;;;;;;;;;
-;; RAM ;;
-;;;;;;;;;
-
-; Some positions are shared between different coroutines
-; (think of them as local variables)
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -143,7 +176,44 @@ CleanStack:
 ;;;;;;;;;;;;;;;;;;;
 ;; PROGRAM SETUP ;;
 ;;;;;;;;;;;;;;;;;;;
+
+; Pre-fill the graphic pointers' MSBs, so we only have to
+; figure out the LSBs for each tile or digit
+    lda #>Tiles        ; MSB of tiles/digits page
+    ldx #11            ; 12-byte table (6 digits), zero-based
+FillMsbLoop:
+    sta TileBmpPtr,x
+    dex                ; Skip to the next MSB
+    dex
+    bpl FillMsbLoop
+
+    lda #$12
+    sta P0ScoreBCD
+
+    lda #$34
+    sta P0ScoreBCD+1
+
+    lda #$56
+    sta P0ScoreBCD+2
+
+ShowTitleScreen:
+    jmp StartFrame
+
+;;;;;;;;;;;;;;
+;; NEW GAME ;;
+;;;;;;;;;;;;;;
+
 StartNewGame:
+    sta CurrentPlayer
+    sta CurrentBGColor
+
+; Start the game with a random tile
+    lda #AddingRandomTile
+    sta GameState
+
+;;;;;;;;;;;;;;;;;
+;; FRAME START ;;
+;;;;;;;;;;;;;;;;;
 
 StartFrame:
     lda #%00000010         ; VSYNC
@@ -159,49 +229,20 @@ StartFrame:
     lda #ColSwitchMask     ; VBLANK start
     bit SWCHB
     bne NoVBlankPALAdjust  ; "Color" => NTSC; "B•W" = PAL
-    inx                    ; (this ajust will appear a few times in the code)
+    inx                    ; (this adjust will appear a few times in the code)
 NoVBlankPALAdjust:
     lda VBlankTime64T,x
     sta TIM64T             ; Use a RIOT timer (with the proper value) instead
     lda #0                 ; of counting scanlines (since we only care about
     sta VBLANK             ; the overall time)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; SELECT, RESET AND P0 FIRE BUTTON ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    ldx GameMode              ; Remember if we were on one or two player mode
-    lda SWCHB                 ; We only want the switch presses once
-    and #SelectResetMask      ; (in particular GAME SELECT)
-    cmp LastSWCHB
-    beq NoSwitchChange
-    sta LastSWCHB             ; Store so we know if it's a repeat next time
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; OTHER FRAME CONFIGURATION ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    cmp #GameSelect           ; GAME SELECT flips single/multiplayer...
-    bne NoSelect
-    lda GameMode
-    eor #1
-    sta GameMode
-    jmp StartNewGame          ; ...and restarts with no further game mode change
-NoSelect:
-    cmp #GameReset            ; GAME RESET restarts the game at any time
-    beq Restart
-NoSwitchChange:
-    lda INPT4
-    bpl ButtonPressed         ; P0 Fire button pressed?
-    ldx #1                    ; P1 fire button always starts two-player game
-    lda INPT5                 ; P1 fire button pressed?
-    bmi NoRestart
-ButtonPressed:
-    lda GameState
-    cmp #TitleScreen
-    beq Restart               ; Start game if title screen
-    cmp #GameOver             ; or game over
-    bne NoRestart
-Restart:
-    stx GameMode
-    jmp StartNewGame
-NoRestart:
+    lda #0                       ; First score to show is P0's
+    sta ScoreBeingDrawn          ; (P1 will come after the grid)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
@@ -211,11 +252,208 @@ WaitForVBlankEndLoop:
     lda INTIM                ; Wait until the timer signals the actual end
     bne WaitForVBlankEndLoop ; of the VBLANK period
 
-    ldx #192
+    sta WSYNC
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; TOP SPACE ABOVE SCORE ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ldx #36
 SpaceAboveLoop:
     sta WSYNC
     dex
     bne SpaceAboveLoop
+    sta WSYNC
+
+;;;;;;;;;;;;;;;;;
+;; SCORE SETUP ;;
+;;;;;;;;;;;;;;;;;
+
+ScoreSetup:
+; Score setup scanline 1:
+; general configuration
+    lda GameState
+    cmp #TitleScreen
+    bne YesScore            ; No score on title screen
+    jmp YesScore            ; JJS
+
+NoScore:
+    ldx #13
+ScoreSpaceLoop:
+    sta WSYNC
+    dex
+    bne ScoreSpaceLoop
+    jmp ScoreCleanup
+
+YesScore:
+    lda #0                   ; No players until we start
+    sta GRP0
+    sta GRP1
+    lda ScoreBeingDrawn      ; Copy the proper score to display
+    bne ReadScoreP1
+ReadScoreP0:
+    lda P0ScoreBCD
+    ldx P0ScoreBCD+1
+    ldy P0ScoreBCD+2
+    jmp WriteScore
+ReadScoreP1:
+    lda P1ScoreBCD
+    ldx P1ScoreBCD+1
+    ldy P1ScoreBCD+2
+WriteScore:
+    sta ScoreBCD
+    stx ScoreBCD+1
+    sty ScoreBCD+2
+    sta WSYNC
+
+; Score setup scanlines 2-3:
+; player graphics triplicated and positioned like this: P0 P1 P0 P1 P0 P1
+; also, set their colors
+
+    lda #PlayerThreeCopies   ; (2)
+    sta NUSIZ0               ; (3)
+    sta NUSIZ1               ; (3)
+
+    lda #VerticalDelay       ; (2) ; Needed for precise timing of GRP0/GRP1
+    sta VDELP0               ; (3)
+    sta VDELP1               ; (3)
+
+    REPEAT 10    ; (20=10x2) ; Delay to position right
+        nop
+    REPEND
+    sta RESP0   ; (3)        ; Position P0
+    sta RESP1   ; (3)        ; Position P1
+    sta WSYNC
+
+    lda #$E0                 ; Fine-tune player positions to center on screen
+    sta HMP0
+    lda #$F0
+    sta HMP1
+    sta WSYNC
+    sta HMOVE   ; (3)
+
+    ldx #ScoreColor          ; Animate score for a few seconds when the
+    lda TurnIndicatorCounter ; turn changes
+    beq NoTurnAnimation
+    adc #ScoreColor
+    tax
+    dec TurnIndicatorCounter
+NoTurnAnimation:
+    lda ScoreBeingDrawn      ; If score drawn belongs to the current player,
+    cmp CurrentPlayer        ; it is always shown as active
+    beq SetScoreColor
+
+    lda GameState            ; If game is over, always show both scores
+
+    ldx CurrentBGColor       ; Get rid of score if not current and on single
+    lda GameMode             ; player game (in which P0 is always current),
+    beq SetScoreColor
+
+SetScoreColor:
+    stx COLUP0
+    stx COLUP1
+
+; Score setup scanlines 4-5
+; set the graphic pointers for each score digit
+
+    ldy #2            ; (2)  ; Score byte counter (source)
+    ldx #10           ; (2)  ; Graphic pointer counter (target)
+    clc               ; (2)
+
+ScorePtrLoop:
+    lda ScoreBCD,y    ; (4)
+    and #$0F          ; (2)  ; Lower nibble
+    sta TempVar1      ; (3)
+    asl               ; (2)  ; A = digit x 2
+    asl               ; (2)  ; A = digit x 4
+    adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
+    adc #<Digits      ; (2)  ; take from the first digit
+    sta DigitBmpPtr,x ; (4)  ; Store lower nibble graphic
+    dex               ; (2)
+    dex               ; (2)
+
+    lda ScoreBCD,y    ; (4)
+    and #$F0          ; (2)
+    lsr               ; (2)
+    lsr               ; (2)
+    lsr               ; (2)
+    lsr               ; (2)
+    sta TempVar1      ; (3)  ; Higher nibble
+    asl               ; (2)  ; A = digit x 2
+    asl               ; (2)  ; A = digit x 4
+    adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
+    adc #<Digits      ; (2)  ; take from the first digit
+    sta DigitBmpPtr,x ; (4)  ; store higher nibble graphic
+    dex               ; (2)
+    dex               ; (2)
+    dey               ; (2)
+    bpl ScorePtrLoop  ; (2*)
+    sta WSYNC         ;      ; We take less than 2 scanlines, round up
+
+; We may have been drawing the end of the grid (if it's P1 score)
+    lda #0
+    sta PF0
+    sta PF1
+    sta PF2
+
+;;;;;;;;;;;
+;; SCORE ;;
+;;;;;;;;;;;
+
+    ldy #4                   ; 5 scanlines
+    sty LineCounter
+DrawScoreLoop:
+    ldy LineCounter          ; 6-digit loop is heavily inspired on Berzerk's
+    lda (DigitBmpPtr),y
+    sta GRP0
+    sta WSYNC
+    lda (DigitBmpPtr+2),y
+    sta GRP1
+    lda (DigitBmpPtr+4),y
+    sta GRP0
+    lda (DigitBmpPtr+6),y
+    sta TempDigitBmp
+    lda (DigitBmpPtr+8),y
+    tax
+    lda (DigitBmpPtr+10),y
+    tay
+    lda TempDigitBmp
+    sta GRP1
+    stx GRP0
+    sty GRP1
+    sta GRP0
+    dec LineCounter
+    bpl DrawScoreLoop
+
+ScoreCleanup:                ; 1 scanline
+    lda #0
+    sta VDELP0
+    sta VDELP1
+    sta GRP0
+    sta GRP1
+    sta WSYNC
+
+    jmp FrameBottomSpace    ; otherwise, we're done with the frame
+
+DrawBottomSeparatorLoop:     ; the remainder will be drawn during P1 score
+    sta WSYNC                ; calculation
+    dex
+    bne DrawBottomSeparatorLoop
+
+    inc ScoreBeingDrawn      ; Display score for P1 (even if invisible)
+    jmp ScoreSetup
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; BOTTOM SPACE BELOW GRID ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+FrameBottomSpace:
+    ldx #36
+SpaceBelowGridLoop:
+    sta WSYNC
+    dex
+    bne SpaceBelowGridLoop
 
 ;;;;;;;;;;;;;;
 ;; OVERSCAN ;;
@@ -258,18 +496,24 @@ VerifyGameStateForJoyCheck:
 CheckJoyUp:
     cmp #JoyUp
     bne CheckJoyDown
+    jmp TriggerShift
 
 CheckJoyDown:
     cmp #JoyDown
     bne CheckJoyLeft
+    jmp TriggerShift
 
 CheckJoyLeft:
     cmp #JoyLeft
     bne CheckJoyRight
+    jmp TriggerShift
 
 CheckJoyRight:
     cmp #JoyRight
     bne EndJoyCheck
+
+TriggerShift:
+    jmp EndJoyCheck
 
 CheckJoyRelease:
     cmp #JoyMask
@@ -279,7 +523,6 @@ CheckJoyRelease:
     sta GameState
 
 EndJoyCheck:
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF OVERSCAN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -291,7 +534,19 @@ WaitForOverscanEndLoop:
     sta WSYNC
     jmp StartFrame
 
-    ORG $FFFA
+;===============================================================================
+; free space check before End of Cartridge
+;===============================================================================
+
+ if (* & $FF)
+    echo "------", [$FFFA - *]d, "bytes free before End of Cartridge"
+    align 256
+  endif
+
+;===============================================================================
+; Define End of Cartridge
+;===============================================================================
+    ORG $FFFA        ; set address to 6507 Interrupt Vectors
 
     .WORD Initialize
     .WORD Initialize
