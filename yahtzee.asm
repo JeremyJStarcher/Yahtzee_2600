@@ -76,7 +76,6 @@ TileBmpPtr: ;  (2 per wasted)
 ; from/to ScoreBCD as needed to display, add, etc.
 ; Note: P1 score will store (and show) the high-score in single-player games
 P0ScoreBCD:  ds 3
-P1ScoreBCD:  ds 3
 
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
 ScoreBCD: ds 3
@@ -86,6 +85,8 @@ CurrentPlayer: ds 1             ; 0 for P0 or 1 for P1
 
 TurnIndicatorCounter: ds 1      ; Controls the time spent changing player turn
 CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
+
+ScoreLineCount: ds 1
 
 ;===============================================================================
 ; free space check before End of Cartridge
@@ -132,9 +133,6 @@ ScoreColor         = $28 ; Colors were chosen to get equal or equally nice
 InactiveScoreColor = $04 ; on both PAL and NTSC, avoiding adjust branches
 BackgroundColor    = $00
 
-TileHeight = 11          ; Tiles have 11 scanlines (and are in graphics.asm)
-
-
 PlayerTwoCopiesWide = $02 ; P0 and P1 drawing tiles: 0 1 0 1
 PlayerThreeCopies   = $03 ; P0 and P1 drawing score: 010101
 VerticalDelay       = $01 ; Delays writing of GRP0/GRP1 for 6-digit score
@@ -149,6 +147,8 @@ ColSwitchMask   = %00001000  ; Mask to test SWCHB for TV TYPE switch
 SelectResetMask = %00000011  ; Mask to test SWCHB for GAME SELECT/RESET switches
 GameSelect      = %00000001  ; Value for GAME SELECT pressed (after mask)
 GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
+
+ScoreLines = 11
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -257,13 +257,13 @@ WaitForVBlankEndLoop:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TOP SPACE ABOVE SCORE ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    ldx #36
-SpaceAboveLoop:
-    sta WSYNC
-    dex
-    bne SpaceAboveLoop
-    sta WSYNC
+;   ** 262 scanlines total
+;    ldx #36
+;SpaceAboveLoop:
+;    sta WSYNC
+;    dex
+;    bne SpaceAboveLoop
+;    sta WSYNC
 
 ;;;;;;;;;;;;;;;;;
 ;; SCORE SETUP ;;
@@ -272,6 +272,10 @@ SpaceAboveLoop:
 ScoreSetup:
 ; Score setup scanline 1:
 ; general configuration
+
+    lda #ScoreLines
+    sta ScoreLineCount
+
     lda GameState
     cmp #TitleScreen
     bne YesScore            ; No score on title screen
@@ -289,17 +293,12 @@ YesScore:
     lda #0                   ; No players until we start
     sta GRP0
     sta GRP1
-    lda ScoreBeingDrawn      ; Copy the proper score to display
-    bne ReadScoreP1
-ReadScoreP0:
+
+    ; Score of the score -- this will have to change later
     lda P0ScoreBCD
     ldx P0ScoreBCD+1
     ldy P0ScoreBCD+2
-    jmp WriteScore
-ReadScoreP1:
-    lda P1ScoreBCD
-    ldx P1ScoreBCD+1
-    ldy P1ScoreBCD+2
+
 WriteScore:
     sta ScoreBCD
     stx ScoreBCD+1
@@ -433,7 +432,7 @@ ScoreCleanup:                ; 1 scanline
     sta GRP1
     sta WSYNC
 
-    jmp FrameBottomSpace    ; otherwise, we're done with the frame
+    jmp LoopScore    ; otherwise, we're done with the frame
 
 DrawBottomSeparatorLoop:     ; the remainder will be drawn during P1 score
     sta WSYNC                ; calculation
@@ -443,6 +442,10 @@ DrawBottomSeparatorLoop:     ; the remainder will be drawn during P1 score
     inc ScoreBeingDrawn      ; Display score for P1 (even if invisible)
     jmp ScoreSetup
 
+LoopScore
+    dec ScoreLineCount
+    beq FrameBottomSpace
+    jmp YesScore
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BOTTOM SPACE BELOW GRID ;;
