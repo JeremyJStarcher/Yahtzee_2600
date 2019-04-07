@@ -67,9 +67,7 @@ TempDigitBmp:               ; Stores intermediate part of 6-digit score
 GameState: ds 1
 
 ; Address of the graphic for for each digit (6x2 bytes)
-; or tile (4x2 bytes) currently being drawn
 DigitBmpPtr: ds 0
-TileBmpPtr: ;  (2 per wasted)
     ds 6 * 2
 
 ; Store each player score separatedly and copy
@@ -178,16 +176,17 @@ CleanStack:
 ; figure out the LSBs for each tile or digit
     lda #>Digits        ; MSB of tiles/digits page
     ldx #11            ; 12-byte table (6 digits), zero-based
-FillMsbLoop:
-    sta TileBmpPtr,x
+FillMsbLoop1:
+    sta DigitBmpPtr,x
     dex                ; Skip to the next MSB
     dex
-    bpl FillMsbLoop
+    bpl FillMsbLoop1
 
-    lda #$12
+
+    lda #$AB
     sta P0ScoreBCD
 
-    lda #$34
+    lda #$00
     sta P0ScoreBCD+1
 
     lda #$56
@@ -350,7 +349,7 @@ ScorePtrLoop:
     asl               ; (2)  ; A = digit x 2
     asl               ; (2)  ; A = digit x 4
     adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
-    adc #<Digits      ; (2)  ; take from the first digit
+    adc #<Digits; (2)  ; take from the first digit
     sta DigitBmpPtr,x ; (4)  ; Store lower nibble graphic
     dex               ; (2)
     dex               ; (2)
@@ -386,27 +385,30 @@ ScorePtrLoop:
     ldy #4                   ; 5 scanlines
     sty LineCounter
 DrawScoreLoop:
-    ldy LineCounter          ; 6-digit loop is heavily inspired on Berzerk's
-    lda (DigitBmpPtr),y
-    sta GRP0
-    sta WSYNC
-    lda (DigitBmpPtr+2),y
-    sta GRP1
-    lda (DigitBmpPtr+4),y
-    sta GRP0
-    lda (DigitBmpPtr+6),y
-    sta TempDigitBmp
-    lda (DigitBmpPtr+8),y
-    tax
-    lda (DigitBmpPtr+10),y
-    tay
-    lda TempDigitBmp
-    sta GRP1
-    stx GRP0
-    sty GRP1
-    sta GRP0
-    dec LineCounter
-    bpl DrawScoreLoop
+
+;    ldy LineCounter          ; 6-digit loop is heavily inspired on Berzerk's
+;    lda (DigitBmpPtr),y
+;    sta GRP0
+;    sta WSYNC
+;    lda (DigitBmpPtr+2),y
+;    sta GRP1
+;    lda (DigitBmpPtr+4),y
+;    sta GRP0
+;    lda (DigitBmpPtr+6),y
+;    sta TempDigitBmp
+;    lda (DigitBmpPtr+8),y
+;    tax
+;    lda (DigitBmpPtr+10),y
+;    tay
+;    lda TempDigitBmp
+;    sta GRP1
+;    stx GRP0
+;    sty GRP1
+;    sta GRP0
+;    dec LineCounter
+;    bpl DrawScoreLoop
+
+    jsr show_TopBonus
 
 ScoreCleanup:                ; 1 scanline
     lda #0

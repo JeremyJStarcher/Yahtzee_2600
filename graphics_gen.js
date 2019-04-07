@@ -139,12 +139,12 @@ TopSubtotal:
 !     XXXXXX     !
 !                !
 
-TopBonus:
+@score TopBonus:
 !      XXX  XXXX !
 !  X     X  X    !
 ! XXX  XXX  XXXX !
 !  X     X     X !
-!      XXX  XXXX !
+!XXXXXXXXX  XXXX !
 
 
 L3k:
@@ -229,7 +229,9 @@ LGrandTotal:
 const fs = require('fs');
 let glyph = [];
 let assembly = [];
-let glyphId = 0;
+let glyphBytes = [];
+let isText = false;
+let textLabel = "-none-set";
 
 function lineToBinary(line, lineNo, isReverse) {
   const digitZero = isReverse ? "0" : "1";
@@ -240,12 +242,20 @@ function lineToBinary(line, lineNo, isReverse) {
     .replace(/ /g, digitZero)
     .replace(/X/g, digitOne);
 
-    if (binary.length !== 8 && binary.length !== 16) {
-      throw new Error(`Length of line is off on ine ${lineNo}: ${line}`);
-    }
+  if (binary.length !== 8 && binary.length !== 16) {
+    throw new Error(`Length of line is off on ine ${lineNo}: ${line}`);
+  }
 
-  const s = `    .BYTE %${binary}   ; ${binary.length} - ${line.length}`;
-  glyph.push(s);
+  if (binary.length === 8) {
+    const s = `    .BYTE %${binary}   ; ${binary.length} - ${line.length}`;
+    glyph.push(s);
+  } else {
+    const s = `    .WORD %${binary}   ; ${binary.length} - ${line.length}`;
+    glyph.push(s);
+  }
+
+  const bytes = binary.match(/.{1,8}/g);
+  glyphBytes.push(bytes);
 }
 
 function title(line, lineNo) {
@@ -257,23 +267,74 @@ function digit(line, lineNo) {
 }
 
 function normal(line) {
-  if (glyph.length) {
-    glyphId++;
-  }
-
   assembly = assembly.concat(glyph.reverse());
   assembly.push(line);
 
   glyph = [];
+  glyphBytes = [];
+}
+
+function generateScoreSub(line, lineNo) {
+  assembly.push(`show_${textLabel}:`);
+
+  const code = `
+    lda #_BYTE1_
+    sta GRP0
+    sta WSYNC
+    lda #_BYTE2_
+    sta GRP1
+    nop
+    nop
+    lda (DigitBmpPtr+4),y
+    sta GRP0
+    lda (DigitBmpPtr+6),y
+    sta TempDigitBmp
+    lda (DigitBmpPtr+8),y
+    tax
+    lda (DigitBmpPtr+10),y
+    tay
+    lda TempDigitBmp
+    sta GRP1
+    stx GRP0
+    sty GRP1
+    sta GRP0
+  `;
+
+  const lines = 5;
+  const count = lines * 2; // Two bytes per line
+  let yreg = lines;
+
+  for (let i = 0; i < lines; i++) {
+    var b1 = '%' + glyphBytes[i][0];
+    var b2 = '%' + glyphBytes[i][1];
+
+    const s = code
+      .replace("_BYTE1_", b1)
+      .replace("_BYTE2_", b2)
+
+    yreg--;
+    assembly.push(`  ldy #${yreg}`);
+    assembly = assembly.concat(s);
+  }
+
+  assembly.push(`  rts`);
 }
 
 glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
   if (line[0] === '|') {
-     title(line, lineNo);
+    title(line, lineNo);
   } else if (line[0] === "!") {
-     digit(line, lineNo);
+    digit(line, lineNo);
+  } else if (line.indexOf("@score") === 0) {
+    textLabel = line.split(" ").pop().replace(/:/, "");
+    isText = true;
   } else {
-     normal(line);
+    if (isText) {
+      generateScoreSub(line, lineNo);
+    } else {
+      normal(line);
+    }
+    isText = false;
   }
 });
 
