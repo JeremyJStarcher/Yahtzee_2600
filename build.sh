@@ -3,7 +3,8 @@
 # This is my (ugly) build script. You'll likely need to adapt it
 # (at least set the proper program locations)
 
-mkdir build 2> /dev/null > /dev/null
+rm -rf build;
+mkdir build;
 
 # Program locations
 RUBY=ruby
@@ -19,7 +20,8 @@ node graphics_gen.js
 
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -f3
 if [ -e build/${NAME}.bin ] &&  [ `wc -c < build/${NAME}.bin` -eq $ROM_SIZE ]
-  echo "ROM issue";
 then
   $STELLA build/${NAME}.bin
+else
+  echo ROM issue
 fi
