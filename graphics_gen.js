@@ -21,73 +21,178 @@ const glyphs = `
 ;
 ;       ┌─── ...don't set THIS bit
 ;       ↓;
+Tiles:
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+|        |
+
+|        |
+| XXXXXX |
+| XXXXXX |
+|     XX |
+| XXXXXX |
+| XXXXXX |
+| XX     |
+| XX     |
+| XXXXXX |
+| XXXXXX |
+|        |
+
+|        |
+| XX  XX |
+| XX  XX |
+| XX  XX |
+| XXXXXX |
+| XXXXXX |
+|     XX |
+|     XX |
+|     XX |
+|     XX |
+|        |
+
+|        |
+|  XXXX  |
+| XX  XX |
+| XX  XX |
+|  XXXX  |
+|  XXXX  |
+| XX  XX |
+| XX  XX |
+| XX  XX |
+|  XXXX  |
+|        |
+
+|        |
+|  X X   |
+|  X X   |
+|  X X   |
+|  X X   |
+|  X XXX |
+|  X X X |
+|  X X X |
+|  X X X |
+|  X XXX |
+|        |
+
+|        |
+|  XX XX |
+|   X  X |
+|   X  X |
+|   X  X |
+|  XX XX |
+|   X X  |
+|   X X  |
+|   X X  |
+|  XX XX |
+|        |
+
+|        |
+| X  X X |
+| X  X X |
+| X  X X |
+| X  XXX |
+| XXX  X |
+| X X  X |
+| X X  X |
+| X X  X |
+| XXX  X |
+|        |
+
+|      X |
+|      X |
+|      X |
+|      X |
+|      X |
+|        |
+|XXX XXX |
+|  X X X |
+|XXX XXX |
+|X   X X |
+|XXX XXX |
+
+|    XXX |
+|      X |
+|    XXX |
+|    X   |
+|    XXX |
+|        |
+|XXX X   |
+|X   X   |
+|XXX XXX |
+|  X X X |
+|XXX XXX |
+
+|    XXX |
+|    X   |
+|    XXX |
+|      X |
+|    XXX |
+|        |
+|  X XXX |
+|  X   X |
+|  X XXX |
+|  X X   |
+|  X XXX |
+
+
+|  X XXX |
+|  X X X |
+|  X X X |
+|  X X X |
+|  X XXX |
+|        |
+|XXX X X |
+|  X X X |
+|XXX XXX |
+|X     X |
+|XXX   X |
+
+|XXX XXX |
+|  X X X |
+|XXX X X |
+|X   X X |
+|XXX XXX |
+|        |
+|X X XXX |
+|X X X X |
+|XXX XXX |
+|  X X X |
+|  X XXX |
+
+|X X XXX |
+|X X X X |
+|XXX X X |
+|  X X X |
+|  X XXX |
+|        |
+|XXX X   |
+|X X X   |
+|XXX XXX |
+|  X X X |
+|  X XXX |
+
+| XXX X  |
+| X X X  |
+| XXX X  |
+| X X X  |
+| XXX X  |
+|        |
+|XXX XXX |
+|X X   X |
+|XXX XXX |
+|  X X   |
+|  X XXX |
+
   
-;===============================================================================
-; Digit Graphics
-;===============================================================================
-        align 256
-DigitGfx:
-! XXX XXX!
-! X X X X!
-! X X X X!
-! X X X X!
-! XXX XXX!
-        
-!   X   X!
-!   X   X!
-!   X   X!
-!   X   X!
-!   X   X!
-        
-! XXX XXX!
-!   X   X!
-! XXX XXX!
-! X   X  !
-! XXX XXX!
-        
-! XXX XXX!
-!   X   X!
-!  XX  XX!
-!   X   X!
-! XXX XXX!
-        
-! X X X X!
-! X X X X!
-! XXX XXX!
-!   X   X!
-!   X   X!
-        
-! XXX XXX!
-! X   X  !
-! XXX XXX!
-!   X   X!
-! XXX XXX!
-           
-! XXX XXX!
-! X   X  !
-! XXX XXX!
-! X X X X!
-! XXX XXX!
-        
-! XXX XXX!
-!   X   X!
-!   X   X!
-!   X   X!
-!   X   X!
-        
-! XXX XXX!
-! X X X X!
-! XXX XXX!
-! X X X X!
-! XXX XXX!
-        
-! XXX XXX!
-! X X X X!
-! XXX XXX!
-!   X   X!
-! XXX XXX!
-        
-BigDigits:
+Digits:
 ! XXXXXX !
 ! XX  XX !
 ! XX  XX !
@@ -147,6 +252,8 @@ BigDigits:
 ! XXXXXX !
 !     XX !
 ! XXXXXX !
+
+
 `;
 
 const fs = require('fs');
@@ -154,8 +261,8 @@ let glyph = [];
 let assembly = [];
 
 function lineToBinary(line, isReverse) {
-  const digitZero = isReverse ? "1" : "0";
-  const digitOne = isReverse ? "0" : "1";
+  const digitZero = isReverse ? "0" : "1";
+  const digitOne = isReverse ? "1" : "0";
 
   const binary = line
     .replace(/\||!/g, "")
@@ -194,4 +301,4 @@ glyphs.split(/\r\n|\r|\n/).forEach((line) => {
   }
 });
 
-fs.writeFileSync('build/graphics.asm', assembly.join("\r"));
+fs.writeFileSync('build/graphics.asm', assembly.join("\n"));
