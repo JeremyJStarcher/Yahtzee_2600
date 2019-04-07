@@ -80,9 +80,6 @@ P0ScoreBCD:  ds 3
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
 ScoreBCD: ds 3
 
-ScoreBeingDrawn: ds 1           ; 0 for P0 or 1 for P1
-CurrentPlayer: ds 1             ; 0 for P0 or 1 for P1
-
 TurnIndicatorCounter: ds 1      ; Controls the time spent changing player turn
 CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
 
@@ -204,7 +201,6 @@ ShowTitleScreen:
 ;;;;;;;;;;;;;;
 
 StartNewGame:
-    sta CurrentPlayer
     sta CurrentBGColor
 
 ; Start the game with a random tile
@@ -236,13 +232,9 @@ NoVBlankPALAdjust:
     lda #0                 ; of counting scanlines (since we only care about
     sta VBLANK             ; the overall time)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OTHER FRAME CONFIGURATION ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    lda #0                       ; First score to show is P0's
-    sta ScoreBeingDrawn          ; (P1 will come after the grid)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
@@ -338,15 +330,7 @@ WriteScore:
     tax
     dec TurnIndicatorCounter
 NoTurnAnimation:
-    lda ScoreBeingDrawn      ; If score drawn belongs to the current player,
-    cmp CurrentPlayer        ; it is always shown as active
-    beq SetScoreColor
-
-    lda GameState            ; If game is over, always show both scores
-
-    ldx CurrentBGColor       ; Get rid of score if not current and on single
-    lda GameMode             ; player game (in which P0 is always current),
-    beq SetScoreColor
+   ; beq SetScoreColor
 
 SetScoreColor:
     stx COLUP0
@@ -432,16 +416,6 @@ ScoreCleanup:                ; 1 scanline
     sta GRP1
     sta WSYNC
 
-    jmp LoopScore    ; otherwise, we're done with the frame
-
-DrawBottomSeparatorLoop:     ; the remainder will be drawn during P1 score
-    sta WSYNC                ; calculation
-    dex
-    bne DrawBottomSeparatorLoop
-
-    inc ScoreBeingDrawn      ; Display score for P1 (even if invisible)
-    jmp ScoreSetup
-
 LoopScore
     dec ScoreLineCount
     beq FrameBottomSpace
@@ -479,12 +453,12 @@ NoOverscanPALAdjust:
 
 ; Joystick
     lda SWCHA
-    ldx CurrentPlayer
-    beq VerifyGameStateForJoyCheck
-    asl                      ; If it's P1's turn, put their bits where P0s
-    asl                      ; would be
-    asl
-    asl
+;    ldx CurrentPlayer
+;    beq VerifyGameStateForJoyCheck
+;    asl                      ; If it's P1's turn, put their bits where P0s
+;    asl                      ; would be
+;    asl
+;    asl
 VerifyGameStateForJoyCheck:
     and #JoyMask           ; Only player 0 bits
 
