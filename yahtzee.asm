@@ -176,7 +176,7 @@ CleanStack:
 
 ; Pre-fill the graphic pointers' MSBs, so we only have to
 ; figure out the LSBs for each tile or digit
-    lda #>Tiles        ; MSB of tiles/digits page
+    lda #>Digits        ; MSB of tiles/digits page
     ldx #11            ; 12-byte table (6 digits), zero-based
 FillMsbLoop:
     sta TileBmpPtr,x
