@@ -90,49 +90,49 @@ Digits:
 ! X    X !
 ! X    X !
 
-L1s:
+@score L1s:
 !   XX    XXX    !
 ! XXXX   X       !
 !   XX    XX     !
 !   XX      X    !
 ! XXXXXX XXX     !
 
-L2s:
+@score L2s:
 ! XXXXXX  XXX    !
 !     XX X       !
 ! XXXXXX  XX     !
 ! XX        X    !
 ! XXXXXX XXX     !
 
-L3s:
+@score L3s:
 ! XXXXXX  XXX    !
 !     XX X       !
 !   XXXX  XX     !
 !     XX    X    !
 ! XXXXXX XXX     !
 
-L4s:
+@score L4s:
 ! XX  XX  XXX    !
 ! XX  XX X       !
 ! XXXXXX  XX     !
 !     XX    X    !
 !     XX XXX     !
 
-L5s:
+@score L5s:
 ! XXXXXX  XXX    !
 ! XX     X       !
 ! XXXXXX  XX     !
 !     XX    X    !
 ! XXXXXX XXX     !
 
-L6s:
+@score L6s:
 ! XXXXXX  XXX    !
 ! XX     X       !
 ! XXXXXX  XX     !
 ! XX  XX    X    !
 ! XXXXXX XXX     !
 
-TopSubtotal:
+@score TopSubtotal:
 !                !
 !     XXXXXX     !
 !                !
@@ -146,78 +146,77 @@ TopSubtotal:
 !  X    X    X   !
 !     XXX XXXX   !
 
-
-L3k:
+@score L3k:
 ! XXXXXX X  X    !
 !     XX X X     !
 !   XXXX XX      !
 !     XX X X     !
 ! XXXXXX X  X    !
 
-L4k:
+@score L4k:
 ! XX  XX X  X    !
 ! XX  XX X X     !
 ! XXXXXX XX      !
 !     XX X X     !
 !     XX X  X    !
 
-LSmallStraight:
+@score LSmallStraight:
 !  XXX  XXX      !
 ! X    X         !
 !  XX   XX       !
 !    X    X      !
 ! XXX  XXX       !
 
-LLargeStraight:
+@score LLargeStraight:
 ! X     XXX      !
 ! X    X         !
 ! X     XX       !
 ! X       X      !
 ! XXXX XXX       !
 
-LFullHouse:
+@score LFullHouse:
 ! XXXX X   X     !
 ! X    X   X     !
 ! XXX  XXXXX     !
 ! X    X   X     !
 ! X    X   X     !
 
-LYahtzee:
+@score LYahtzee:
 ! X     X  XXX   !
 !  X   X  X   X  !
 !   XXX   XXXXX  !
 !    X    X   X  !
 !    X    X   X  !
 
-LChance:
+@score LChance:
 !  XXX X   X     !
 ! X    X   X     !
 ! X    XXXXX     !
 ! X    X   X     !
 !  XXX X   X     !
 
-LYahtzeeBonus:
+@score LYahtzeeBonus:
 ! X     X XXXX   !
 !  X   X  X   X  !
 !   XXX   XXXX   !
 !    X    X   X  !
 !    X    XXXX   !
 
-LLowerTotal:
+@score LLowerTotal:
 !  X    XXXXX    !
 !  X      X      !
 !  X      X      !
 !  X      X      !
 !  XXXXXX X      !
 
-LUpperTotal:
+@score LUpperTotal:
 !  X    X XXXXX  !
 !  X    X   X    !
 !  X    X   X    !
 !  X    X   X    !
 !  XXXXXX   X    !
 
-LGrandTotal:
+@score LGrandTotal:
 ! XXXXXX XXXXX   !
 ! X        X     !
 ! X  XXX   X     !
@@ -313,6 +312,7 @@ show_${textLabel}:
   });
 
   glyph = [];
+  glyphBytes = [];
 }
 
 glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
