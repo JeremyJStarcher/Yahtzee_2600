@@ -162,67 +162,67 @@ L4k:
 !     XX X  X    !
 
 LSmallStraight:
-!  XXX    XXX    !
-! X      X       !
-!  XX     XX     !
-!    X      X    !
-! XXX    XXX     !
+!  XXX  XXX      !
+! X    X         !
+!  XX   XX       !
+!    X    X      !
+! XXX  XXX       !
 
 LLargeStraight:
-! X       XXX    !
-! X      X       !
-! X       XX     !
-! X         X    !
-! XXXX   XXX     !
+! X     XXX      !
+! X    X         !
+! X     XX       !
+! X       X      !
+! XXXX XXX       !
 
 LFullHouse:
-! XXXX    XXX    !
-! X      X       !
-! XX      XX     !
-! X         X    !
-! X      XXX     !
+! XXXX X   X     !
+! X    X   X     !
+! XXX  XXXXX     !
+! X    X   X     !
+! X    X   X     !
 
 LYahtzee:
-! X     X   XXX  !
-!  X   X   X   X !
-!   XXX    XXXXX !
-!    X     X   X !
-!    X     X   X !
+! X     X  XXX   !
+!  X   X  X   X  !
+!   XXX   XXXXX  !
+!    X    X   X  !
+!    X    X   X  !
 
 LChance:
-! XXXX   XXX     !
-! X     X   X    !
-! X     XXXXX    !
-! X     X   X    !
-! XXXX  X   X    !
+!  XXX X   X     !
+! X    X   X     !
+! X    XXXXX     !
+! X    X   X     !
+!  XXX X   X     !
 
 LYahtzeeBonus:
-! X     X  XXXX  !
-!  X   X   X   X !
-!   XXX    XXXX  !
-!    X     X   X !
-!    X     XXXX  !
+! X     X XXXX   !
+!  X   X  X   X  !
+!   XXX   XXXX   !
+!    X    X   X  !
+!    X    XXXX   !
 
 LLowerTotal:
-!  X       XXXXX !
-!  X         X   !
-!  X         X   !
-!  X         X   !
-!  XXXXXX    X   !
+!  X    XXXXX    !
+!  X      X      !
+!  X      X      !
+!  X      X      !
+!  XXXXXX X      !
 
 LUpperTotal:
-!  X    X  XXXXX !
-!  X    X    X   !
-!  X    X    X   !
-!  X    X    X   !
-!  XXXXXX    X   !
+!  X    X XXXXX  !
+!  X    X   X    !
+!  X    X   X    !
+!  X    X   X    !
+!  XXXXXX   X    !
 
 LGrandTotal:
-!  XXXXXX  XXXXX !
-!  X         X   !
-!  X  XXX    X   !
-!  X    X    X   !
-!  XXXXXX    X   !
+! XXXXXX XXXXX   !
+! X        X     !
+! X  XXX   X     !
+! X    X   X     !
+! XXXXXX   X     !
 
 `;
 
