@@ -399,11 +399,9 @@ DrawScoreLoop:
     sta WSYNC
     lda (DrawSymbolsMap+2),y
     sta GRP1
-    ;lda (DigitBmpPtr+4),y
-    lda #$00                ; Blank space after the labelA
-    nop
-    nop
-
+    lda #$00                ; Blank space after the label
+    nop                     ; Timing...
+    nop                     ; And another timing
     sta GRP0
     lda (DigitBmpPtr+6),y
     sta TempDigitBmp
