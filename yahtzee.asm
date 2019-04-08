@@ -84,6 +84,26 @@ ScoreLineCount: ds 1
 
 DrawSymbolsMap: ds 4
 
+; FieldName     Size        Max Value
+S1s:            ds 1        ;5
+S2s:            ds 1        ;10
+S3s:            ds 1        ;15
+S4s:            ds 1        ;20
+S5s:            ds 1        ;25
+S6s:            ds 1        ;30
+STopSubtotal:   ds 2        ;105
+STopBonus:      ds 1        ;35
+S3k:            ds 1        ;30
+S4k:            ds 1        ;30
+SSmallStraight: ds 1        ;30
+SLargeStraight: ds 1        ;40
+SFullHouse:     ds 1        ;25
+SYahtzee:       ds 1        ;50
+SChance:        ds 1        ;30
+SYahtzeeBonus:  ds 1        ;##
+SLowerTotal:    ds 2        ;###
+SUpperTotal:    ds 2        ;###
+SGrandTotal:    ds 2        ;####
 
 ;===============================================================================
 ; free space check before End of Cartridge
