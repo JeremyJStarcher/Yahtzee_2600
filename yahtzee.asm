@@ -57,7 +57,6 @@ GameMode: ds 1              ; One or Two players
 
 TempVar1: ds 0              ; General use variable
 LineCounter: ds 0           ; Counts lines while drawing the score
-DidShift:                   ; True if a shift happened
     ds 1
 
 TempVar2: ds 0              ; General use variable
