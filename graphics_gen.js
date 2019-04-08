@@ -275,49 +275,44 @@ function normal(line) {
 }
 
 function generateScoreSub(line, lineNo) {
-  assembly.push(`show_${textLabel}:`);
 
   const code = `
-    lda #_BYTE1_
-    sta GRP0
-    sta WSYNC
-    lda #_BYTE2_
-    sta GRP1
-    nop
-    nop
-    lda (DigitBmpPtr+4),y
-    sta GRP0
-    lda (DigitBmpPtr+6),y
-    sta TempDigitBmp
-    lda (DigitBmpPtr+8),y
-    tax
-    lda (DigitBmpPtr+10),y
-    tay
-    lda TempDigitBmp
-    sta GRP1
-    stx GRP0
-    sty GRP1
-    sta GRP0
+show_${textLabel}:
+  lda #<${textLabel}_0
+  sta DrawSymbolsMap+0
+  lda #>${textLabel}_0
+  sta DrawSymbolsMap+1
+
+  lda #<${textLabel}_1
+  sta DrawSymbolsMap+2
+  lda #>${textLabel}_1
+  sta DrawSymbolsMap+3
+  rts
   `;
 
-  const lines = 5;
-  const count = lines * 2; // Two bytes per line
-  let yreg = lines;
+  assembly = assembly.concat(code);
 
-  for (let i = 0; i < lines; i++) {
-    var b1 = '%' + glyphBytes[i][0];
-    var b2 = '%' + glyphBytes[i][1];
+  const bytes0 = [];
+  const bytes1 = [];
+  for (var i = 0; i < 5; i++) {
+    const b0= glyphBytes[i][0];
+    const b1= glyphBytes[i][1];
 
-    const s = code
-      .replace("_BYTE1_", b1)
-      .replace("_BYTE2_", b2)
-
-    yreg--;
-    assembly.push(`  ldy #${yreg}`);
-    assembly = assembly.concat(s);
+    bytes0.push(b0);
+    bytes1.push(b1);
   }
 
-  assembly.push(`  rts`);
+  assembly.push(`${textLabel}_0:`);
+  bytes0.reverse().forEach(b => {
+    assembly.push(`  .byte %${b}`);
+  });
+
+  assembly.push(`${textLabel}_1:`);
+  bytes1.reverse().forEach(b => {
+    assembly.push(`  .byte %${b}`);
+  });
+
+  glyph = [];
 }
 
 glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {

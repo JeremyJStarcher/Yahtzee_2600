@@ -83,6 +83,9 @@ CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
 
 ScoreLineCount: ds 1
 
+DrawSymbolsMap: ds 4
+
+
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
@@ -384,31 +387,38 @@ ScorePtrLoop:
 
     ldy #4                   ; 5 scanlines
     sty LineCounter
-DrawScoreLoop:
-
-;    ldy LineCounter          ; 6-digit loop is heavily inspired on Berzerk's
-;    lda (DigitBmpPtr),y
-;    sta GRP0
-;    sta WSYNC
-;    lda (DigitBmpPtr+2),y
-;    sta GRP1
-;    lda (DigitBmpPtr+4),y
-;    sta GRP0
-;    lda (DigitBmpPtr+6),y
-;    sta TempDigitBmp
-;    lda (DigitBmpPtr+8),y
-;    tax
-;    lda (DigitBmpPtr+10),y
-;    tay
-;    lda TempDigitBmp
-;    sta GRP1
-;    stx GRP0
-;    sty GRP1
-;    sta GRP0
-;    dec LineCounter
-;    bpl DrawScoreLoop
 
     jsr show_TopBonus
+
+;; This loop is so tight there isn't room for *any* additional calculations.
+;; So we have to calculate DrawSymbolsMap *before* we hit this code.
+DrawScoreLoop:
+    ldy LineCounter          ; 6-digit loop is heavily inspired on Berzerk's
+    lda (DrawSymbolsMap+0),y
+    sta GRP0
+    sta WSYNC
+    lda (DrawSymbolsMap+2),y
+    sta GRP1
+    ;lda (DigitBmpPtr+4),y
+    lda #$00                ; Blank space after the labelA
+    nop
+    nop
+
+    sta GRP0
+    lda (DigitBmpPtr+6),y
+    sta TempDigitBmp
+    lda (DigitBmpPtr+8),y
+    tax
+    lda (DigitBmpPtr+10),y
+    tay
+    lda TempDigitBmp
+    sta GRP1
+    stx GRP0
+    sty GRP1
+    sta GRP0
+    dec LineCounter
+    bpl DrawScoreLoop
+
 
 ScoreCleanup:                ; 1 scanline
     lda #0
