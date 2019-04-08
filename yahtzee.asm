@@ -122,6 +122,14 @@ SGrandTotal:    ds 2        ;####
     ORG $F800          ; It's a 2K cart, meaning it has 2048 bytes! #mindblow
 
     INCLUDE "build/graphics.asm"
+;===============================================================================
+; free space check before End of Cartridge
+;===============================================================================
+
+ if (* & $FF)
+    echo "------", [$F800 - *]d, "bytes of graphics.asm"
+  endif
+
     INCLUDE "build/graphics_code.asm"
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
