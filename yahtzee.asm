@@ -55,18 +55,18 @@
 
 GameMode: ds 1              ; One or Two players
 
-TempVar1: ds 0              ; General use variable
-LineCounter: ds 0           ; Counts lines while drawing the score
+TempVar1:                   ; General use variable
+LineCounter:                ; Counts lines while drawing the score
     ds 1
 
-TempVar2: ds 0              ; General use variable
+TempVar2:                   ; General use variable
 TempDigitBmp:               ; Stores intermediate part of 6-digit score
     ds 1
 
 GameState: ds 1
 
 ; Address of the graphic for for each digit (6x2 bytes)
-DigitBmpPtr: ds 0
+DigitBmpPtr:
     ds 6 * 2
 
 ; Store each player score separatedly and copy
