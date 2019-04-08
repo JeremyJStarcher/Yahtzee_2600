@@ -564,10 +564,8 @@ WaitForOverscanEndLoop:
 
 ; The MIT License (MIT)
 
-; Copyright (c) 2014 Carlos Duarte do Nascimento (Chester)
+; Copyright (c) 2018 Jeremy J Starcher
 ;
-; Original 2048 game Copyright (c) 2014 Gabriele Cirulli
-
 ; Permission is hereby granted, free of charge, to any person obtaining a copy
 ; of this software and associated documentation files (the "Software"), to deal
 ; in the Software without restriction, including without limitation the rights
