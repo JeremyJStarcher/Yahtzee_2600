@@ -140,11 +140,11 @@ TopSubtotal:
 !                !
 
 @score TopBonus:
-!      XXX  XXXX !
-!  X     X  X    !
-! XXX  XXX  XXXX !
-!  X     X     X !
-!XXXXXXXXX  XXXX !
+!     XXX XXXX   !
+!  X    X X      !
+! XXX XXX XXXX   !
+!  X    X    X   !
+!     XXX XXXX   !
 
 
 L3k:
