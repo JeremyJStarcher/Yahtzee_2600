@@ -227,7 +227,8 @@ Digits:
 
 const fs = require('fs');
 let glyph = [];
-let assembly = [];
+let gfx = [];
+let code = [];
 let glyphBytes = [];
 let isText = false;
 let textLabel = "-none-set";
@@ -266,8 +267,8 @@ function digit(line, lineNo) {
 }
 
 function normal(line) {
-  assembly = assembly.concat(glyph.reverse());
-  assembly.push(line);
+  gfx = gfx.concat(glyph.reverse());
+  gfx.push(line);
 
   glyph = [];
   glyphBytes = [];
@@ -275,7 +276,7 @@ function normal(line) {
 
 function generateScoreSub(line, lineNo) {
 
-  const code = `
+  const c = `
 show_${textLabel}:
   lda #<${textLabel}_0
   sta DrawSymbolsMap+0
@@ -288,27 +289,26 @@ show_${textLabel}:
   sta DrawSymbolsMap+3
   rts
   `;
-
-  assembly = assembly.concat(code);
+  code = code.concat(c);
 
   const bytes0 = [];
   const bytes1 = [];
   for (var i = 0; i < 5; i++) {
-    const b0= glyphBytes[i][0];
-    const b1= glyphBytes[i][1];
+    const b0 = glyphBytes[i][0];
+    const b1 = glyphBytes[i][1];
 
     bytes0.push(b0);
     bytes1.push(b1);
   }
 
-  assembly.push(`${textLabel}_0:`);
+  gfx.push(`${textLabel}_0:`);
   bytes0.reverse().forEach(b => {
-    assembly.push(`  .byte %${b}`);
+    gfx.push(`  .byte %${b}`);
   });
 
-  assembly.push(`${textLabel}_1:`);
+  gfx.push(`${textLabel}_1:`);
   bytes1.reverse().forEach(b => {
-    assembly.push(`  .byte %${b}`);
+    gfx.push(`  .byte %${b}`);
   });
 
   glyph = [];
@@ -333,4 +333,5 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
   }
 });
 
-fs.writeFileSync('build/graphics.asm', assembly.join("\n"));
+fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
+fs.writeFileSync('build/graphics_code.asm', code.join("\n"));

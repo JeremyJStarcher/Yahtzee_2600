@@ -121,14 +121,8 @@ SGrandTotal:    ds 2        ;####
     SEG CODE
     ORG $F800          ; It's a 2K cart, meaning it has 2048 bytes! #mindblow
 
-;;;;;;;;;;;;;;;;;
-;; DATA TABLES ;;
-;;;;;;;;;;;;;;;;;
-
-; Tile and digit graphics go in the beginning of the cart to keep page-aligned
-; (that is, the address' MSB never changes and we only calculate the LSB)
-
     INCLUDE "build/graphics.asm"
+    INCLUDE "build/graphics_code.asm"
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
 VBlankTime64T:
@@ -420,7 +414,7 @@ DrawScoreLoop:
     sta GRP1
     lda #$00                ; Blank space after the label
     nop                     ; Timing...
-    nop                     ; And another timing
+    nop                     ; Timing
     sta GRP0
     lda (DigitBmpPtr+6),y
     sta TempDigitBmp
