@@ -13,7 +13,7 @@ STELLA=stella
 NAME=yahtzee
 
 # Expected ROM size in bytes
-ROM_SIZE=2048
+ROM_SIZE=4096
 
 node graphics_gen.js
 

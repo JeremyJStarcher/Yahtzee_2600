@@ -125,21 +125,24 @@ rolledDice:     ds 5
 ;===============================================================================
 
     SEG CODE
-    ORG $F800          ; It's a 2K cart, meaning it has 2048 bytes! #mindblow
-
+    ORG $F000
+startofrom: ds 0
     INCLUDE "build/graphics.asm"
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
 
  if (* & $FF)
-    echo "------", [$F800 - *]d, "bytes of graphics.asm.  ", [$F800 - * + 256]d, "bytes wasted."
+    echo "------", [startofrom - *]d, "bytes of graphics.asm.  ", [startofrom - * + 256]d, "bytes wasted."
   endif
 
     ; We ran out of room with graphics.asm.
     ; start a new page.
     align 256
+facesstart: ds 0
     include "build/faces.asm"
+    echo "------", [[startofrom + 256] - *]d, "bytes of faces.asm.  "
+
     INCLUDE "build/graphics_code.asm"
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
