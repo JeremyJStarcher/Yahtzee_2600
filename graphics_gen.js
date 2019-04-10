@@ -464,7 +464,7 @@ function lineToBinary(line, lineNo, isReverse) {
     .replace(/X/g, digitOne);
 
   if (binary.length !== 8 && binary.length !== 16) {
-    throw new Error(`Length of line is off on ine ${lineNo}: ${line}`);
+    throw new Error(`Length of line is off on line ${lineNo}: ${line}`);
   }
 
   if (binary.length === 8) {
