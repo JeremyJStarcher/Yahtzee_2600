@@ -408,17 +408,11 @@ function createDiceFunctions() {
   // L = Line/ P = Position / F = Face //
   //  Each cell is 4 bytes. (One wasted, but faster lookup)
   // [L0P0F0] [L0P1F0] [...] [L2P0F0] ...
-  const dataLeft = [];
-  const dataRight = [];
+  const dataLeft = {};
+  const dataRight = {};
   for (let l = 0; l <= 2; l++) {
     for (let p = 0; p <= 5; p++) {
       for (f = 0; f <= 6; f++) {
-
-        dataLeft[l] = dataLeft[l] || [];
-        dataLeft[l][p] = dataLeft[l][p] || [];
-
-        dataRight[l] = dataRight[l] || [];
-        dataRight[l][p] = dataRight[l][p] || [];
 
         const bS = bitmap[f][l];
         // filter out just the bitmap for this position.
@@ -434,11 +428,10 @@ function createDiceFunctions() {
         leftValue.push(0);
         rightValue.push(0);
 
-
         const displaypf = pf.replace(/1/g, '#').replace(/0/g, "_");
-
-        dataRight[l][p][f] = rightValue;
-        dataLeft[l][p][f] = leftValue;
+        const hash = [l, p, f].join("_");
+        dataRight[hash] = rightValue;
+        dataLeft[hash] = leftValue;
       }
     }
   }
@@ -449,11 +442,25 @@ function createDiceFunctions() {
     thisCode.push(`Dice_Line_Right${l}:`);
     for (let p = 0; p <= 5; p++) {
       for (f = 0; f <= 6; f++) {
-        thisCode.push(`LPF_${l}_${p}_${f}: .byte ${dataLeft[l][p][f]}`);
+        const hash = [l, p, f].join("_");
+        const dval = dataLeft[hash];
+        thisCode.push(`LPF_${l}_${p}_${f}: .byte ${dval}`);
       }
     }
   }
   fs.writeFileSync('build/faces.asm', thisCode.join("\n"));
+
+  for (let l = 0; l < 3; l++) {
+    const hash = [l, 1, 4].join("_");
+    const dval = dataLeft[hash];
+    const val = dval.map(s => {
+      let n = s.toString(2);
+      n = "00000000".substr(n.length) + n;
+      n = n.replace(/0/g, " ");
+      return n;
+    });
+    console.log(val);
+  }
 
 }
 

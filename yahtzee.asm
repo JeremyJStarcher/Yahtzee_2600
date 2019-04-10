@@ -486,44 +486,51 @@ FrameBottomSpace:
     lda #%00000001                      ; Reflect bit
     sta CTRLPF                          ; Set it
 
-; JJZ
-    lda #80                      ; Set the patter
+    sta WSYNC
+
+JJSHEIGHT = 4;
+JJS0 = LPF_0_2_5
+JJS1 = LPF_1_2_5
+JJS2 = LPF_2_2_5
+
+    lda JJS0
+    sta PF0
+    lda JJS0+1
+    sta PF1
+    lda JJS0+2
+    sta PF2
+    REPEAT JJSHEIGHT
+    sta WSYNC
+    REPEND
+
+    lda JJS1+0
+    sta PF0
+    lda JJS1+1
+    sta PF1
+    lda JJS1+2
+    sta PF2
+    REPEAT JJSHEIGHT
+    sta WSYNC
+    REPEND
+
+    lda JJS2+0
+    sta PF0
+    lda JJS2+1
+    sta PF1
+    lda JJS2+2
+    sta PF2
+    REPEAT JJSHEIGHT
+    sta WSYNC
+    REPEND
+    
+    lda #0
     sta PF0
     sta PF1
     sta PF2
-
-    lda LPF_0_1_3
-    sta PF0
-    lda LPF_0_1_3+1
-    sta PF1
-    lda LPF_0_1_3+2
-    sta PF2
-    sta WSYNC
-    sta WSYNC
-
-    lda LPF_1_1_3
-    sta PF0
-    lda LPF_1_1_3+1
-    sta PF1
-    lda LPF_1_1_3+2
-    sta PF2
-    sta WSYNC
-    sta WSYNC
-
-    lda LPF_2_1_3
-    sta PF0
-    lda LPF_2_1_3+1
-    sta PF1
-    lda LPF_2_1_3+2
-    sta PF2
-    sta WSYNC
-    sta WSYNC
-
-
 
 ;jjs
     ; 262 scan lines total
-    ldx #36 + 12 - (2 * 3)
+    ldx #36 + 12 - (JJSHEIGHT * 3) -1
 SpaceBelowGridLoop:
     sta WSYNC
     dex
