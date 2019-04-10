@@ -1,3 +1,49 @@
+(function () {
+  // test stuff
+
+  const tests = [
+    {
+      fp: "10101010101010101010",
+      fp0: "01010000",
+      fp1: "10101010",
+      fp2: "01010101",
+    },
+    {
+      fp: "10000000000000000000",
+      fp0: "00010000",
+      fp1: "00000000",
+      fp2: "00000000",
+    },
+    {
+      fp: "10010010010010010010",
+      fp0: "10010000",
+      fp1: "00100100",
+      fp2: "01001001",
+    }
+  ];
+
+  let fail = false;
+  tests.forEach(t => {
+    const val = pfToRegistersString(t.fp);
+
+    if (val[0] !== t.fp0) {
+      console.error(`fp0 failed:\n${t.fp0}\n${val[0]}`);
+      fail = true;
+    }
+    if (val[1] !== t.fp1) {
+      console.error(`fp1 failed:\n${t.fp1}\n${val[1]}`);
+      fail = true;
+    }
+    if (val[2] !== t.fp2) {
+      console.error(`fp2 failed:\n${t.fp2}\n${val[2]}`);
+      fail = true;
+    }
+  });
+
+  if (fail) {
+    throw new Error("Test failed");
+  }
+})();
 //
 // graphics_gen.js
 // 
@@ -234,9 +280,21 @@ let isText = false;
 let textLabel = "-none-set";
 
 function pfToRegisters(_pf) {
+  const regs = pfToRegistersString(_pf);
+
+  const ret = [
+    parseInt(regs[0], 2),
+    parseInt(regs[1], 2),
+    parseInt(regs[2], 2),
+  ];
+
+  return ret;
+}
+
+function pfToRegistersString(_pf) {
   // The weird bitpattern is the Atart 2600 -- we just have to deal with it.
 
-  const pf = Array.from(_pf);
+  let pf = Array.from(_pf).reverse();
   if (pf.length !== 20) {
     throw new Error("pfToRegisters takes exactly 20 bits");
   }
@@ -255,7 +313,7 @@ function pfToRegisters(_pf) {
   pf1[7] = pf[pfi--];
   pf1[6] = pf[pfi--];
   pf1[5] = pf[pfi--];
-  pf1[4] = pf[pfi--];
+  pf1[3] = pf[pfi--];
   pf1[3] = pf[pfi--];
   pf1[2] = pf[pfi--];
   pf1[1] = pf[pfi--];
@@ -271,9 +329,9 @@ function pfToRegisters(_pf) {
   pf2[7] = pf[pfi--];
 
   const ret = [
-    parseInt(pf0.join(""), 2),
-    parseInt(pf1.join(""), 2),
-    parseInt(pf2.join(""), 2),
+    pf0.reverse().join(""),
+    pf1.reverse().join(""),
+    pf2.reverse().join(""),
   ];
 
   return ret;
