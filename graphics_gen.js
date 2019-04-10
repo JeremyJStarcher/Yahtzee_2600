@@ -341,49 +341,44 @@ function createDiceFunctions() {
   // For each position, these are the possible places to display it
   // .......... 0000000000111111111122222222223333333333
   // .......... 0123456789012345678901234567890123456789
-  const mask = "        111 222 333 444 555 666         ";
+  const mask = "000 111 222 333 444                     ";
 
   // And these are the actual positions used.
   const bitmap = [
     [
-      "        ... ... ... ... ... ...         ",
-      "        111 222 333 444 555 666         ",
-      "        ... ... ... ... ... ...         ",
+      "... ... ... ... ...                     ",
+      "000 111 222 333 444                     ",
+      "... ... ... ... ...                     ",
     ],
     [
-      "        ... ... ... ... ... ...         ",
-      "        .1. .2. .3. .4. .5. .6.         ",
-      "        ... ... ... ... ... ...         ",
+      "... ... ... ... ...                     ",
+      ".0. .1. .2. .3. .4.                     ",
+      "... ... ... ... ...                     ",
     ],
     [
-      "        ..1 ..2 ..3 ..4 ..5 ..6         ",
-      "        ... ... ... ... ... ...         ",
-      "        1.. 2.. 3.. 4.. 5.. 6..         ",
+      "..0 ..1 ..2 ..3 ..4                     ",
+      "... ... ... ... ...                     ",
+      "0.. 1.. 2.. 3.. 4..                     ",
     ],
     [
-      "        ..1 ..2 ..3 ..4 ..5 ..6         ",
-      "        .1. .2. .3. .4. .5. .6.         ",
-      "        1.. 2.. 3.. 4.. 5.. 6..         ",
+      "..0 ..1 ..2 ..3 ..4                     ",
+      ".0. .1. .2. .3. .4..                    ",
+      "0.. 1.. 2.. 3.. 4...                    ",
     ],
     [
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
-      "        ... ... ... ... ... ...         ",
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      "... ... ... ... ...                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
     ],
     [
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
-      "        .1. .2. .3. .4. .5. .6.         ",
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      ".0. .1. .2. .3. .4.                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
     ],
     [
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
-      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
-    ],
-    [
-      "        111 222 333 444 555 666         ",
-      "        111 222 333 444 555 666         ",
-      "        111 222 333 444 555 666         ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
     ],
   ];
 
@@ -406,54 +401,56 @@ function createDiceFunctions() {
 
   // Reorganize into a very different layout
   // L = Line/ P = Position / F = Face //
-  //  Each cell is 4 bytes. (One wasted, but faster lookup)
-  // [L0P0F0] [L0P1F0] [...] [L2P0F0] ...
-  const dataLeft = [];
-  const dataRight = [];
-  for (let l = 0; l <= 2; l++) {
-    for (let p = 0; p <= 5; p++) {
-      for (f = 0; f <= 6; f++) {
+  const dataLeft = {};
 
-        dataLeft[l] = dataLeft[l] || [];
-        dataLeft[l][p] = dataLeft[l][p] || [];
-
-        dataRight[l] = dataRight[l] || [];
-        dataRight[l][p] = dataRight[l][p] || [];
+  const maxLine = 2;
+  const maxPosition = 4;
+  maxFace = 6;
+  for (let l = 0; l <= maxLine; l++) {
+    for (let p = 0; p <= maxPosition; p++) {
+      for (f = 0; f <= maxFace; f++) {
 
         const bS = bitmap[f][l];
         // filter out just the bitmap for this position.
         let pf = Array.from(bS).map(s => s === "" + p ? "1" : "0").join("");
 
         const pfLeft = pf.substring(0, 20);
-        const pfRight = pf.substring(20, 80);
-
         const leftValue = pfToRegisters(pfLeft);
-        const rightValue = pfToRegisters(pfRight);
 
         // Pad to four bytes for easy math.
-        leftValue.push(0);
-        rightValue.push(0);
+        // leftValue.push(0);
 
-
-        const displaypf = pf.replace(/1/g, '#').replace(/0/g, "_");
-
-        dataRight[l][p][f] = rightValue;
-        dataLeft[l][p][f] = leftValue;
+        const hash = [l, p, f].join("_");
+        dataLeft[hash] = leftValue;
       }
     }
   }
 
   let thisCode = [];
-  for (let l = 0; l <= 2; l++) {
+  for (let l = 0; l <= maxLine; l++) {
     thisCode.push(``);
     thisCode.push(`Dice_Line_Right${l}:`);
-    for (let p = 0; p <= 5; p++) {
-      for (f = 0; f <= 6; f++) {
-        thisCode.push(`LPF_${l}_${p}_${f}: .byte ${dataLeft[l][p][f]}`);
+    for (let p = 0; p <= maxPosition; p++) {
+      for (f = 0; f <= maxFace; f++) {
+        const hash = [l, p, f].join("_");
+        const dval = dataLeft[hash];
+        thisCode.push(`LPF_${l}_${p}_${f}: .byte ${dval}`);
       }
     }
   }
   fs.writeFileSync('build/faces.asm', thisCode.join("\n"));
+
+  for (let l = 0; l < 3; l++) {
+    const hash = [l, 1, 4].join("_");
+    const dval = dataLeft[hash];
+    const val = dval.map(s => {
+      let n = s.toString(2);
+      n = "00000000".substr(n.length) + n;
+      n = n.replace(/0/g, " ");
+      return n;
+    });
+    console.log(val);
+  }
 
 }
 
