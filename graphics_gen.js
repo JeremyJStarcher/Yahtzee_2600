@@ -224,16 +224,6 @@ Digits:
 ! XXXXXX   X     !
 
 `;
-// PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
-// FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-// 0000111111112222222222222222111111110000
-// 4567765432100123456776543210012345677654
-
-// 0000000000111111111122222222223333333333
-// 0123456789012345678901234567890123456789
-// *   *  *   *  *   *  *   *  *   *  *   *
-// * * *  * * *  * * *  * * *  * * *  * * *
-// *   *  *   *  *   *  *   *  *   *  *   *
 
 const fs = require('fs');
 let glyph = [];
@@ -242,6 +232,172 @@ let code = [];
 let glyphBytes = [];
 let isText = false;
 let textLabel = "-none-set";
+
+function pfToRegisters(_pf) {
+  // The weird bitpattern is the Atart 2600 -- we just have to deal with it.
+
+  const pf = Array.from(_pf);
+  if (pf.length !== 20) {
+    throw new Error("pfToRegisters takes exactly 20 bits");
+  }
+
+  const emptyByte = Array(8).fill(0);
+  const pf0 = [...emptyByte];
+  const pf1 = [...emptyByte];
+  const pf2 = [...emptyByte];
+
+  let pfi = pf.length - 1;
+  pf0[4] = pf[pfi--];
+  pf0[5] = pf[pfi--];
+  pf0[6] = pf[pfi--];
+  pf0[7] = pf[pfi--];
+
+  pf1[7] = pf[pfi--];
+  pf1[6] = pf[pfi--];
+  pf1[5] = pf[pfi--];
+  pf1[4] = pf[pfi--];
+  pf1[3] = pf[pfi--];
+  pf1[2] = pf[pfi--];
+  pf1[1] = pf[pfi--];
+  pf1[0] = pf[pfi--];
+
+  pf2[0] = pf[pfi--];
+  pf2[1] = pf[pfi--];
+  pf2[2] = pf[pfi--];
+  pf2[3] = pf[pfi--];
+  pf2[4] = pf[pfi--];
+  pf2[5] = pf[pfi--];
+  pf2[6] = pf[pfi--];
+  pf2[7] = pf[pfi--];
+
+  const ret = [
+    parseInt(pf0.join(""), 2),
+    parseInt(pf1.join(""), 2),
+    parseInt(pf2.join(""), 2),
+  ];
+
+  return ret;
+}
+
+function createDiceFunctions() {
+  // For each position, these are the possible places to display it
+  // .......... 0000000000111111111122222222223333333333
+  // .......... 0123456789012345678901234567890123456789
+  const mask = "        111 222 333 444 555 666         ";
+
+  // And these are the actual positions used.
+  const bitmap = [
+    [
+      "        ... ... ... ... ... ...         ",
+      "        111 222 333 444 555 666         ",
+      "        ... ... ... ... ... ...         ",
+    ],
+    [
+      "        ... ... ... ... ... ...         ",
+      "        .1. .2. .3. .4. .5. .6.         ",
+      "        ... ... ... ... ... ...         ",
+    ],
+    [
+      "        ..1 ..2 ..3 ..4 ..5 ..6         ",
+      "        ... ... ... ... ... ...         ",
+      "        1.. 2.. 3.. 4.. 5.. 6..         ",
+    ],
+    [
+      "        ..1 ..2 ..3 ..4 ..5 ..6         ",
+      "        .1. .2. .3. .4. .5. .6.         ",
+      "        1.. 2.. 3.. 4.. 5.. 6..         ",
+    ],
+    [
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+      "        ... ... ... ... ... ...         ",
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+    ],
+    [
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+      "        .1. .2. .3. .4. .5. .6.         ",
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+    ],
+    [
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+      "        1.1 2.2 3.3 4.4 5.5 6.6         ",
+    ],
+    [
+      "        111 222 333 444 555 666         ",
+      "        111 222 333 444 555 666         ",
+      "        111 222 333 444 555 666         ",
+    ],
+  ];
+
+  const blanks = Array.from(' .');
+
+  // Sanity check the data, just to make sure there are no collisions
+  bitmap.forEach((face, faceIdx) => {
+    face.forEach((line, lineIdx) => {
+      Array.from(line).forEach((p, i) => {
+        if (blanks.indexOf(p) !== -1) {
+          return;
+        }
+
+        if (mask[i] !== p) {
+          throw new Error(`Error: face ${faceIdx} line ${lineIdx} does not fit inside mask`);
+        }
+      });
+    });
+  });
+
+  // Reorganize into a very different layout
+  // L = Line/ P = Position / F = Face //
+  //  Each cell is 4 bytes. (One wasted, but faster lookup)
+  // [L0P0F0] [L0P1F0] [...] [L2P0F0] ...
+  const dataLeft = [];
+  const dataRight = [];
+  for (let l = 0; l <= 2; l++) {
+    for (let p = 0; p <= 5; p++) {
+      for (f = 0; f <= 6; f++) {
+
+        dataLeft[l] = dataLeft[l] || [];
+        dataLeft[l][p] = dataLeft[l][p] || [];
+
+        dataRight[l] = dataRight[l] || [];
+        dataRight[l][p] = dataRight[l][p] || [];
+
+        const bS = bitmap[f][l];
+        // filter out just the bitmap for this position.
+        let pf = Array.from(bS).map(s => s === "" + p ? "1" : "0").join("");
+
+        const pfLeft = pf.substring(0, 20);
+        const pfRight = pf.substring(20, 80);
+
+        const leftValue = pfToRegisters(pfLeft);
+        const rightValue = pfToRegisters(pfRight);
+
+        // Pad to four bytes for easy math.
+        leftValue.push(0);
+        rightValue.push(0);
+
+
+        const displaypf = pf.replace(/1/g, '#').replace(/0/g, "_");
+
+        dataRight[l][p][f] = rightValue;
+        dataLeft[l][p][f] = leftValue;
+      }
+    }
+  }
+
+  let thisCode = [];
+  for (let l = 0; l <= 2; l++) {
+    thisCode.push(``);
+    thisCode.push(`Dice_Line_Right${l}:`);
+    for (let p = 0; p <= 5; p++) {
+      for (f = 0; f <= 6; f++) {
+        thisCode.push(`LPF_${l}_${p}_${f}: .byte ${dataLeft[l][p][f]}`);
+      }
+    }
+  }
+  fs.writeFileSync('build/faces.asm', thisCode.join("\n"));
+
+}
 
 function lineToBinary(line, lineNo, isReverse) {
   const digitZero = isReverse ? "0" : "1";
@@ -342,6 +498,8 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
     isText = false;
   }
 });
+
+createDiceFunctions();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
 fs.writeFileSync('build/graphics_code.asm', code.join("\n"));

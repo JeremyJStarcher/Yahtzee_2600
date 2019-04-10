@@ -55,13 +55,18 @@
 
 GameMode: ds 1              ; One or Two players
 
+SFP0:                       ; Shadow FP0
 TempVar1:                   ; General use variable
 LineCounter:                ; Counts lines while drawing the score
     ds 1
 
+SFP1:                       ; Shadow FP1
 TempVar2:                   ; General use variable
 TempDigitBmp:               ; Stores intermediate part of 6-digit score
     ds 1
+
+TempVar3:                   ; General use variable
+SFP2:                       ; Shadow FP2
 
 GameState: ds 1
 
@@ -105,6 +110,7 @@ SLowerTotal:    ds 2        ;###
 SUpperTotal:    ds 2        ;###
 SGrandTotal:    ds 2        ;####
 
+rolledDice:     ds 5
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
@@ -127,9 +133,13 @@ SGrandTotal:    ds 2        ;####
 ;===============================================================================
 
  if (* & $FF)
-    echo "------", [$F800 - *]d, "bytes of graphics.asm"
+    echo "------", [$F800 - *]d, "bytes of graphics.asm.  ", [$F800 - * + 256]d, "bytes wasted."
   endif
 
+    ; We ran out of room with graphics.asm.
+    ; start a new page.
+    align 256
+    include "build/faces.asm"
     INCLUDE "build/graphics_code.asm"
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
@@ -215,6 +225,21 @@ FillMsbLoop1:
 
     lda #$56
     sta P0ScoreBCD+2
+
+    lda #$01
+    sta rolledDice + 0
+
+    lda #$02
+    sta rolledDice + 1
+    
+    lda #$03
+    sta rolledDice + 2
+
+    lda #$04
+    sta rolledDice + 3
+
+    lda #$04
+    sta rolledDice + 4
 
 ShowTitleScreen:
     jmp StartFrame
@@ -452,12 +477,53 @@ LoopScore
     beq FrameBottomSpace
     jmp YesScore
 
+FrameBottomSpace:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BOTTOM SPACE BELOW GRID ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda #$45                            ; Color
+    sta COLUPF                          ; Set playfield color
+    lda #%00000001                      ; Reflect bit
+    sta CTRLPF                          ; Set it
 
-FrameBottomSpace:
-    ldx #36
+; JJZ
+    lda #80                      ; Set the patter
+    sta PF0
+    sta PF1
+    sta PF2
+
+    lda LPF_0_1_3
+    sta PF0
+    lda LPF_0_1_3+1
+    sta PF1
+    lda LPF_0_1_3+2
+    sta PF2
+    sta WSYNC
+    sta WSYNC
+
+    lda LPF_1_1_3
+    sta PF0
+    lda LPF_1_1_3+1
+    sta PF1
+    lda LPF_1_1_3+2
+    sta PF2
+    sta WSYNC
+    sta WSYNC
+
+    lda LPF_2_1_3
+    sta PF0
+    lda LPF_2_1_3+1
+    sta PF1
+    lda LPF_2_1_3+2
+    sta PF2
+    sta WSYNC
+    sta WSYNC
+
+
+
+;jjs
+    ; 262 scan lines total
+    ldx #36 + 12 - (2 * 3)
 SpaceBelowGridLoop:
     sta WSYNC
     dex
@@ -466,6 +532,10 @@ SpaceBelowGridLoop:
 ;;;;;;;;;;;;;;
 ;; OVERSCAN ;;
 ;;;;;;;;;;;;;;
+    lda #0                  ; Clear pattern
+    sta PF0
+    sta PF1
+    sta PF2
 
     lda #%01000010           ; Disable output
     sta VBLANK
