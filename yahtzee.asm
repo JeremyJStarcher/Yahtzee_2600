@@ -55,18 +55,18 @@
 
 GameMode: ds 1              ; One or Two players
 
-SFP0:                       ; Shadow FP0
+SPF0:                       ; Shadow PF0
 TempVar1:                   ; General use variable
 LineCounter:                ; Counts lines while drawing the score
     ds 1
 
-SFP1:                       ; Shadow FP1
+SPF1:                       ; Shadow PF1
 TempVar2:                   ; General use variable
 TempDigitBmp:               ; Stores intermediate part of 6-digit score
     ds 1
 
 TempVar3:                   ; General use variable
-SFP2:                       ; Shadow FP2
+SPF2:                       ; Shadow PF2
 
 GameState: ds 1
 
@@ -492,69 +492,82 @@ FrameBottomSpace:
 
     sta WSYNC
 
-JJSHEIGHT = 4
+JJSHEIGHT = 4;
 
     MAC BARS
       REPEAT JJSHEIGHT
-      sta WSYNC
+        sta WSYNC
+        lda SPF0
+        sta PF0
+
+        lda SPF1
+        sta PF1
+
+        lda SPF2
+        sta PF2
+
+        REPEAT  10
+          nop
+        REPEND
+
+        lda #0
+        sta PF0
+        sta PF1
+        sta PF2
       REPEND
     ENDM
 
     ldy rolledDice + 0
     lda LP_0_0,y
-    sta PF0
+    sta SPF0
 
     ldy rolledDice + 1
     ldx rolledDice + 2
     lda LP_0_1,y
     ora LP_0_2,x
-    sta PF1
+    sta SPF1
 
     ldy rolledDice + 3
     ldx rolledDice + 4
     lda LP_0_3,y
     ora LP_0_4,x
-    sta PF2
+    sta SPF2
 
     BARS
 
-    lda #$95                            ; Color
-    sta COLUPF                          ; Set playfield color
-    lda #%00000001                      ; Reflect bit
-
     ldy rolledDice + 0
     lda LP_1_0,y
-    sta PF0
+    sta SPF0
 
     ldy rolledDice + 1
     ldx rolledDice + 2
     lda LP_1_1,y
     ora LP_1_2,x
-    sta PF1
+    sta SPF1
 
     ldy rolledDice + 3
     ldx rolledDice + 4
     lda LP_1_3,y
     ora LP_1_4,x
-    sta PF2
+    sta SPF2
 
     BARS
 
     ldy rolledDice + 0
     lda LP_2_0,y
-    sta PF0
+    sta SPF0
 
     ldy rolledDice + 1
     ldx rolledDice + 2
     lda LP_2_1,y
     ora LP_2_2,x
-    sta PF1
+    sta SPF1
 
     ldy rolledDice + 3
     ldx rolledDice + 4
     lda LP_2_3,y
     ora LP_2_4,x
-    sta PF2
+    sta SPF2
 
     BARS
 
