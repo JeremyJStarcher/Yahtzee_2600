@@ -230,19 +230,19 @@ FillMsbLoop1:
     lda #$56
     sta P0ScoreBCD+2
 
-    lda #$01
+    lda #5
     sta rolledDice + 0
 
-    lda #$02
+    lda #2
     sta rolledDice + 1
 
-    lda #$03
+    lda #3
     sta rolledDice + 2
 
-    lda #$04
+    lda #4
     sta rolledDice + 3
 
-    lda #$04
+    lda #5
     sta rolledDice + 4
 
 ShowTitleScreen:
@@ -493,14 +493,10 @@ FrameBottomSpace:
     sta WSYNC
 
 JJSHEIGHT = 4
-FACE = 1
-JJS0 = LP_0_0 + FACE
-JJS1 = LP_1_0 + FACE
-JJS2 = LP_2_0 + FACE
 
-; Load position 0
+    ldy rolledDice + 0
 
-    lda JJS0
+    lda LP_0_0,y
     sta PF0
     REPEAT JJSHEIGHT
     sta WSYNC
@@ -510,13 +506,13 @@ JJS2 = LP_2_0 + FACE
     sta COLUPF                          ; Set playfield color
     lda #%00000001                      ; Reflect bit
 
-    lda JJS1
+    lda LP_1_0,y
     sta PF0
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
 
-    lda JJS2
+    lda LP_2_0,y
     sta PF0
     REPEAT JJSHEIGHT
     sta WSYNC
