@@ -417,9 +417,6 @@ function createDiceFunctions() {
         const pfLeft = pf.substring(0, 20);
         const leftValue = pfToRegisters(pfLeft);
 
-        // Pad to four bytes for easy math.
-        // leftValue.push(0);
-
         const hash = [l, p, f].join("_");
         dataLeft[hash] = leftValue;
       }
@@ -446,9 +443,6 @@ function createDiceFunctions() {
       if (values.length !== 7) {
         throw new Error("Something broke.....");
       }
-
-      // Round out to a nice 8 bytes for easy math.
-      values.push(255);
 
       const binaryValues = values.map(v => {
         let n = v.toString(2);
