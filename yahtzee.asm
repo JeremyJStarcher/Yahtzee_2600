@@ -128,28 +128,29 @@ rolledDice:     ds 5
     ORG $F000
 startofrom: ds 0
     INCLUDE "build/graphics.asm"
-;===============================================================================
-; free space check before End of Cartridge
-;===============================================================================
-
- if (* & $FF)
-    echo "------", [startofrom - *]d, "bytes of graphics.asm.  ", [startofrom - * + 256]d, "bytes wasted."
-  endif
-
-    ; We ran out of room with graphics.asm.
-    ; start a new page.
-    align 256
-facesstart: ds 0
-    include "build/faces.asm"
-    echo "------", [[startofrom + 256] - *]d, "bytes of faces.asm.  "
-
-    INCLUDE "build/graphics_code.asm"
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
 VBlankTime64T:
     .byte 44,74
 OverscanTime64T:
     .byte 35,65
+
+;===============================================================================
+; free space check on this page
+;===============================================================================
+
+ if (* & $FF)
+    echo "------", [* - startofrom]d, "bytes of graphics.asm.  ", [startofrom - * + 256]d, "bytes wasted."
+  endif
+
+    ; We ran out of room with graphics.asm.
+    ; start a new page.
+    ;  align 256
+facesstart: = *
+    include "build/faces.asm"
+    echo "------", [ * - [startofrom + 256]  ]d, "bytes of faces.asm.  "
+
+    INCLUDE "build/graphics_code.asm"
 
 ;;;;;;;;;;;;;;;
 ;; CONSTANTS ;;
@@ -234,7 +235,7 @@ FillMsbLoop1:
 
     lda #$02
     sta rolledDice + 1
-    
+
     lda #$03
     sta rolledDice + 2
 
@@ -491,41 +492,36 @@ FrameBottomSpace:
 
     sta WSYNC
 
-JJSHEIGHT = 4;
-JJS0 = LPF_0_4_6
-JJS1 = LPF_1_4_6
-JJS2 = LPF_2_4_6
+JJSHEIGHT = 4
+FACE = 1
+JJS0 = LP_0_0 + FACE
+JJS1 = LP_1_0 + FACE
+JJS2 = LP_2_0 + FACE
+
+; Load position 0
 
     lda JJS0
     sta PF0
-    lda JJS0+1
-    sta PF1
-    lda JJS0+2
-    sta PF2
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
 
-    lda JJS1+0
+    lda #$95                            ; Color
+    sta COLUPF                          ; Set playfield color
+    lda #%00000001                      ; Reflect bit
+
+    lda JJS1
     sta PF0
-    lda JJS1+1
-    sta PF1
-    lda JJS1+2
-    sta PF2
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
 
-    lda JJS2+0
+    lda JJS2
     sta PF0
-    lda JJS2+1
-    sta PF1
-    lda JJS2+2
-    sta PF2
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
-    
+
     lda #0
     sta PF0
     sta PF1

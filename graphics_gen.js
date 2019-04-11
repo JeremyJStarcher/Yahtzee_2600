@@ -46,7 +46,7 @@
 })();
 //
 // graphics_gen.js
-// 
+//
 // Builds the graphics.asm file from the template below.
 //
 // Graphic glyphs are built with "X" and spaces, and surrounded on
@@ -427,31 +427,43 @@ function createDiceFunctions() {
   }
 
   let thisCode = [];
+  let values = [];
   for (let l = 0; l <= maxLine; l++) {
-    thisCode.push(``);
-    thisCode.push(`Dice_Line_Right${l}:`);
     for (let p = 0; p <= maxPosition; p++) {
+      values = [];
       for (f = 0; f <= maxFace; f++) {
         const hash = [l, p, f].join("_");
         const dval = dataLeft[hash];
-        thisCode.push(`LPF_${l}_${p}_${f}: .byte ${dval}`);
+
+        // For each combo there is only one byte that we need.
+        // Doing this is cheap and dirty, but hey, I don't mind
+        // cheap and dirty in code like this
+
+        const oneByte = dval.filter(v => v > 0)[0] || 0;
+        values.push(oneByte);
       }
+
+      if (values.length !== 7) {
+        throw new Error("Something broke.....");
+      }
+
+      // Round out to a nice 8 bytes for easy math.
+      values.push(255);
+
+      const binaryValues = values.map(v => {
+        let n = v.toString(2);
+        n = "00000000".substr(n.length) + n;
+        return `%${n}`;
+      });
+
+      thisCode.push(`LP_${l}_${p}:`);
+      binaryValues.forEach(v => {
+        thisCode.push(`  .byte ${v}`);
+      });
+
     }
   }
   fs.writeFileSync('build/faces.asm', thisCode.join("\n"));
-
-  for (let l = 0; l < 3; l++) {
-    const hash = [l, 1, 4].join("_");
-    const dval = dataLeft[hash];
-    const val = dval.map(s => {
-      let n = s.toString(2);
-      n = "00000000".substr(n.length) + n;
-      n = n.replace(/0/g, " ");
-      return n;
-    });
-    console.log(val);
-  }
-
 }
 
 function lineToBinary(line, lineNo, isReverse) {
