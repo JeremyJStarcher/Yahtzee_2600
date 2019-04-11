@@ -230,10 +230,10 @@ FillMsbLoop1:
     lda #$56
     sta P0ScoreBCD+2
 
-    lda #4
+    lda #1
     sta rolledDice + 0
 
-    lda #5
+    lda #2
     sta rolledDice + 1
 
     lda #3
@@ -499,7 +499,9 @@ JJSHEIGHT = 4
     sta PF0
 
     ldy rolledDice + 1
+    ldx rolledDice + 2
     lda LP_0_1,y
+    ora LP_0_2,x
     sta PF1
 
     REPEAT JJSHEIGHT
@@ -515,7 +517,9 @@ JJSHEIGHT = 4
     sta PF0
 
     ldy rolledDice + 1
+    ldx rolledDice + 2
     lda LP_1_1,y
+    ora LP_1_2,x
     sta PF1
 
     REPEAT JJSHEIGHT
@@ -527,7 +531,9 @@ JJSHEIGHT = 4
     sta PF0
 
     ldy rolledDice + 1
+    ldx rolledDice + 2
     lda LP_2_1,y
+    ora LP_2_2,x
     sta PF1
 
     REPEAT JJSHEIGHT
