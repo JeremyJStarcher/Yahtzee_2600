@@ -230,10 +230,10 @@ FillMsbLoop1:
     lda #$56
     sta P0ScoreBCD+2
 
-    lda #5
+    lda #4
     sta rolledDice + 0
 
-    lda #2
+    lda #5
     sta rolledDice + 1
 
     lda #3
@@ -323,7 +323,7 @@ ScoreSetup:
     lda GameState
     cmp #TitleScreen
     bne YesScore            ; No score on title screen
-    jmp YesScore            ; JJS
+    jmp YesScore            ;
 
 NoScore:
     ldx #13
@@ -495,9 +495,13 @@ FrameBottomSpace:
 JJSHEIGHT = 4
 
     ldy rolledDice + 0
-
     lda LP_0_0,y
     sta PF0
+
+    ldy rolledDice + 1
+    lda LP_0_1,y
+    sta PF1
+
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
@@ -506,14 +510,26 @@ JJSHEIGHT = 4
     sta COLUPF                          ; Set playfield color
     lda #%00000001                      ; Reflect bit
 
+    ldy rolledDice + 0
     lda LP_1_0,y
     sta PF0
+
+    ldy rolledDice + 1
+    lda LP_1_1,y
+    sta PF1
+
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
 
+    ldy rolledDice + 0
     lda LP_2_0,y
     sta PF0
+
+    ldy rolledDice + 1
+    lda LP_2_1,y
+    sta PF1
+
     REPEAT JJSHEIGHT
     sta WSYNC
     REPEND
