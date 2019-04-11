@@ -492,10 +492,18 @@ FrameBottomSpace:
 
     sta WSYNC
 
-JJSHEIGHT = 4;
+DiceRowScanLines = 4
 
-    MAC BARS
-      REPEAT JJSHEIGHT
+    MAC REVEALDICE
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;; Reveal the dice that are in the shadow registers ;;
+      ;;                                                  ;;
+      ;; We use shadow registers because we turn the PF   ;;
+      ;; on and then off every scan line, keeping the     ;;
+      ;; dice display oo just the left-hand side.         ;;
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+      REPEAT DiceRowScanLines
         sta WSYNC
         lda SPF0
         sta PF0
@@ -533,7 +541,7 @@ JJSHEIGHT = 4;
     ora LP_0_4,x
     sta SPF2
 
-    BARS
+    REVEALDICE
 
     ldy rolledDice + 0
     lda LP_1_0,y
@@ -551,7 +559,7 @@ JJSHEIGHT = 4;
     ora LP_1_4,x
     sta SPF2
 
-    BARS
+    REVEALDICE
 
     ldy rolledDice + 0
     lda LP_2_0,y
@@ -569,16 +577,11 @@ JJSHEIGHT = 4;
     ora LP_2_4,x
     sta SPF2
 
-    BARS
-
-    lda #0
-    sta PF0
-    sta PF1
-    sta PF2
+    REVEALDICE
 
 ;jjs
     ; 262 scan lines total
-    ldx #36 + 12 - (JJSHEIGHT * 3) -1
+    ldx #36 + 10 - (DiceRowScanLines * 3) -1
 SpaceBelowGridLoop:
     sta WSYNC
     dex
