@@ -116,8 +116,7 @@ rolledDice:     ds 5
 ;===============================================================================
 
     if (* & $FF)
-        echo "------", [$FF - *]d, "bytes free before End of Ram"
-        align 256
+        echo "------", [$FF - *]d, "bytes free before end of RAM"
     endif
 
 ;===============================================================================
@@ -221,6 +220,7 @@ FillMsbLoop1:
     bpl FillMsbLoop1
 
 
+    ; Prefill the score with test data
     lda #$AB
     sta P0ScoreBCD
 
@@ -230,6 +230,7 @@ FillMsbLoop1:
     lda #$56
     sta P0ScoreBCD+2
 
+    ; Prefill the rolled dice with test data
     lda #1
     sta rolledDice + 0
 
@@ -467,7 +468,6 @@ DrawScoreLoop:
     dec LineCounter
     bpl DrawScoreLoop
 
-
 ScoreCleanup:                ; 1 scanline
     lda #0
     sta VDELP0
@@ -493,8 +493,11 @@ FrameBottomSpace:
     sta WSYNC
 
 DiceRowScanLines = 4
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Calculate the dice PF fields and put them in shadow registers
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+    ;; Line 0
     ldy rolledDice + 0
     lda LP_0_0,y
     sta SPF0
@@ -513,6 +516,7 @@ DiceRowScanLines = 4
 
     jsr showDice
 
+    ;; Line 1
     ldy rolledDice + 0
     lda LP_1_0,y
     sta SPF0
@@ -531,6 +535,7 @@ DiceRowScanLines = 4
 
     jsr showDice
 
+    ;; Line 3
     ldy rolledDice + 0
     lda LP_2_0,y
     sta SPF0
