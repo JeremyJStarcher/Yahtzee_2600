@@ -117,7 +117,7 @@ rolledDice:     ds 5
 
     if (* & $FF)
         echo "------", [$FF - *]d, "bytes free before End of Ram"
-        ; align 256
+        align 256
     endif
 
 ;===============================================================================
