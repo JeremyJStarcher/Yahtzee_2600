@@ -494,6 +494,12 @@ FrameBottomSpace:
 
 JJSHEIGHT = 4
 
+    MAC BARS
+      REPEAT JJSHEIGHT
+      sta WSYNC
+      REPEND
+    ENDM
+
     ldy rolledDice + 0
     lda LP_0_0,y
     sta PF0
@@ -504,9 +510,13 @@ JJSHEIGHT = 4
     ora LP_0_2,x
     sta PF1
 
-    REPEAT JJSHEIGHT
-    sta WSYNC
-    REPEND
+    ldy rolledDice + 3
+    ldx rolledDice + 4
+    lda LP_0_3,y
+    ora LP_0_4,x
+    sta PF2
+
+    BARS
 
     lda #$95                            ; Color
     sta COLUPF                          ; Set playfield color
@@ -522,9 +532,13 @@ JJSHEIGHT = 4
     ora LP_1_2,x
     sta PF1
 
-    REPEAT JJSHEIGHT
-    sta WSYNC
-    REPEND
+    ldy rolledDice + 3
+    ldx rolledDice + 4
+    lda LP_1_3,y
+    ora LP_1_4,x
+    sta PF2
+
+    BARS
 
     ldy rolledDice + 0
     lda LP_2_0,y
@@ -536,9 +550,13 @@ JJSHEIGHT = 4
     ora LP_2_2,x
     sta PF1
 
-    REPEAT JJSHEIGHT
-    sta WSYNC
-    REPEND
+    ldy rolledDice + 3
+    ldx rolledDice + 4
+    lda LP_2_3,y
+    ora LP_2_4,x
+    sta PF2
+
+    BARS
 
     lda #0
     sta PF0
