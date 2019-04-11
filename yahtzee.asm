@@ -494,36 +494,6 @@ FrameBottomSpace:
 
 DiceRowScanLines = 4
 
-    MAC REVEALDICE
-      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      ;; Reveal the dice that are in the shadow registers ;;
-      ;;                                                  ;;
-      ;; We use shadow registers because we turn the PF   ;;
-      ;; on and then off every scan line, keeping the     ;;
-      ;; dice display oo just the left-hand side.         ;;
-      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-      REPEAT DiceRowScanLines
-        sta WSYNC
-        lda SPF0
-        sta PF0
-
-        lda SPF1
-        sta PF1
-
-        lda SPF2
-        sta PF2
-
-        REPEAT  10
-          nop
-        REPEND
-
-        lda #0
-        sta PF0
-        sta PF1
-        sta PF2
-      REPEND
-    ENDM
 
     ldy rolledDice + 0
     lda LP_0_0,y
@@ -541,7 +511,7 @@ DiceRowScanLines = 4
     ora LP_0_4,x
     sta SPF2
 
-    REVEALDICE
+    jsr showDice
 
     ldy rolledDice + 0
     lda LP_1_0,y
@@ -559,7 +529,7 @@ DiceRowScanLines = 4
     ora LP_1_4,x
     sta SPF2
 
-    REVEALDICE
+    jsr showDice
 
     ldy rolledDice + 0
     lda LP_2_0,y
@@ -577,7 +547,7 @@ DiceRowScanLines = 4
     ora LP_2_4,x
     sta SPF2
 
-    REVEALDICE
+    jsr showDice
 
 ;jjs
     ; 262 scan lines total
@@ -673,6 +643,36 @@ WaitForOverscanEndLoop:
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
+showDice:
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Reveal the dice that are in the shadow registers ;;
+    ;;                                                  ;;
+    ;; We use shadow registers because we turn the PF   ;;
+    ;; on and then off every scan line, keeping the     ;;
+    ;; dice display oo just the left-hand side.         ;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    REPEAT DiceRowScanLines
+      sta WSYNC
+      lda SPF0
+      sta PF0
+
+      lda SPF1
+      sta PF1
+
+      lda SPF2
+      sta PF2
+
+      REPEAT  10
+        nop
+      REPEND
+
+      lda #0
+      sta PF0
+      sta PF1
+      sta PF2
+    REPEND
+    rts
 
  if (* & $FF)
     echo "------", [$FFFA - *]d, "bytes free before End of Cartridge"
