@@ -658,24 +658,24 @@ showDice:
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     REPEAT DiceRowScanLines
-      sta WSYNC
-      lda SPF0
-      sta PF0
+        sta WSYNC
+        lda SPF0
+        sta PF0
 
-      lda SPF1
-      sta PF1
+        lda SPF1
+        sta PF1
 
-      lda SPF2
-      sta PF2
+        lda SPF2
+        sta PF2
 
-      REPEAT  10
-        nop
-      REPEND
+        REPEAT  10
+            nop
+        REPEND
 
-      lda #0
-      sta PF0
-      sta PF1
-      sta PF2
+        lda #0
+        sta PF0
+        sta PF1
+        sta PF2
     REPEND
     rts
 
