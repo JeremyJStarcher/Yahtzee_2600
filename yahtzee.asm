@@ -147,6 +147,32 @@ OverscanTime64T:
     ;  align 256
 facesstart: = *
     include "build/faces.asm"
+
+;-----------------------------
+; This table converts the "remainder" of the division by 15 (-1 to -15) to the correct
+; fine adjustment value. This table is on a page boundary to guarantee the processor
+; will cross a page boundary and waste a cycle in order to be at the precise position
+; for a RESP0,x write
+fineAdjustBegin:
+            DC.B %01110000; Left 7
+            DC.B %01100000; Left 6
+            DC.B %01010000; Left 5
+            DC.B %01000000; Left 4
+            DC.B %00110000; Left 3
+            DC.B %00100000; Left 2
+            DC.B %00010000; Left 1
+            DC.B %00000000; No movement.
+            DC.B %11110000; Right 1
+            DC.B %11100000; Right 2
+            DC.B %11010000; Right 3
+            DC.B %11000000; Right 4
+            DC.B %10110000; Right 5
+            DC.B %10100000; Right 6
+            DC.B %10010000; Right 7
+
+fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
+
+
     echo "------", [ * - [startofrom + 256]  ]d, "bytes of faces.asm.  "
 
     INCLUDE "build/graphics_code.asm"
@@ -165,6 +191,7 @@ ScoreColor         = $28 ; Colors were chosen to get equal or equally nice
 InactiveScoreColor = $04 ; on both PAL and NTSC, avoiding adjust branches
 BackgroundColor    = $00
 
+PlayerOneCopy       = $00 ; P0 and P1 drawing tiles: 1
 PlayerTwoCopiesWide = $02 ; P0 and P1 drawing tiles: 0 1 0 1
 PlayerThreeCopies   = $03 ; P0 and P1 drawing score: 010101
 VerticalDelay       = $01 ; Delays writing of GRP0/GRP1 for 6-digit score
@@ -485,12 +512,29 @@ FrameBottomSpace:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BOTTOM SPACE BELOW GRID ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
     lda #$45                            ; Color
     sta COLUPF                          ; Set playfield color
     lda #%00000001                      ; Reflect bit
     sta CTRLPF                          ; Set it
 
+
+    sta HMCLR
+
+;jjs
+    lda #19                 ; Position
+    ldx #0                  ; GRP0
+    jsr PosObject
+
+    lda #PlayerThreeCopies
+    sta NUSIZ0
+
+    lda #%1100000
+    sta GRP0
+
     sta WSYNC
+    sta HMOVE
+
 
 DiceRowScanLines = 4
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -554,9 +598,13 @@ DiceRowScanLines = 4
 
     jsr showDice
 
+    lda #0
+    sta GRP0
+    sta GRP1
+
 ;jjs
     ; 262 scan lines total
-    ldx #36 + 10 - (DiceRowScanLines * 3) -1
+    ldx #36 + 10 - (DiceRowScanLines * 3) -2
 SpaceBelowGridLoop:
     sta WSYNC
     dex
@@ -645,9 +693,6 @@ WaitForOverscanEndLoop:
     sta WSYNC
     jmp StartFrame
 
-;===============================================================================
-; free space check before End of Cartridge
-;===============================================================================
 showDice:
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Reveal the dice that are in the shadow registers ;;
@@ -679,6 +724,36 @@ showDice:
     REPEND
     rts
 
+
+
+
+; Positions an object horizontally
+; Inputs: A = Desired position.
+; X = Desired object to be positioned (0-5).
+; scanlines: If control comes on or before cycle 73 then 1 scanline is consumed.
+; If control comes after cycle 73 then 2 scanlines are consumed.
+; Outputs: X = unchanged
+; A = Fine Adjustment value.
+; Y = the "remainder" of the division by 15 minus an additional 15.
+; control is returned on cycle 6 of the next scanline.
+
+
+
+PosObject:
+            sta WSYNC                ; 00     Sync to start of scanline.
+            sec                      ; 02     Set the carry flag so no borrow will be applied during the division.
+.divideby15 sbc #15                  ; 04     Waste the necessary amount of time dividing X-pos by 15!
+            bcs .divideby15          ; 06/07  11/16/21/26/31/36/41/46/51/56/61/66
+            tay
+            lda fineAdjustTable,y    ; 13 -> Consume 5 cycles by guaranteeing we cross a page boundary
+            sta HMP0,x
+            sta RESP0,x              ; 21/ 26/31/36/41/46/51/56/61/66/71 - Set the rough position./Pos
+
+            rts
+
+;===============================================================================
+; free space check before End of Cartridge
+;===============================================================================
  if (* & $FF)
     echo "------", [$FFFA - *]d, "bytes free before End of Cartridge"
     align 256
