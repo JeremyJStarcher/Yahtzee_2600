@@ -191,7 +191,7 @@ GameSelect      = %00000001  ; Value for GAME SELECT pressed (after mask)
 GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
 
 ScoreLinesPerPage = 11
-ActiveScoreline = ScoreLinesPerPage / 2
+ActiveScoreLine = ScoreLinesPerPage / 2
 
 MaxScoreLines = 13
 
@@ -384,7 +384,13 @@ WriteScore:
     sta WSYNC
     sta HMOVE   ; (3)
 
-    ldx #ScoreColor          ; Animate score for a few seconds when the
+    ldx #ScoreColor
+    lda ScoreLineIdx
+    cmp ActiveScoreLine
+    beq UsePrimaryColor
+    ldx #InactiveScoreColor
+
+UsePrimaryColor:
     lda TurnIndicatorCounter ; turn changes
     beq NoTurnAnimation
     adc #ScoreColor
