@@ -348,17 +348,10 @@ ScoreSetup:
 
     lda GameState
     cmp #TitleScreen
-    bne YesScore            ; No score on title screen
-    jmp YesScore            ;
 
-NoScore:
-    ldx #13
-ScoreSpaceLoop:
-    sta WSYNC
-    dex
-    bne ScoreSpaceLoop
-    jmp ScoreCleanup
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Start showing the score ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 YesScore:
     lda #0                   ; No players until we start
     sta GRP0
