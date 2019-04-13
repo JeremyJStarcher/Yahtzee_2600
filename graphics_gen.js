@@ -556,8 +556,10 @@ const drawMap0 = [`drawMap0:`];
 const drawMap1 = [`drawMap1:`];
 const drawMap2 = [`drawMap2:`];
 const drawMap3 = [`drawMap3:`];
+const ram = ['scores:'];
 
 gfx_names.reverse().forEach(textLabel => {
+  ram.push(`  .ds 3`);
   drawMap0.push(`  .byte <${textLabel}_0`);
   drawMap1.push(`  .byte >${textLabel}_0`);
   drawMap2.push(`  .byte <${textLabel}_1`);
@@ -571,3 +573,4 @@ const newData = []
   .concat(drawMap3)
 
 fs.writeFileSync('build/faces_lookup.asm', newData.join("\n"));
+fs.writeFileSync('build/scores.asm', ram.join("\n"));
