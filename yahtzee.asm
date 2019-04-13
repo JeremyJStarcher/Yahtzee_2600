@@ -67,6 +67,7 @@ TempDigitBmp:               ; Stores intermediate part of 6-digit score
 
 TempVar3:                   ; General use variable
 SPF2:                       ; Shadow PF2
+    ds 1
 
 GameState: ds 1
 
@@ -144,9 +145,10 @@ OverscanTime64T:
 
     ; We ran out of room with graphics.asm.
     ; start a new page.
-    ;  align 256
-facesstart: = *
+    align 256
+page2start: = *
     include "build/faces.asm"
+    include "build/faces_lookup.asm"
 
 ;-----------------------------
 ; This table converts the "remainder" of the division by 15 (-1 to -15) to the correct
@@ -172,9 +174,9 @@ fineAdjustBegin:
 
 fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
 
-    echo "------", [ * - [startofrom + 256]  ]d, "bytes of faces.asm.  "
+    echo "------", [ * - [startofrom + 256]  ]d, "bytes of page 2"
 
-    INCLUDE "build/graphics_code.asm"
+   align 256
 
 ;;;;;;;;;;;;;;;
 ;; CONSTANTS ;;
@@ -457,7 +459,17 @@ ScorePtrLoop:
     ldy #4                   ; 5 scanlines
     sty LineCounter
 
-    jsr show_TopBonus
+    ldx ScoreLineCount
+    lda drawMap0,x
+    sta DrawSymbolsMap+0
+    lda drawMap1,x
+    sta DrawSymbolsMap+1
+    lda drawMap2,x
+    sta DrawSymbolsMap+2
+    lda drawMap3,x
+    sta DrawSymbolsMap+3
+
+; jjz
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.

@@ -274,7 +274,7 @@ Digits:
 const fs = require('fs');
 let glyph = [];
 let gfx = [];
-let code = [];
+let gfx_names = [];
 let glyphBytes = [];
 let isText = false;
 let textLabel = "-none-set";
@@ -502,21 +502,9 @@ function normal(line) {
 }
 
 function generateScoreSub(line, lineNo) {
-
-  const c = `
-show_${textLabel}:
-  lda #<${textLabel}_0
-  sta DrawSymbolsMap+0
-  lda #>${textLabel}_0
-  sta DrawSymbolsMap+1
-
-  lda #<${textLabel}_1
-  sta DrawSymbolsMap+2
-  lda #>${textLabel}_1
-  sta DrawSymbolsMap+3
-  rts
-  `;
-  code = code.concat(c);
+  if (gfx_names.indexOf(textLabel) === -1) {
+    gfx_names.push(textLabel);
+  }
 
   const bytes0 = [];
   const bytes1 = [];
@@ -563,4 +551,23 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
 createDiceFunctions();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
-fs.writeFileSync('build/graphics_code.asm', code.join("\n"));
+
+const drawMap0 = [`drawMap0:`];
+const drawMap1 = [`drawMap1:`];
+const drawMap2 = [`drawMap2:`];
+const drawMap3 = [`drawMap3:`];
+
+gfx_names.reverse().forEach(textLabel => {
+  drawMap0.push(`  .byte <${textLabel}_0`);
+  drawMap1.push(`  .byte >${textLabel}_0`);
+  drawMap2.push(`  .byte <${textLabel}_1`);
+  drawMap3.push(`  .byte >${textLabel}_1`);
+});
+
+const newData = []
+  .concat(drawMap0)
+  .concat(drawMap1)
+  .concat(drawMap2)
+  .concat(drawMap3)
+
+fs.writeFileSync('build/faces_lookup.asm', newData.join("\n"));
