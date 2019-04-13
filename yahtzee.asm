@@ -441,13 +441,35 @@ ScorePtrLoop:
     lda drawMap0,x
     sta DrawSymbolsMap+0
     lda drawMap1,x
+    cmp #0
+    bne keepShowing
+
+    ; There is nothing to show for this position, but
+    ; we need to still show some data
+    LDY #6
+NoItemBusyLoop:
+    sta WSYNC
+
+    lda #%00000001                      ; Reflect bit
+    sta CTRLPF                          ; Set it
+
+    lda #$96                            ; Color
+    sta COLUBK                          ; Set playfield color
+
+    DEY
+    bne NoItemBusyLoop
+    lda #0                              ; Color
+    sta COLUBK                          ; Set playfield color
+
+    jmp ScoreCleanup
+; jjz
+
+keepShowing:
     sta DrawSymbolsMap+1
     lda drawMap2,x
     sta DrawSymbolsMap+2
     lda drawMap3,x
     sta DrawSymbolsMap+3
-
-; jjz
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
@@ -482,6 +504,7 @@ ScoreCleanup:                ; 1 scanline
     sta VDELP1
     sta GRP0
     sta GRP1
+
     sta WSYNC
 
 LoopScore
