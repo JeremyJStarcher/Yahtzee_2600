@@ -172,7 +172,6 @@ fineAdjustBegin:
 
 fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
 
-
     echo "------", [ * - [startofrom + 256]  ]d, "bytes of faces.asm.  "
 
     INCLUDE "build/graphics_code.asm"
@@ -245,7 +244,6 @@ FillMsbLoop1:
     dex                ; Skip to the next MSB
     dex
     bpl FillMsbLoop1
-
 
     ; Prefill the score with test data
     lda #$AB
@@ -518,8 +516,15 @@ FrameBottomSpace:
     lda #%00000001                      ; Reflect bit
     sta CTRLPF                          ; Set it
 
+    lda #$98
+    sta COLUP0
+    lda #$25
+    sta COLUP1
 
     sta HMCLR
+
+    lda #1                  ; Delay until the next scan line = TRUE
+    sta VDELP0              ; Player 0
 
 ;jjs
     lda #19                 ; Position
@@ -532,9 +537,18 @@ FrameBottomSpace:
     lda #%1100000
     sta GRP0
 
+    lda #46                 ; Position
+    ldx #1                  ; GRP0
+    jsr PosObject
+
+    lda #PlayerThreeCopies
+    sta NUSIZ1
+
+    lda #%00000011
+    sta GRP1
+
     sta WSYNC
     sta HMOVE
-
 
 DiceRowScanLines = 4
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -604,7 +618,7 @@ DiceRowScanLines = 4
 
 ;jjs
     ; 262 scan lines total
-    ldx #36 + 10 - (DiceRowScanLines * 3) -2
+    ldx #36 + 7 - (DiceRowScanLines * 3)
 SpaceBelowGridLoop:
     sta WSYNC
     dex
@@ -724,9 +738,6 @@ showDice:
     REPEND
     rts
 
-
-
-
 ; Positions an object horizontally
 ; Inputs: A = Desired position.
 ; X = Desired object to be positioned (0-5).
@@ -736,8 +747,6 @@ showDice:
 ; A = Fine Adjustment value.
 ; Y = the "remainder" of the division by 15 minus an additional 15.
 ; control is returned on cycle 6 of the next scanline.
-
-
 
 PosObject:
             sta WSYNC                ; 00     Sync to start of scanline.
