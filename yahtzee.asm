@@ -83,7 +83,6 @@ P0ScoreBCD:  ds 3
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
 ScoreBCD: ds 3
 
-TurnIndicatorCounter: ds 1      ; Controls the time spent changing player turn
 CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
 ScoreLineIdx: ds 1              ; Which scoreline is currently being rendered
 
@@ -391,15 +390,6 @@ WriteScore:
     ldx #InactiveScoreColor
 
 UsePrimaryColor:
-    lda TurnIndicatorCounter ; turn changes
-    beq NoTurnAnimation
-    adc #ScoreColor
-    tax
-    dec TurnIndicatorCounter
-NoTurnAnimation:
-   ; beq SetScoreColor
-
-SetScoreColor:
     stx COLUP0
     stx COLUP1
 
