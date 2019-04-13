@@ -567,12 +567,19 @@ const ram = ['scores:'];
 });
 
 gfx_names.reverse().forEach(textLabel => {
-  ram.push(`  .ds 3`);
+  ram.push(`  .ds 2`);
   drawMap0.push(`  .byte <${textLabel}_0`);
   drawMap1.push(`  .byte >${textLabel}_0`);
   drawMap2.push(`  .byte <${textLabel}_1`);
   drawMap3.push(`  .byte >${textLabel}_1`);
 });
+
+[drawMap0, drawMap1, drawMap2, drawMap3].forEach(a => {
+  for (var i = 0; i < 3; i++) {
+    a.push(`  .byte 00`);
+  }
+});
+
 
 const newData = []
   .concat(drawMap0)
