@@ -256,7 +256,7 @@ FillMsbLoop1:
     sta P0ScoreBCD+2
 
     ; Prefill the rolled dice with test data
-    lda #1
+    lda #6
     sta rolledDice + 0
 
     lda #2
