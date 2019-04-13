@@ -85,7 +85,11 @@ ScoreBCD: ds 3
 
 TurnIndicatorCounter: ds 1      ; Controls the time spent changing player turn
 CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
-ScoreLineCount: ds 1
+ScoreLineIdx: ds 1              ; Which scoreline is currently being rendered
+
+ScoreLineTop: ds 1              ; Which is the TOP scoreline to display
+                                ; (The screen is drawn upside down)
+
 DrawSymbolsMap: ds 4
 rolledDice:     ds 5
 
@@ -186,7 +190,10 @@ SelectResetMask = %00000011  ; Mask to test SWCHB for GAME SELECT/RESET switches
 GameSelect      = %00000001  ; Value for GAME SELECT pressed (after mask)
 GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
 
-ScoreLines = 11
+ScoreLinesPerPage = 11
+ActiveScoreline = ScoreLinesPerPage / 2
+
+MaxScoreLines = 13
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -224,6 +231,9 @@ FillMsbLoop1:
     dex                ; Skip to the next MSB
     dex
     bpl FillMsbLoop1
+
+    lda #MaxScoreLines
+    sta ScoreLineTop   ; Reset te top line
 
     ; Prefill the score with test data
     lda #$AB
@@ -323,8 +333,8 @@ ScoreSetup:
 ; Score setup scanline 1:
 ; general configuration
 
-    lda #ScoreLines
-    sta ScoreLineCount
+    lda #ScoreLinesPerPage
+    sta ScoreLineIdx
 
     lda GameState
     cmp #TitleScreen
@@ -437,7 +447,12 @@ ScorePtrLoop:
     ldy #4                   ; 5 scanlines
     sty LineCounter
 
-    ldx ScoreLineCount
+    clc
+    lda ScoreLineIdx
+    adc ScoreLineTop
+
+    tax
+
     lda drawMap0,x
     sta DrawSymbolsMap+0
     lda drawMap1,x
@@ -508,7 +523,7 @@ ScoreCleanup:                ; 1 scanline
     sta WSYNC
 
 LoopScore
-    dec ScoreLineCount
+    dec ScoreLineIdx
     beq FrameBottomSpace
     jmp YesScore
 
