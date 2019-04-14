@@ -723,6 +723,8 @@ VerifyGameStateForJoyCheck:
     cpx #WaitingJoyPress
     bne EndJoyCheck
 
+; jjz
+
 ; If the joystick is in one of these directions, trigger the shift by
 ; setting the ShiftVector and changing mode
 CheckJoyUp:
