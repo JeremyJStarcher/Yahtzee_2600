@@ -263,25 +263,25 @@ StartNewGame:
     sta score_low_L1s
 
     lda #$78
-    sta score_low_L2s
-    lda #$56
     sta score_high_L2s
+    lda #$56
+    sta score_low_L2s
 
     lda #$33
-    sta score_low_L3s
     sta score_high_L3s
+    sta score_low_L3s
 
     lda #$44
-    sta score_low_L4s
     sta score_high_L4s
+    sta score_low_L4s
 
     lda #$55
-    sta score_low_L5s
     sta score_high_L5s
+    sta score_low_L5s
 
     lda #$66
-    sta score_low_L6s
     sta score_high_L6s
+    sta score_low_L6s
 
     ; Continue into real prep
     lda #WaitingJoyPress
