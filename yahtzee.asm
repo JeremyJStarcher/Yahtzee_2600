@@ -443,11 +443,7 @@ ScorePtrLoop:
     ldy #4                   ; 5 scanlines
     sty LineCounter
 
-    clc
-    lda ScoreLineIdx
-    adc ScoreLineTop
-
-    tax
+    ldx ScoreLineIdx
 
     lda drawMap0,x
     sta DrawSymbolsMap+0
