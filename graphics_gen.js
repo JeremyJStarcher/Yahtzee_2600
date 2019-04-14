@@ -562,17 +562,6 @@ const drawMap2 = [`drawMap2:`];
 const drawMap3 = [`drawMap3:`];
 const ram = [];
 
-const makeBuffer = () => {
-  // Make a little padding so we can slide the sheet up and down
-  [drawMap0, drawMap1, drawMap2, drawMap3].forEach(a => {
-    for (var i = 0; i < LINE_BUFFER_SIZE; i++) {
-      a.push(`  .byte 00`);
-    }
-  });
-}
-
-makeBuffer();
-
 gfx_names.forEach(textLabel => {
   drawMap0.push(`  .byte <${textLabel}_0`);
   drawMap1.push(`  .byte >${textLabel}_0`);
@@ -580,12 +569,17 @@ gfx_names.forEach(textLabel => {
   drawMap3.push(`  .byte >${textLabel}_1`);
 });
 
-ram.push(`scores:`);
+ram.push(`scores_low:`);
 gfx_names.forEach(textLabel => {
-  ram.push(`score_${textLabel}:  .ds 2`);
+  ram.push(`score_low_${textLabel}:  .ds 1`);
 });
 
-makeBuffer();
+ram.push(`scores_high:`);
+gfx_names.forEach(textLabel => {
+  ram.push(`score_high_${textLabel}:  .ds 1`);
+});
+
+
 
 const newData = []
   .concat(drawMap0)

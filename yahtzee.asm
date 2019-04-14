@@ -258,30 +258,30 @@ StartNewGame:
 
     ; Prefill scores with dummy values
     lda #$34
-    sta score_L1s
+    sta score_high_L1s
     lda #$12
-    sta score_L1s+1
+    sta score_low_L1s
 
     lda #$78
-    sta score_L2s
+    sta score_low_L2s
     lda #$56
-    sta score_L2s+1
+    sta score_high_L2s
 
     lda #$33
-    sta score_L3s
-    sta score_L3s+1
+    sta score_low_L3s
+    sta score_high_L3s
 
     lda #$44
-    sta score_L4s
-    sta score_L4s+1
+    sta score_low_L4s
+    sta score_high_L4s
 
     lda #$55
-    sta score_L5s
-    sta score_L5s+1
+    sta score_low_L5s
+    sta score_high_L5s
 
     lda #$66
-    sta score_L6s
-    sta score_L6s+1
+    sta score_low_L6s
+    sta score_high_L6s
 
     ; Continue into real prep
     lda #WaitingJoyPress
@@ -349,16 +349,6 @@ YesScore:
     lda #0                   ; No players until we start
     sta GRP0
     sta GRP1
-
-    lda #ActiveScoreLine
-    adc ScoreTextIndex
-    tax
-
-    lda scores+0,x
-    sta ScoreBCD+1
-
-    lda scores+1,x
-    sta ScoreBCD+2
 
     sta WSYNC
 
@@ -453,13 +443,7 @@ ScorePtrLoop:
     cmp #MaxScoreLines
     bcs StartNoItem
 
-jjz
-
-    lda drawMap0,x
-    sta DrawSymbolsMap+0
-    lda drawMap1,x
-    cmp #0
-    bne keepShowing
+    jmp keepShowing
 
 StartNoItem:
     ; There is nothing to show for this position, but
@@ -482,11 +466,21 @@ NoItemBusyLoop:
     jmp ScoreCleanup
 
 keepShowing:
+    lda drawMap0,x
+    sta DrawSymbolsMap+0
+    lda drawMap1,x
     sta DrawSymbolsMap+1
     lda drawMap2,x
     sta DrawSymbolsMap+2
     lda drawMap3,x
     sta DrawSymbolsMap+3
+
+    lda scores_low,x
+    sta ScoreBCD+1
+
+    lda scores_high,x
+    sta ScoreBCD+2
+
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
