@@ -79,10 +79,8 @@ DigitBmpPtr:
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
 ScoreBCD: ds 3
 
-CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
 ScoreLineCounter: ds 1          ; How many score lines have been drawn?
 ScoreTextIndex: ds 1            ; Track the label
-ScoreValuesIndex: ds 1          ; Track the score value
 
 ScoreLineTop: ds 1              ; Which is the TOP scoreline to display
                                 ; (The screen is drawn upside down)
@@ -242,8 +240,6 @@ ShowTitleScreen:
 ;;;;;;;;;;;;;;
 
 StartNewGame:
-    sta CurrentBGColor
-
     ; Prefill the rolled dice with test data
     lda #6
     sta rolledDice + 0
