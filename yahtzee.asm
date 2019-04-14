@@ -354,12 +354,7 @@ YesScore:
     sta GRP0
     sta GRP1
 
-    clc
-    lda ScoreTextIndex
-    sbc #DisplayBufferSize
-    adc ScoreLineTop
-    tax
-
+    ldx #0
     lda scores_high,x
     sta ScoreBCD+1
 
