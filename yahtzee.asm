@@ -83,7 +83,6 @@ ScoreLineCounter: ds 1          ; How many score lines have been drawn?
 ScoreTextIndex: ds 1            ; Track the label
 
 ScoreLineTop: ds 1              ; Which is the TOP scoreline to display
-                                ; (The screen is drawn upside down)
 
 DrawSymbolsMap: ds 4
 rolledDice:     ds 5
