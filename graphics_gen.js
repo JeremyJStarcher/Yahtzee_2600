@@ -551,7 +551,7 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
 createDiceFunctions();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
-const LINE_BUFFER_SIZE = 6;
+const LINE_BUFFER_SIZE = 0;
 
 const drawMap0 = [
   `DisplayBufferSize = ${LINE_BUFFER_SIZE}`,
@@ -580,18 +580,10 @@ gfx_names.forEach(textLabel => {
   drawMap3.push(`  .byte >${textLabel}_1`);
 });
 
-ram.push(`scores_high:`);
+ram.push(`scores:`);
 gfx_names.forEach(textLabel => {
-  ram.push(`score_${textLabel}_hi:  .ds 1`);
+  ram.push(`score_${textLabel}:  .ds 2`);
 });
-
-ram.push(`scores_low:`);
-gfx_names.forEach(textLabel => {
-  ram.push(`score_${textLabel}_low:  .ds 1`);
-});
-
-
-
 
 makeBuffer();
 

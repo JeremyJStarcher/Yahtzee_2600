@@ -188,8 +188,9 @@ GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
 
 ScoreLinesPerPage = 11
 ActiveScoreLine = ScoreLinesPerPage / 2
+TopPadding = ScoreLinesPerPage - ActiveScoreLine
 
-MaxScoreLines = 27
+MaxScoreLines = 25
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -257,30 +258,30 @@ StartNewGame:
 
     ; Prefill scores with dummy values
     lda #$34
-    sta score_L1s_low
+    sta score_L1s
     lda #$12
-    sta score_L1s_hi
+    sta score_L1s+1
 
     lda #$78
-    sta score_L2s_low
+    sta score_L2s
     lda #$56
-    sta score_L2s_hi
+    sta score_L2s+1
 
     lda #$33
-    sta score_L3s_low
-    sta score_L3s_hi
+    sta score_L3s
+    sta score_L3s+1
 
     lda #$44
-    sta score_L4s_low
-    sta score_L4s_hi
+    sta score_L4s
+    sta score_L4s+1
 
     lda #$55
-    sta score_L5s_low
-    sta score_L5s_hi
+    sta score_L5s
+    sta score_L5s+1
 
     lda #$66
-    sta score_L6s_low
-    sta score_L6s_hi
+    sta score_L6s
+    sta score_L6s+1
 
     ; Continue into real prep
     lda #WaitingJoyPress
@@ -335,7 +336,7 @@ ScoreSetup:
     lda #ScoreLinesPerPage
     sta ScoreLineCounter
 
-    lda #0
+    lda #[0 - TopPadding]
     sta ScoreTextIndex
 
     lda GameState
@@ -349,11 +350,14 @@ YesScore:
     sta GRP0
     sta GRP1
 
-    ldx #0
-    lda scores_high,x
+    lda #ActiveScoreLine
+    adc ScoreTextIndex
+    tax
+
+    lda scores+0,x
     sta ScoreBCD+1
 
-    lda scores_low,x
+    lda scores+1,x
     sta ScoreBCD+2
 
     sta WSYNC
@@ -443,12 +447,21 @@ ScorePtrLoop:
     adc ScoreLineTop
     tax
 
+    adc #TopPadding         ; Move into the a good compare range
+    bcs StartNoItem
+
+    cmp #MaxScoreLines
+    bcs StartNoItem
+
+jjz
+
     lda drawMap0,x
     sta DrawSymbolsMap+0
     lda drawMap1,x
     cmp #0
     bne keepShowing
 
+StartNoItem:
     ; There is nothing to show for this position, but
     ; we need to still show some data
     LDY #6
