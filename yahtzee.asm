@@ -431,12 +431,6 @@ ScorePtrLoop:
     bpl ScorePtrLoop  ; (2*)
     sta WSYNC         ;      ; We take less than 2 scanlines, round up
 
-; We may have been drawing the end of the grid (if it's P1 score)
-    lda #0
-    sta PF0
-    sta PF1
-    sta PF2
-
 ;;;;;;;;;;;
 ;; SCORE ;;
 ;;;;;;;;;;;
