@@ -551,20 +551,27 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
 createDiceFunctions();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
+const LINE_BUFFER_SIZE = 6;
 
-const drawMap0 = [`drawMap0:`];
+const drawMap0 = [
+  `DisplayBufferSize = ${LINE_BUFFER_SIZE}`,
+  `drawMap0:`
+];
 const drawMap1 = [`drawMap1:`];
 const drawMap2 = [`drawMap2:`];
 const drawMap3 = [`drawMap3:`];
 const ram = ['scores:'];
 
-// Make a little padding so we can slide the sheet up and down
+const makeBuffer = () => {
+  // Make a little padding so we can slide the sheet up and down
+  [drawMap0, drawMap1, drawMap2, drawMap3].forEach(a => {
+    for (var i = 0; i < LINE_BUFFER_SIZE; i++) {
+      a.push(`  .byte 00`);
+    }
+  });
+}
 
-[drawMap0, drawMap1, drawMap2, drawMap3].forEach(a => {
-  for (var i = 0; i < 6; i++) {
-    a.push(`  .byte 00`);
-  }
-});
+makeBuffer();
 
 gfx_names.forEach(textLabel => {
   ram.push(`  .ds 2`);
@@ -574,11 +581,7 @@ gfx_names.forEach(textLabel => {
   drawMap3.push(`  .byte >${textLabel}_1`);
 });
 
-[drawMap0, drawMap1, drawMap2, drawMap3].forEach(a => {
-  for (var i = 0; i < 3; i++) {
-    a.push(`  .byte 00`);
-  }
-});
+makeBuffer();
 
 const newData = []
   .concat(drawMap0)
