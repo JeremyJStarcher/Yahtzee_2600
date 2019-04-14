@@ -54,6 +54,9 @@
 ; (think of them as local variables)
 
 GameMode: ds 1              ; One or Two players
+GameState: ds 1
+LastSWCHB: ds 1             ; Avoid multiple detection of console switches
+MoveVector: ds 1            ; Movement Vector
 
 SPF0:                       ; Shadow PF0
 TempVar1:                   ; General use variable
@@ -69,8 +72,6 @@ TempVar3:                   ; General use variable
 SPF2:                       ; Shadow PF2
     ds 1
 
-GameState: ds 1
-
 ; Address of the graphic for for each digit (6x2 bytes)
 DigitBmpPtr:
     ds 6 * 2
@@ -84,7 +85,8 @@ P0ScoreBCD:  ds 3
 ScoreBCD: ds 3
 
 CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
-ScoreLineIdx: ds 1              ; Which scoreline is currently being rendered
+ScoreLineCounter: ds 1          ; Counter
+ScoreLineIdx: ds 1
 
 ScoreLineTop: ds 1              ; Which is the TOP scoreline to display
                                 ; (The screen is drawn upside down)
@@ -167,7 +169,9 @@ fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
 TitleScreen       = 0  ; => AddingRandomTitle
 AddingRandomTile  = 1  ; => WaitingJoyRelease
 WaitingJoyRelease = 2  ; => WaitingJoyPress
-WaitingJoyPress   = 3  ; => Shifting
+WaitingJoyPress   = 3  ; => ShiftingA
+JoyVectorUp       = 1  ; Last joystick action
+JoyVectorDown     = 2  ; last joystick action
 
 ScoreColor         = $28 ; Colors were chosen to get equal or equally nice
 InactiveScoreColor = $04 ; on both PAL and NTSC, avoiding adjust branches
@@ -192,7 +196,7 @@ GameReset       = %00000010  ; Value for GAME RESET  pressed (after mask)
 ScoreLinesPerPage = 11
 ActiveScoreLine = ScoreLinesPerPage / 2
 
-MaxScoreLines = 13
+MaxScoreLines = 27
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -231,7 +235,7 @@ FillMsbLoop1:
     dex
     bpl FillMsbLoop1
 
-    lda #MaxScoreLines
+    lda #0
     sta ScoreLineTop   ; Reset te top line
 
     ; Prefill the score with test data
@@ -243,6 +247,16 @@ FillMsbLoop1:
 
     lda #$56
     sta P0ScoreBCD+2
+
+ShowTitleScreen:
+    jmp StartFrame
+
+;;;;;;;;;;;;;;
+;; NEW GAME ;;
+;;;;;;;;;;;;;;
+
+StartNewGame:
+    sta CurrentBGColor
 
     ; Prefill the rolled dice with test data
     lda #6
@@ -260,18 +274,7 @@ FillMsbLoop1:
     lda #6
     sta rolledDice + 4
 
-ShowTitleScreen:
-    jmp StartFrame
-
-;;;;;;;;;;;;;;
-;; NEW GAME ;;
-;;;;;;;;;;;;;;
-
-StartNewGame:
-    sta CurrentBGColor
-
-; Start the game with a random tile
-    lda #AddingRandomTile
+    lda #WaitingJoyPress
     sta GameState
 
 ;;;;;;;;;;;;;;;;;
@@ -333,6 +336,9 @@ ScoreSetup:
 ; general configuration
 
     lda #ScoreLinesPerPage
+    sta ScoreLineCounter
+
+    lda 0
     sta ScoreLineIdx
 
     lda GameState
@@ -384,7 +390,7 @@ WriteScore:
     sta HMOVE   ; (3)
 
     ldx #ScoreColor
-    lda ScoreLineIdx
+    lda ScoreLineCounter
     cmp ActiveScoreLine
     beq UsePrimaryColor
     ldx #InactiveScoreColor
@@ -443,7 +449,10 @@ ScorePtrLoop:
     ldy #4                   ; 5 scanlines
     sty LineCounter
 
-    ldx ScoreLineIdx
+    clc
+    lda ScoreLineIdx
+    adc ScoreLineTop
+    tax
 
     lda drawMap0,x
     sta DrawSymbolsMap+0
@@ -469,7 +478,6 @@ NoItemBusyLoop:
     sta COLUBK                          ; Set playfield color
 
     jmp ScoreCleanup
-; jjz
 
 keepShowing:
     sta DrawSymbolsMap+1
@@ -515,7 +523,8 @@ ScoreCleanup:                ; 1 scanline
     sta WSYNC
 
 LoopScore
-    dec ScoreLineIdx
+    inc ScoreLineIdx
+    dec ScoreLineCounter
     beq FrameBottomSpace
     jmp YesScore
 
@@ -523,6 +532,7 @@ FrameBottomSpace:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BOTTOM SPACE BELOW GRID ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    sta WSYNC
 
     lda #$45                            ; Color
     sta COLUPF                          ; Set playfield color
@@ -539,7 +549,6 @@ FrameBottomSpace:
     lda #1                  ; Delay until the next scan line = TRUE
     sta VDELP0              ; Player 0
 
-;jjs
     lda #19                 ; Position
     ldx #0                  ; GRP0
     jsr PosObject
@@ -629,9 +638,8 @@ DiceRowScanLines = 4
     sta GRP0
     sta GRP1
 
-;jjs
     ; 262 scan lines total
-    ldx #36 + 7 - (DiceRowScanLines * 3)
+    ldx #36 + 6 - (DiceRowScanLines * 3)
 SpaceBelowGridLoop:
     sta WSYNC
     dex
@@ -656,6 +664,43 @@ NoOverscanPALAdjust:
     lda OverscanTime64T,x    ; Use a timer adjusted to the color system's TV
     sta TIM64T               ; timings to end Overscan, same as VBLANK
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SELECT, RESET AND P0 FIRE BUTTON ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ldx GameMode              ; Remember if we were on one or two player mode
+    lda SWCHB                 ; We only want the switch presses once
+    and #SelectResetMask      ; (in particular GAME SELECT)
+    cmp LastSWCHB
+    beq NoSwitchChange
+    sta LastSWCHB             ; Store so we know if it's a repeat next time
+
+    cmp #GameSelect           ; GAME SELECT flips single/multiplayer...
+    bne NoSelect
+    lda GameMode
+    eor #1
+    sta GameMode
+    jmp StartNewGame          ; ...and restarts with no further game mode change
+NoSelect:
+    cmp #GameReset            ; GAME RESET restarts the game at any time
+    beq Restart
+NoSwitchChange:
+    lda INPT4
+    bpl ButtonPressed         ; P0 Fire button pressed?
+    ldx #1                    ; P1 fire button always starts two-player game
+    lda INPT5                 ; P1 fire button pressed?
+    bmi NoRestart
+ButtonPressed:
+    lda GameState
+    cmp #TitleScreen
+    beq Restart               ; Start game if title screen
+    ; cmp #GameOver             ; or game over
+    bne NoRestart
+Restart:
+    stx GameMode
+    jmp StartNewGame
+NoRestart:
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; INPUT CHECKING ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -674,6 +719,7 @@ VerifyGameStateForJoyCheck:
     ldx GameState            ; We only care for states in which we are waiting
     cpx #WaitingJoyRelease   ; for a joystick press or release
     beq CheckJoyRelease
+
     cpx #WaitingJoyPress
     bne EndJoyCheck
 
@@ -682,11 +728,13 @@ VerifyGameStateForJoyCheck:
 CheckJoyUp:
     cmp #JoyUp
     bne CheckJoyDown
+    lda #JoyVectorUp
     jmp TriggerShift
 
 CheckJoyDown:
     cmp #JoyDown
     bne CheckJoyLeft
+    lda #JoyVectorDown
     jmp TriggerShift
 
 CheckJoyLeft:
@@ -699,12 +747,42 @@ CheckJoyRight:
     bne EndJoyCheck
 
 TriggerShift:
+    sta MoveVector
+    lda #WaitingJoyRelease
+    sta GameState
     jmp EndJoyCheck
 
 CheckJoyRelease:
     cmp #JoyMask
     bne EndJoyCheck
 
+    ldy ScoreLineTop            ; Save value
+
+    lda MoveVector
+    cmp #JoyVectorUp
+    bne checkDownVector
+    inc ScoreLineTop
+    jmp CheckJoyReleaseEnd
+
+checkDownVector
+    lda MoveVector
+    cmp #JoyVectorDown
+    bne checkRightVector
+    dec ScoreLineTop
+    jmp CheckJoyReleaseEnd
+
+checkRightVector:
+
+CheckJoyReleaseEnd:
+    ldx ScoreLineTop
+    inx
+    lda [drawMap1 + ActiveScoreLine],x
+    cmp #0
+    bne CheckJoyReleaseRangeValid
+    sty ScoreLineTop
+
+CheckJoyReleaseRangeValid:
+jjz
     lda #WaitingJoyPress       ; Joystick released, can accept shifts again
     sta GameState
 

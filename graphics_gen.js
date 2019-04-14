@@ -561,12 +561,12 @@ const ram = ['scores:'];
 // Make a little padding so we can slide the sheet up and down
 
 [drawMap0, drawMap1, drawMap2, drawMap3].forEach(a => {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 6; i++) {
     a.push(`  .byte 00`);
   }
 });
 
-gfx_names.reverse().forEach(textLabel => {
+gfx_names.forEach(textLabel => {
   ram.push(`  .ds 2`);
   drawMap0.push(`  .byte <${textLabel}_0`);
   drawMap1.push(`  .byte >${textLabel}_0`);
@@ -579,7 +579,6 @@ gfx_names.reverse().forEach(textLabel => {
     a.push(`  .byte 00`);
   }
 });
-
 
 const newData = []
   .concat(drawMap0)
