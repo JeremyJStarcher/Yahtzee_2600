@@ -76,17 +76,13 @@ SPF2:                       ; Shadow PF2
 DigitBmpPtr:
     ds 6 * 2
 
-; Store each player score separatedly and copy
-; from/to ScoreBCD as needed to display, add, etc.
-; Note: P1 score will store (and show) the high-score in single-player games
-P0ScoreBCD:  ds 3
-
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
 ScoreBCD: ds 3
 
 CurrentBGColor: ds 1            ; Ensures invisible score keeps invisible during
-ScoreLineCounter: ds 1          ; Counter
-ScoreLineIdx: ds 1
+ScoreLineCounter: ds 1          ; How many score lines have been drawn?
+ScoreTextIndex: ds 1            ; Track the label
+ScoreValuesIndex: ds 1          ; Track the score value
 
 ScoreLineTop: ds 1              ; Which is the TOP scoreline to display
                                 ; (The screen is drawn upside down)
@@ -238,16 +234,6 @@ FillMsbLoop1:
     lda #0
     sta ScoreLineTop   ; Reset te top line
 
-    ; Prefill the score with test data
-    lda #$AB
-    sta P0ScoreBCD
-
-    lda #$00
-    sta P0ScoreBCD+1
-
-    lda #$56
-    sta P0ScoreBCD+2
-
 ShowTitleScreen:
     jmp StartFrame
 
@@ -274,6 +260,34 @@ StartNewGame:
     lda #6
     sta rolledDice + 4
 
+    ; Prefill scores with dummy values
+    lda #$34
+    sta score_L1s_low
+    lda #$12
+    sta score_L1s_hi
+
+    lda #$78
+    sta score_L2s_low
+    lda #$56
+    sta score_L2s_hi
+
+    lda #$33
+    sta score_L3s_low
+    sta score_L3s_hi
+
+    lda #$44
+    sta score_L4s_low
+    sta score_L4s_hi
+
+    lda #$55
+    sta score_L5s_low
+    sta score_L5s_hi
+
+    lda #$66
+    sta score_L6s_low
+    sta score_L6s_hi
+
+    ; Continue into real prep
     lda #WaitingJoyPress
     sta GameState
 
@@ -316,30 +330,18 @@ WaitForVBlankEndLoop:
 
     sta WSYNC
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; TOP SPACE ABOVE SCORE ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;   ** 262 scanlines total
-;    ldx #36
-;SpaceAboveLoop:
-;    sta WSYNC
-;    dex
-;    bne SpaceAboveLoop
-;    sta WSYNC
-
 ;;;;;;;;;;;;;;;;;
 ;; SCORE SETUP ;;
 ;;;;;;;;;;;;;;;;;
 
 ScoreSetup:
-; Score setup scanline 1:
 ; general configuration
 
     lda #ScoreLinesPerPage
     sta ScoreLineCounter
 
-    lda 0
-    sta ScoreLineIdx
+    lda #0
+    sta ScoreTextIndex
 
     lda GameState
     cmp #TitleScreen
@@ -352,15 +354,18 @@ YesScore:
     sta GRP0
     sta GRP1
 
-    ; Score of the score -- this will have to change later
-    lda P0ScoreBCD
-    ldx P0ScoreBCD+1
-    ldy P0ScoreBCD+2
+    clc
+    lda ScoreTextIndex
+    sbc #DisplayBufferSize
+    adc ScoreLineTop
+    tax
 
-WriteScore:
-    sta ScoreBCD
-    stx ScoreBCD+1
-    sty ScoreBCD+2
+    lda scores_high,x
+    sta ScoreBCD+1
+
+    lda scores_low,x
+    sta ScoreBCD+2
+
     sta WSYNC
 
 ; Score setup scanlines 2-3:
@@ -450,7 +455,7 @@ ScorePtrLoop:
     sty LineCounter
 
     clc
-    lda ScoreLineIdx
+    lda ScoreTextIndex
     adc ScoreLineTop
     tax
 
@@ -523,7 +528,7 @@ ScoreCleanup:                ; 1 scanline
     sta WSYNC
 
 LoopScore
-    inc ScoreLineIdx
+    inc ScoreTextIndex
     dec ScoreLineCounter
     beq FrameBottomSpace
     jmp YesScore
@@ -723,8 +728,6 @@ VerifyGameStateForJoyCheck:
     cpx #WaitingJoyPress
     bne EndJoyCheck
 
-; jjz
-
 ; If the joystick is in one of these directions, trigger the shift by
 ; setting the ShiftVector and changing mode
 CheckJoyUp:
@@ -784,7 +787,6 @@ CheckJoyReleaseEnd:
     sty ScoreLineTop
 
 CheckJoyReleaseRangeValid:
-jjz
     lda #WaitingJoyPress       ; Joystick released, can accept shifts again
     sta GameState
 

@@ -560,7 +560,7 @@ const drawMap0 = [
 const drawMap1 = [`drawMap1:`];
 const drawMap2 = [`drawMap2:`];
 const drawMap3 = [`drawMap3:`];
-const ram = ['scores:'];
+const ram = [];
 
 const makeBuffer = () => {
   // Make a little padding so we can slide the sheet up and down
@@ -574,12 +574,24 @@ const makeBuffer = () => {
 makeBuffer();
 
 gfx_names.forEach(textLabel => {
-  ram.push(`  .ds 2`);
   drawMap0.push(`  .byte <${textLabel}_0`);
   drawMap1.push(`  .byte >${textLabel}_0`);
   drawMap2.push(`  .byte <${textLabel}_1`);
   drawMap3.push(`  .byte >${textLabel}_1`);
 });
+
+ram.push(`scores_high:`);
+gfx_names.forEach(textLabel => {
+  ram.push(`score_${textLabel}_hi:  .ds 1`);
+});
+
+ram.push(`scores_low:`);
+gfx_names.forEach(textLabel => {
+  ram.push(`score_${textLabel}_low:  .ds 1`);
+});
+
+
+
 
 makeBuffer();
 
