@@ -283,6 +283,10 @@ StartNewGame:
     sta score_high_L6s
     sta score_low_L6s
 
+    lda #$78
+    sta score_high_LChance
+    sta score_low_LChance
+
     ; Continue into real prep
     lda #WaitingJoyPress
     sta GameState
