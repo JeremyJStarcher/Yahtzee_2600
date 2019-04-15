@@ -1,3 +1,5 @@
+"use strict";
+
 (function () {
   // test stuff
 
@@ -271,6 +273,45 @@ Digits:
 
 `;
 
+const diceFaceBitmaps = [
+    [
+      "... ... ... ... ...                     ",
+      "000 111 222 333 444                     ",
+      "... ... ... ... ...                     ",
+    ],
+    [
+      "... ... ... ... ...                     ",
+      ".0. .1. .2. .3. .4.                     ",
+      "... ... ... ... ...                     ",
+    ],
+    [
+      "..0 ..1 ..2 ..3 ..4                     ",
+      "... ... ... ... ...                     ",
+      "0.. 1.. 2.. 3.. 4..                     ",
+    ],
+    [
+      "..0 ..1 ..2 ..3 ..4                     ",
+      ".0. .1. .2. .3. .4..                    ",
+      "0.. 1.. 2.. 3.. 4...                    ",
+    ],
+    [
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      "... ... ... ... ...                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+    ],
+    [
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      ".0. .1. .2. .3. .4.                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+    ],
+    [
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+      "0.0 1.1 2.2 3.3 4.4                     ",
+    ],
+  ];
+
+
 const fs = require('fs');
 let glyph = [];
 let gfx = [];
@@ -337,55 +378,17 @@ function pfToRegistersString(_pf) {
   return ret;
 }
 
-function createDiceFunctions() {
+function bitmapsToRegisterMasks(bitmaps, maxLine, maxPosition, maxFace) {
   // For each position, these are the possible places to display it
   // .......... 0000000000111111111122222222223333333333
   // .......... 0123456789012345678901234567890123456789
   const mask = "000 111 222 333 444                     ";
 
   // And these are the actual positions used.
-  const bitmap = [
-    [
-      "... ... ... ... ...                     ",
-      "000 111 222 333 444                     ",
-      "... ... ... ... ...                     ",
-    ],
-    [
-      "... ... ... ... ...                     ",
-      ".0. .1. .2. .3. .4.                     ",
-      "... ... ... ... ...                     ",
-    ],
-    [
-      "..0 ..1 ..2 ..3 ..4                     ",
-      "... ... ... ... ...                     ",
-      "0.. 1.. 2.. 3.. 4..                     ",
-    ],
-    [
-      "..0 ..1 ..2 ..3 ..4                     ",
-      ".0. .1. .2. .3. .4..                    ",
-      "0.. 1.. 2.. 3.. 4...                    ",
-    ],
-    [
-      "0.0 1.1 2.2 3.3 4.4                     ",
-      "... ... ... ... ...                     ",
-      "0.0 1.1 2.2 3.3 4.4                     ",
-    ],
-    [
-      "0.0 1.1 2.2 3.3 4.4                     ",
-      ".0. .1. .2. .3. .4.                     ",
-      "0.0 1.1 2.2 3.3 4.4                     ",
-    ],
-    [
-      "0.0 1.1 2.2 3.3 4.4                     ",
-      "0.0 1.1 2.2 3.3 4.4                     ",
-      "0.0 1.1 2.2 3.3 4.4                     ",
-    ],
-  ];
-
   const blanks = Array.from(' .');
 
   // Sanity check the data, just to make sure there are no collisions
-  bitmap.forEach((face, faceIdx) => {
+  bitmaps.forEach((face, faceIdx) => {
     face.forEach((line, lineIdx) => {
       Array.from(line).forEach((p, i) => {
         if (blanks.indexOf(p) !== -1) {
@@ -403,14 +406,11 @@ function createDiceFunctions() {
   // L = Line/ P = Position / F = Face //
   const dataLeft = {};
 
-  const maxLine = 2;
-  const maxPosition = 4;
-  maxFace = 6;
   for (let l = 0; l <= maxLine; l++) {
     for (let p = 0; p <= maxPosition; p++) {
-      for (f = 0; f <= maxFace; f++) {
+      for (let f = 0; f <= maxFace; f++) {
 
-        const bS = bitmap[f][l];
+        const bS = bitmaps[f][l];
         // filter out just the bitmap for this position.
         let pf = Array.from(bS).map(s => s === "" + p ? "1" : "0").join("");
 
@@ -422,19 +422,29 @@ function createDiceFunctions() {
       }
     }
   }
+  return dataLeft;
+}
+
+function createDiceBitmaps() {
+  const maxLine = 2;
+  const maxPosition = 4;
+  const maxFace = 6;
+
+  const dataLeft = bitmapsToRegisterMasks(diceFaceBitmaps, maxLine, maxPosition,maxFace);
 
   let thisCode = [];
   let values = [];
   for (let l = 0; l <= maxLine; l++) {
     for (let p = 0; p <= maxPosition; p++) {
       values = [];
-      for (f = 0; f <= maxFace; f++) {
+      for (let f = 0; f <= maxFace; f++) {
         const hash = [l, p, f].join("_");
         const dval = dataLeft[hash];
 
         // For each combo there is only one byte that we need.
         // Doing this is cheap and dirty, but hey, I don't mind
         // cheap and dirty in code like this
+        // (Because the images align to the byte boundary!)
 
         const oneByte = dval.filter(v => v > 0)[0] || 0;
         values.push(oneByte);
@@ -548,7 +558,7 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
   }
 });
 
-createDiceFunctions();
+createDiceBitmaps();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
 const LINE_BUFFER_SIZE = 0;
