@@ -549,7 +549,6 @@ FrameBottomSpace:
 
     lda #AccentColor
     sta COLUP0
-    lda #AccentColor
     sta COLUP1
 
     sta HMCLR
