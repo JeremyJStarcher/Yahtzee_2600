@@ -780,11 +780,18 @@ checkDownVector
 checkRightVector:
 
 CheckJoyReleaseEnd:
-    ldx OffsetIntoScoreList
-    inx
-    lda [drawMap1 + ActiveScoreLine],x
-    cmp #0
-    bne CheckJoyReleaseRangeValid
+    clc
+    lda ScreenLineIndex
+    adc OffsetIntoScoreList
+
+    ; adc #TopPadding         ; Move into the a good compare range
+    bcs CheckJoyReleaseRangeNotValid
+
+    cmp #MaxScoreLines-1
+    bcc CheckJoyReleaseRangeValid
+    jmp CheckJoyReleaseRangeNotValid
+
+CheckJoyReleaseRangeNotValid:
     sty OffsetIntoScoreList
 
 CheckJoyReleaseRangeValid:
