@@ -80,7 +80,8 @@ DigitBmpPtr:
 ScoreBCD: ds 3
 
 ScoreLineCounter: ds 1          ; How many score lines have been drawn?
-ScreenLineIndex: ds 1           ; Track the label
+ScoreLineIndex: ds 1            ; The index of which actual scoreline
+ScreenLineIndex: ds 1           ; The index of which score screen line
 OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
 
 DrawSymbolsMap: ds 4
@@ -359,6 +360,7 @@ WriteScore:
     lda ScreenLineIndex
     adc OffsetIntoScoreList
     tax
+    sta ScoreLineIndex
 
     lda scores_low,x
     sta ScoreBCD+1
@@ -448,20 +450,19 @@ ScorePtrLoop:
     ldy #4                   ; 5 scanlines
     sty ScanLineCounter
 
-    clc
-    lda ScreenLineIndex
-    adc OffsetIntoScoreList
+    ; Check if the line we are drawing is part of the scorecard
+    ; or part of the top/bottom filler
+    lda ScoreLineIndex
     tax
-
     adc #TopPadding         ; Move into the a good compare range
-    bcs StartNoItem
+    bcs StartBlankLineFiller
 
     cmp #MaxScoreLines
-    bcs StartNoItem
+    bcs StartBlankLineFiller
 
-    jmp keepShowing
+    jmp ShowRealScoreLine
 
-StartNoItem:
+StartBlankLineFiller:
     ; There is nothing to show for this position, but
     ; we need to still show some data
     LDY #6
@@ -481,7 +482,7 @@ NoItemBusyLoop:
 
     jmp ScoreCleanup
 
-keepShowing:
+ShowRealScoreLine:
     lda drawMap0,x
     sta DrawSymbolsMap+0
     lda drawMap1,x
