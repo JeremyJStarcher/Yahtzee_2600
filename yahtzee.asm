@@ -169,6 +169,8 @@ JoyVectorDown     = 2  ; last joystick action
 ScoreColor         = $28 ; Colors were chosen to get equal or equally nice
 InactiveScoreColor = $04 ; on both PAL and NTSC, avoiding adjust branches
 BackgroundColor    = $00
+DieFaceColor       = $45
+AccentColor        = $98
 
 PlayerOneCopy       = $00 ; P0 and P1 drawing tiles: 1
 PlayerTwoCopiesWide = $02 ; P0 and P1 drawing tiles: 0 1 0 1
@@ -472,12 +474,12 @@ NoItemBusyLoop:
     lda #%00000001                      ; Reflect bit
     sta CTRLPF                          ; Set it
 
-    lda #$96                            ; Color
-    sta COLUBK                          ; Set playfield color
+;    lda #$96                            ; Color
+;    sta COLUBK                          ; Set playfield color
 
     DEY
     bne NoItemBusyLoop
-    lda #0                              ; Color
+    lda #BackgroundColor
     sta COLUBK                          ; Set playfield color
 
     jmp ScoreCleanup
@@ -540,14 +542,14 @@ FrameBottomSpace:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     sta WSYNC
 
-    lda #$45                            ; Color
+    lda #DieFaceColor                   ; Color
     sta COLUPF                          ; Set playfield color
     lda #%00000001                      ; Reflect bit
     sta CTRLPF                          ; Set it
 
-    lda #$98
+    lda #AccentColor
     sta COLUP0
-    lda #$25
+    lda #AccentColor
     sta COLUP1
 
     sta HMCLR
@@ -562,7 +564,7 @@ FrameBottomSpace:
     lda #PlayerThreeCopies
     sta NUSIZ0
 
-    lda #%1100000
+    lda #%1100000           ; The pattern
     sta GRP0
 
     lda #46                 ; Position
@@ -572,7 +574,7 @@ FrameBottomSpace:
     lda #PlayerThreeCopies
     sta NUSIZ1
 
-    lda #%00000011
+    lda #%00000011          ; The pattern
     sta GRP1
 
     sta WSYNC
