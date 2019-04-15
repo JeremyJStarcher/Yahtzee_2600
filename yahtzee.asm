@@ -350,6 +350,19 @@ YesScore:
     sta GRP0
     sta GRP1
 
+WriteScore:
+
+    clc
+    lda ScoreTextIndex
+    adc ScoreLineTop
+    tax
+
+    lda scores_low,x
+    sta ScoreBCD+1
+
+    lda scores_high,x
+    sta ScoreBCD+2
+
     sta WSYNC
 
 ; Score setup scanlines 2-3:
@@ -402,7 +415,7 @@ ScorePtrLoop:
     asl               ; (2)  ; A = digit x 2
     asl               ; (2)  ; A = digit x 4
     adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
-    adc #<Digits; (2)  ; take from the first digit
+    adc #<Digits      ; (2)  ; take from the first digit
     sta DigitBmpPtr,x ; (4)  ; Store lower nibble graphic
     dex               ; (2)
     dex               ; (2)
@@ -474,13 +487,6 @@ keepShowing:
     sta DrawSymbolsMap+2
     lda drawMap3,x
     sta DrawSymbolsMap+3
-
-    lda scores_low,x
-    sta ScoreBCD+1
-
-    lda scores_high,x
-    sta ScoreBCD+2
-
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
