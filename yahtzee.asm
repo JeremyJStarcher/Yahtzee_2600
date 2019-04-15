@@ -198,17 +198,18 @@ MaxScoreLines = 25
 ;; BOOTSTRAP ;;
 ;;;;;;;;;;;;;;;
 
-Initialize:             ; Cleanup routine from macro.h (by Andrew Davie/DASM)
+
+Initialize: subroutine            ; Cleanup routine from macro.h (by Andrew Davie/DASM)
     sei
     cld
     ldx #0
     txa
     tay
-CleanStack:
+.CleanStack:
     dex
     txs
     pha
-    bne CleanStack
+    bne .CleanStack
 
 ;;;;;;;;;;;;;;;
 ;; TIA SETUP ;;
@@ -220,16 +221,16 @@ CleanStack:
 ;;;;;;;;;;;;;;;;;;;
 ;; PROGRAM SETUP ;;
 ;;;;;;;;;;;;;;;;;;;
-
+    subroutine
 ; Pre-fill the graphic pointers' MSBs, so we only have to
 ; figure out the LSBs for each tile or digit
     lda #>Digits        ; MSB of tiles/digits page
     ldx #11            ; 12-byte table (6 digits), zero-based
-FillMsbLoop1:
+.FillMsbLoop1:
     sta DigitBmpPtr,x
     dex                ; Skip to the next MSB
     dex
-    bpl FillMsbLoop1
+    bpl .FillMsbLoop1
 
     lda #0
     sta OffsetIntoScoreList   ; Reset te top line
@@ -297,7 +298,7 @@ StartNewGame:
 ;; FRAME START ;;
 ;;;;;;;;;;;;;;;;;
 
-StartFrame:
+StartFrame: subroutine
     lda #%00000010         ; VSYNC
     sta VSYNC
     REPEAT 3
@@ -310,9 +311,9 @@ StartFrame:
     ldx #$00
     lda #ColSwitchMask     ; VBLANK start
     bit SWCHB
-    bne NoVBlankPALAdjust  ; "Color" => NTSC; "B•W" = PAL
+    bne .NoVBlankPALAdjust  ; "Color" => NTSC; "B•W" = PAL
     inx                    ; (this adjust will appear a few times in the code)
-NoVBlankPALAdjust:
+.NoVBlankPALAdjust:
     lda VBlankTime64T,x
     sta TIM64T             ; Use a RIOT timer (with the proper value) instead
     lda #0                 ; of counting scanlines (since we only care about
@@ -325,10 +326,10 @@ NoVBlankPALAdjust:
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-
-WaitForVBlankEndLoop:
+    subroutine
+.WaitForVBlankEndLoop:
     lda INTIM                ; Wait until the timer signals the actual end
-    bne WaitForVBlankEndLoop ; of the VBLANK period
+    bne .WaitForVBlankEndLoop ; of the VBLANK period
 
     sta WSYNC
 
@@ -351,13 +352,12 @@ ScoreSetup:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Start showing the score ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-YesScore:
+YesScore:   subroutine
     lda #0                   ; No players until we start
     sta GRP0
     sta GRP1
 
-WriteScore:
-
+; Copy the score to the scratch buffer
     clc
     lda ScreenLineIndex
     adc OffsetIntoScoreList
@@ -401,10 +401,10 @@ WriteScore:
     ldx #ScoreColor
     lda ScoreLineCounter
     cmp ActiveScoreLine
-    beq UsePrimaryColor
+    beq .UsePrimaryColor
     ldx #InactiveScoreColor
 
-UsePrimaryColor:
+.UsePrimaryColor:
     stx COLUP0
     stx COLUP1
 
@@ -415,7 +415,7 @@ UsePrimaryColor:
     ldx #10           ; (2)  ; Graphic pointer counter (target)
     clc               ; (2)
 
-ScorePtrLoop:
+.loop:
     lda ScoreBCD,y    ; (4)
     and #$0F          ; (2)  ; Lower nibble
     sta TempVar1      ; (3)
@@ -442,13 +442,13 @@ ScorePtrLoop:
     dex               ; (2)
     dex               ; (2)
     dey               ; (2)
-    bpl ScorePtrLoop  ; (2*)
+    bpl .loop         ; (2*)
     sta WSYNC         ;      ; We take less than 2 scanlines, round up
 
 ;;;;;;;;;;;
 ;; SCORE ;;
 ;;;;;;;;;;;
-
+    subroutine
     ldy #4                   ; 5 scanlines
     sty ScanLineCounter
 
@@ -457,18 +457,18 @@ ScorePtrLoop:
     lda ScoreLineIndex
     tax
     adc #TopPadding         ; Move into the a good compare range
-    bcs StartBlankLineFiller
+    bcs .StartBlankLineFiller
 
     cmp #MaxScoreLines
-    bcs StartBlankLineFiller
+    bcs .StartBlankLineFiller
 
     jmp ShowRealScoreLine
 
-StartBlankLineFiller:
+.StartBlankLineFiller:
     ; There is nothing to show for this position, but
     ; we need to still show some data
     LDY #6
-NoItemBusyLoop:
+.loop:
     sta WSYNC
 
     lda #%00000001                      ; Reflect bit
@@ -478,13 +478,13 @@ NoItemBusyLoop:
 ;    sta COLUBK                          ; Set playfield color
 
     DEY
-    bne NoItemBusyLoop
+    bne .loop
     lda #BackgroundColor
     sta COLUBK                          ; Set playfield color
 
     jmp ScoreCleanup
 
-ShowRealScoreLine:
+ShowRealScoreLine: subroutine
     lda drawMap0,x
     sta DrawSymbolsMap+0
     lda drawMap1,x
@@ -496,7 +496,7 @@ ShowRealScoreLine:
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
-DrawScoreLoop:
+.loop:
     ldy ScanLineCounter          ; 6-digit loop is heavily inspired on Berzerk's
     lda (DrawSymbolsMap+0),y
     sta GRP0
@@ -519,7 +519,7 @@ DrawScoreLoop:
     sty GRP1
     sta GRP0
     dec ScanLineCounter
-    bpl DrawScoreLoop
+    bpl .loop
 
 ScoreCleanup:                ; 1 scanline
     lda #0
@@ -536,7 +536,7 @@ LoopScore
     beq FrameBottomSpace
     jmp YesScore
 
-FrameBottomSpace:
+FrameBottomSpace: subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BOTTOM SPACE BELOW GRID ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -647,14 +647,15 @@ DiceRowScanLines = 4
 
     ; 262 scan lines total
     ldx #36 + 6 - (DiceRowScanLines * 3)
-SpaceBelowGridLoop:
+.loop:
     sta WSYNC
     dex
-    bne SpaceBelowGridLoop
+    bne .loop
 
 ;;;;;;;;;;;;;;
 ;; OVERSCAN ;;
 ;;;;;;;;;;;;;;
+    subroutine
     lda #0                  ; Clear pattern
     sta PF0
     sta PF1
@@ -665,52 +666,54 @@ SpaceBelowGridLoop:
     ldx #$00
     lda #ColSwitchMask
     bit SWCHB
-    bne NoOverscanPALAdjust
+    bne .NoOverscanPALAdjust
     inx
-NoOverscanPALAdjust:
+.NoOverscanPALAdjust:
     lda OverscanTime64T,x    ; Use a timer adjusted to the color system's TV
     sta TIM64T               ; timings to end Overscan, same as VBLANK
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SELECT, RESET AND P0 FIRE BUTTON ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    subroutine
 
     ldx GameMode              ; Remember if we were on one or two player mode
     lda SWCHB                 ; We only want the switch presses once
     and #SelectResetMask      ; (in particular GAME SELECT)
     cmp LastSWCHB
-    beq NoSwitchChange
+    beq .NoSwitchChange
     sta LastSWCHB             ; Store so we know if it's a repeat next time
 
     cmp #GameSelect           ; GAME SELECT flips single/multiplayer...
-    bne NoSelect
+    bne .NoSelect
     lda GameMode
     eor #1
     sta GameMode
     jmp StartNewGame          ; ...and restarts with no further game mode change
-NoSelect:
+.NoSelect:
     cmp #GameReset            ; GAME RESET restarts the game at any time
-    beq Restart
-NoSwitchChange:
+    beq .Restart
+.NoSwitchChange:
     lda INPT4
-    bpl ButtonPressed         ; P0 Fire button pressed?
+    bpl .ButtonPressed         ; P0 Fire button pressed?
     ldx #1                    ; P1 fire button always starts two-player game
     lda INPT5                 ; P1 fire button pressed?
-    bmi NoRestart
-ButtonPressed:
+    bmi .NoRestart
+.ButtonPressed:
     lda GameState
     cmp #TitleScreen
-    beq Restart               ; Start game if title screen
+    beq .Restart               ; Start game if title screen
     ; cmp #GameOver             ; or game over
-    bne NoRestart
-Restart:
+    bne .NoRestart
+.Restart:
     stx GameMode
     jmp StartNewGame
-NoRestart:
+.NoRestart:
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; INPUT CHECKING ;;
 ;;;;;;;;;;;;;;;;;;;;
+    subroutine
 
 ; Joystick
     lda SWCHA
@@ -803,15 +806,15 @@ EndJoyCheck:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF OVERSCAN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-WaitForOverscanEndLoop:
+    subroutine
+.WaitForOverscanEndLoop:
     lda INTIM                   ; Wait until the timer signals the actual end
-    bne WaitForOverscanEndLoop  ; of the overscan period
+    bne .WaitForOverscanEndLoop  ; of the overscan period
 
     sta WSYNC
     jmp StartFrame
 
-showDice:
+showDice: subroutine
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Reveal the dice that are in the shadow registers ;;
     ;;                                                  ;;
@@ -822,19 +825,21 @@ showDice:
 
     REPEAT DiceRowScanLines
         sta WSYNC
+
+        ; Copy the shadow registers
         lda SPF0
         sta PF0
-
         lda SPF1
         sta PF1
-
         lda SPF2
         sta PF2
 
+        ; Wait for playfield to be drawn
         REPEAT  10
             nop
         REPEND
 
+        ; And clear it before the other side.
         lda #0
         sta PF0
         sta PF1
@@ -852,7 +857,7 @@ showDice:
 ; Y = the "remainder" of the division by 15 minus an additional 15.
 ; control is returned on cycle 6 of the next scanline.
 
-PosObject:
+PosObject:  subroutine
             sta WSYNC                ; 00     Sync to start of scanline.
             sec                      ; 02     Set the carry flag so no borrow will be applied during the division.
 .divideby15 sbc #15                  ; 04     Waste the necessary amount of time dividing X-pos by 15!
