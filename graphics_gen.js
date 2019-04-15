@@ -180,17 +180,17 @@ Digits:
 
 @score TopSubtotal:
 !                !
-!     XXXXXX     !
+! XXXXXXXXXXX    !
 !                !
-!     XXXXXX     !
+! XXXXXXXXXXX    !
 !                !
 
 @score TopBonus:
-!     XXX XXXX   !
+!     XXX XXX    !
 !  X    X X      !
-! XXX XXX XXXX   !
-!  X    X    X   !
-!     XXX XXXX   !
+! XXX XXX XXX    !
+!  X    X   X    !
+!     XXX XXX    !
 
 @score L3k:
 ! XXXXXX X  X    !
@@ -207,18 +207,18 @@ Digits:
 !     XX X  X    !
 
 @score LSmallStraight:
+!   XXX  XXX     !
+!  X    X        !
+!   XX   XX      !
+!     X    X     !
 !  XXX  XXX      !
-! X    X         !
-!  XX   XX       !
-!    X    X      !
-! XXX  XXX       !
 
 @score LLargeStraight:
-! X     XXX      !
-! X    X         !
-! X     XX       !
-! X       X      !
-! XXXX XXX       !
+!  X     XXX     !
+!  X    X        !
+!  X     XX      !
+!  X       X     !
+!  XXXX XXX      !
 
 @score LFullHouse:
 ! XXXX X   X     !
@@ -228,11 +228,11 @@ Digits:
 ! X    X   X     !
 
 @score LYahtzee:
-! X     X  XXX   !
-!  X   X  X   X  !
-!   XXX   XXXXX  !
-!    X    X   X  !
-!    X    X   X  !
+! X   X  XX      !
+! X   X X  X     !
+!  XXX  XXXX     !
+!   X   X  X     !
+!   X   X  X     !
 
 @score LChance:
 !  XXX X   X     !
@@ -242,32 +242,32 @@ Digits:
 !  XXX X   X     !
 
 @score LYahtzeeBonus:
-! X     X XXXX   !
-!  X   X  X   X  !
-!   XXX   XXXX   !
-!    X    X   X  !
-!    X    XXXX   !
+! X   X XXX      !
+! X   X X  X     !
+!  XXX  XXX      !
+!   X   X  X     !
+!   X   XXX      !
 
 @score LLowerTotal:
-!  X    XXXXX    !
-!  X      X      !
-!  X      X      !
-!  X      X      !
-!  XXXXXX X      !
+!  X    XXX      !
+!  X     X       !
+!  X     X       !
+!  X     X       !
+!  XXXX  X       !
 
 @score LUpperTotal:
-!  X    X XXXXX  !
-!  X    X   X    !
-!  X    X   X    !
-!  X    X   X    !
-!  XXXXXX   X    !
+!  X  X XXX      !
+!  X  X  X       !
+!  X  X  X       !
+!  X  X  X       !
+!  XXXX  X       !
 
 @score LGrandTotal:
-! XXXXXX XXXXX   !
-! X        X     !
-! X  XXX   X     !
-! X    X   X     !
-! XXXXXX   X     !
+!  XXXX XXX      !
+!  X     X       !
+!  X XX  X       !
+!  X  X  X       !
+!  XXXX  X       !
 
 `;
 
