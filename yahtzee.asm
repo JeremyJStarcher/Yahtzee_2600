@@ -60,7 +60,7 @@ MoveVector: ds 1            ; Movement Vector
 
 SPF0:                       ; Shadow PF0
 TempVar1:                   ; General use variable
-LineCounter:                ; Counts lines while drawing the score
+ScanLineCounter:            ; Counts lines while drawing the score
     ds 1
 
 SPF1:                       ; Shadow PF1
@@ -80,9 +80,8 @@ DigitBmpPtr:
 ScoreBCD: ds 3
 
 ScoreLineCounter: ds 1          ; How many score lines have been drawn?
-ScoreTextIndex: ds 1            ; Track the label
-
-ScoreLineTop: ds 1              ; Which is the TOP scoreline to display
+ScreenLineIndex: ds 1           ; Track the label
+OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
 
 DrawSymbolsMap: ds 4
 rolledDice:     ds 5
@@ -230,7 +229,7 @@ FillMsbLoop1:
     bpl FillMsbLoop1
 
     lda #0
-    sta ScoreLineTop   ; Reset te top line
+    sta OffsetIntoScoreList   ; Reset te top line
 
 ShowTitleScreen:
     jmp StartFrame
@@ -341,7 +340,7 @@ ScoreSetup:
     sta ScoreLineCounter
 
     lda #[0 - TopPadding]
-    sta ScoreTextIndex
+    sta ScreenLineIndex
 
     lda GameState
     cmp #TitleScreen
@@ -357,8 +356,8 @@ YesScore:
 WriteScore:
 
     clc
-    lda ScoreTextIndex
-    adc ScoreLineTop
+    lda ScreenLineIndex
+    adc OffsetIntoScoreList
     tax
 
     lda scores_low,x
@@ -447,11 +446,11 @@ ScorePtrLoop:
 ;;;;;;;;;;;
 
     ldy #4                   ; 5 scanlines
-    sty LineCounter
+    sty ScanLineCounter
 
     clc
-    lda ScoreTextIndex
-    adc ScoreLineTop
+    lda ScreenLineIndex
+    adc OffsetIntoScoreList
     tax
 
     adc #TopPadding         ; Move into the a good compare range
@@ -495,7 +494,7 @@ keepShowing:
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
 DrawScoreLoop:
-    ldy LineCounter          ; 6-digit loop is heavily inspired on Berzerk's
+    ldy ScanLineCounter          ; 6-digit loop is heavily inspired on Berzerk's
     lda (DrawSymbolsMap+0),y
     sta GRP0
     sta WSYNC
@@ -516,7 +515,7 @@ DrawScoreLoop:
     stx GRP0
     sty GRP1
     sta GRP0
-    dec LineCounter
+    dec ScanLineCounter
     bpl DrawScoreLoop
 
 ScoreCleanup:                ; 1 scanline
@@ -529,7 +528,7 @@ ScoreCleanup:                ; 1 scanline
     sta WSYNC
 
 LoopScore
-    inc ScoreTextIndex
+    inc ScreenLineIndex
     dec ScoreLineCounter
     beq FrameBottomSpace
     jmp YesScore
@@ -762,30 +761,30 @@ CheckJoyRelease:
     cmp #JoyMask
     bne EndJoyCheck
 
-    ldy ScoreLineTop            ; Save value
+    ldy OffsetIntoScoreList            ; Save value
 
     lda MoveVector
     cmp #JoyVectorUp
     bne checkDownVector
-    inc ScoreLineTop
+    inc OffsetIntoScoreList
     jmp CheckJoyReleaseEnd
 
 checkDownVector
     lda MoveVector
     cmp #JoyVectorDown
     bne checkRightVector
-    dec ScoreLineTop
+    dec OffsetIntoScoreList
     jmp CheckJoyReleaseEnd
 
 checkRightVector:
 
 CheckJoyReleaseEnd:
-    ldx ScoreLineTop
+    ldx OffsetIntoScoreList
     inx
     lda [drawMap1 + ActiveScoreLine],x
     cmp #0
     bne CheckJoyReleaseRangeValid
-    sty ScoreLineTop
+    sty OffsetIntoScoreList
 
 CheckJoyReleaseRangeValid:
     lda #WaitingJoyPress       ; Joystick released, can accept shifts again
