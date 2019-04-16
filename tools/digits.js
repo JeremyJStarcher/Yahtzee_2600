@@ -3,80 +3,81 @@
 const lib = require("./lib");
 const fs = require("fs");
 
-const glyphs = `
-;;;;;;;;;;;;;;
-;; GRAPHICS ;;
-;;;;;;;;;;;;;;
 
-; Actually, the value-colored kernel can't really
-; update the rightmost pixel on the first tile, so
-; if you want to roll your own tiles...
-;
-;       ┌─── ...don't set THIS bit
-;       ↓;
+const source = `
+@header Digits
 
-Digits:
-
+@glyph num0
 ! XXXXXX !
 ! XX  XX !
 ! XX  XX !
 ! XX  XX !
 ! XXXXXX !
 
+@glyph num1
 !   XX   !
 ! XXXX   !
 !   XX   !
 !   XX   !
 ! XXXXXX !
 
+@glyph num2
 ! XXXXXX !
 !     XX !
 ! XXXXXX !
 ! XX     !
 ! XXXXXX !
 
+@glyph num3
 ! XXXXXX !
 !     XX !
 !   XXXX !
 !     XX !
 ! XXXXXX !
 
+@glyph num4
 ! XX  XX !
 ! XX  XX !
 ! XXXXXX !
 !     XX !
 !     XX !
 
+@glyph num5
 ! XXXXXX !
 ! XX     !
 ! XXXXXX !
 !     XX !
 ! XXXXXX !
 
+@glyph num6
 ! XXXXXX !
 ! XX     !
 ! XXXXXX !
 ! XX  XX !
 ! XXXXXX !
 
+@glyph num7
 ! XXXXXX !
 !     XX !
 !     XX !
 !     XX !
 !     XX !
 
+@glyph num8
 ! XXXXXX !
 ! XX  XX !
 ! XXXXXX !
 ! XX  XX !
 ! XXXXXX !
 
+@glyph num9
 ! XXXXXX !
 ! XX  XX !
 ! XXXXXX !
 !     XX !
 ! XXXXXX !
 
+@glyph numA
 ! XXXXXX !
 ! X    X !
 ! XXXXXX !
@@ -84,22 +85,23 @@ Digits:
 ! X    X !
 `;
 
-function convertDigits() {
-    const data = {
-        gfx: [],
-        glyph: [],
-        glyphBytes: [],
-    };
 
-    glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
-        if (line[0] === "!") {
-            lib.all.digit(data, line, lineNo);
-        } else {
-            lib.all.normal(data, line);
-        }
+function convertDigits() {
+    const glyphData = lib.all.stringToObject(source);
+
+    const out = [];
+    out.push(`${glyphData.header}:`)
+    glyphData.glyphs.forEach((bin, idx) => {
+        out.push(`;${glyphData.names[idx]}`);
+        bin.forEach(binary => {
+            const comment = binary.replace(/0/g, ".").replace(/1/g, "#");
+            out.push(`    .byte %${binary}; ${comment}`);
+        });
     });
 
-    fs.writeFileSync('../build/digits.asm', data.gfx.join("\n"));
+    console.log(out);
+
+    fs.writeFileSync('../build/digits.asm', out.join("\n"));
 }
 
 convertDigits();
