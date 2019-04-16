@@ -3,6 +3,8 @@
 const lib = require("./lib");
 const fs = require("fs");
 
+function convertDigits() {
+
 const source = `
 @header Digits
 
@@ -84,7 +86,6 @@ const source = `
 ! X    X !
 `;
 
-function convertDigits() {
     const glyphData = lib.all.stringToObject(source);
 
     const out = [];
@@ -97,7 +98,7 @@ function convertDigits() {
         });
     });
 
-    fs.writeFileSync('../build/digits.asm', out.join("\n"));
+    fs.writeFileSync('../build/digits_bitmap.asm', out.join("\n"));
 }
 
 convertDigits();

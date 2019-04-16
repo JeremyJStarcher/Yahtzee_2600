@@ -17,6 +17,7 @@ ROM_SIZE=4096
 
 cd ./tools
 node digits.js
+node scoresheet.js
 cd ..
 
 node graphics_gen.js

@@ -87,7 +87,7 @@ OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
 DrawSymbolsMap: ds 4
 rolledDice:     ds 5
 
-    INCLUDE "build/scores.asm";
+    INCLUDE "build/score_ram.asm";
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
@@ -103,8 +103,8 @@ rolledDice:     ds 5
     SEG CODE
     ORG $F000
 startofrom: ds 0
-    INCLUDE "build/digits.asm"
-    INCLUDE "build/graphics.asm"
+    INCLUDE "build/digits_bitmap.asm"
+    INCLUDE "build/score_bitmap.asm";
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
 VBlankTime64T:
@@ -125,7 +125,7 @@ OverscanTime64T:
     align 256
 page2start: = *
     include "build/faces.asm"
-    include "build/faces_lookup.asm"
+    include "build/score_lookup.asm"
 
 ;-----------------------------
 ; This table converts the "remainder" of the division by 15 (-1 to -15) to the correct
@@ -365,10 +365,10 @@ YesScore:   subroutine
     tax
     sta ScoreLineIndex
 
-    lda scores_low,x
+    lda score_low,x
     sta ScoreBCD+1
 
-    lda scores_high,x
+    lda score_high,x
     sta ScoreBCD+2
 
     sta WSYNC

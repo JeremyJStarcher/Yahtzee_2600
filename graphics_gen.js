@@ -481,7 +481,7 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
 
 createDiceBitmaps();
 
-fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
+// fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
 const LINE_BUFFER_SIZE = 0;
 
 const drawMap0 = [
@@ -518,5 +518,5 @@ const newData = []
   .concat(drawMap2)
   .concat(drawMap3)
 
-fs.writeFileSync('build/faces_lookup.asm', newData.join("\n"));
-fs.writeFileSync('build/scores.asm', ram.join("\n"));
+// fs.writeFileSync('build/faces_lookup.asm', newData.join("\n"));
+// fs.writeFileSync('build/scores.asm', ram.join("\n"));
