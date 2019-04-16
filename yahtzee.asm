@@ -486,13 +486,15 @@ YesScore:   subroutine
     jmp ScoreCleanup
 
 ShowRealScoreLine: subroutine
-    lda drawMap0,x
+    ; Point the symbol map at the current label to draw
+    lda scoreglyph0lsb,x
     sta DrawSymbolsMap+0
-    lda drawMap1,x
+    lda #>scoreglyphs0
     sta DrawSymbolsMap+1
-    lda drawMap2,x
+
+    lda scoreglyph1lsb,x
     sta DrawSymbolsMap+2
-    lda drawMap3,x
+    lda #>scoreglyphs1
     sta DrawSymbolsMap+3
 
 ;; This loop is so tight there isn't room for *any* additional calculations.

@@ -141,6 +141,10 @@ function convertScoreInfo() {
 !  XXXX  X       !
 
 `;
+
+    // These glyphs are actually broken up into separate 8-bit chunks.
+    // and stored in two separate tables.
+    //
     const glyphData = lib.all.stringToObject(source);
 
     const out = [
@@ -149,8 +153,8 @@ function convertScoreInfo() {
     ];
     const glyphNames = [];
 
-    out[0].push(`;${glyphData.header}byte1:`);
-    out[1].push(`;${glyphData.header}byte1:`);
+    out[0].push(`scoreglyphs0:`);
+    out[1].push(`scoreglyphs1:`);
 
     glyphData.glyphs.forEach((bin, idx) => {
         const glyphName = `glyph${glyphData.names[idx]}`;
@@ -169,13 +173,10 @@ function convertScoreInfo() {
         });
     });
 
-
     const lookup = [];
     [
-        ['<', '0', 'drawMap0'],
-        ['>', '0', 'drawMap1'],
-        ['<', '1', 'drawMap2'],
-        ['>', '1', 'drawMap3'],
+        ['<', '0', 'scoreglyph0lsb'],
+        ['<', '1', 'scoreglyph1lsb'],
     ].forEach(key => {
         const [sym, byte, header] = key;
 
