@@ -311,7 +311,6 @@ const diceFaceBitmaps = [
     ],
   ];
 
-
 const fs = require('fs');
 let glyph = [];
 let gfx = [];
@@ -460,7 +459,7 @@ function createDiceBitmaps() {
         return `%${n}`;
       });
 
-      thisCode.push(`LP_${l}_${p}:`);
+      thisCode.push(`faceL${l}P${p}:`);
       binaryValues.forEach(v => {
         thisCode.push(`  .byte ${v}`);
       });
@@ -526,12 +525,12 @@ function generateScoreSub(line, lineNo) {
     bytes1.push(b1);
   }
 
-  gfx.push(`${textLabel}_0:`);
+  gfx.push(`${textLabel}Low:`);
   bytes0.reverse().forEach(b => {
     gfx.push(`  .byte %${b}`);
   });
 
-  gfx.push(`${textLabel}_1:`);
+  gfx.push(`${textLabel}High:`);
   bytes1.reverse().forEach(b => {
     gfx.push(`  .byte %${b}`);
   });
@@ -573,10 +572,10 @@ const drawMap3 = [`drawMap3:`];
 const ram = [];
 
 gfx_names.forEach(textLabel => {
-  drawMap0.push(`  .byte <${textLabel}_0`);
-  drawMap1.push(`  .byte >${textLabel}_0`);
-  drawMap2.push(`  .byte <${textLabel}_1`);
-  drawMap3.push(`  .byte >${textLabel}_1`);
+  drawMap0.push(`  .byte <${textLabel}Low`);
+  drawMap1.push(`  .byte >${textLabel}Low`);
+  drawMap2.push(`  .byte <${textLabel}High`);
+  drawMap3.push(`  .byte >${textLabel}High`);
 });
 
 ram.push(`scores_low:`);
@@ -588,8 +587,6 @@ ram.push(`scores_high:`);
 gfx_names.forEach(textLabel => {
   ram.push(`score_high_${textLabel}:  .ds 1`);
 });
-
-
 
 const newData = []
   .concat(drawMap0)

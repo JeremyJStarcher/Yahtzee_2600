@@ -586,57 +586,57 @@ DiceRowScanLines = 4
 
     ;; Line 0
     ldy rolledDice + 0
-    lda LP_0_0,y
+    lda faceL0P0,y
     sta SPF0
 
     ldy rolledDice + 1
     ldx rolledDice + 2
-    lda LP_0_1,y
-    ora LP_0_2,x
+    lda faceL0P1,y
+    ora faceL0P2,x
     sta SPF1
 
     ldy rolledDice + 3
     ldx rolledDice + 4
-    lda LP_0_3,y
-    ora LP_0_4,x
+    lda faceL0P3,y
+    ora faceL0P4,x
     sta SPF2
 
     jsr showDice
 
     ;; Line 1
     ldy rolledDice + 0
-    lda LP_1_0,y
+    lda faceL1P0,y
     sta SPF0
 
     ldy rolledDice + 1
     ldx rolledDice + 2
-    lda LP_1_1,y
-    ora LP_1_2,x
+    lda faceL1P1,y
+    ora faceL1P2,x
     sta SPF1
 
     ldy rolledDice + 3
     ldx rolledDice + 4
-    lda LP_1_3,y
-    ora LP_1_4,x
+    lda faceL1P3,y
+    ora faceL1P4,x
     sta SPF2
 
     jsr showDice
 
     ;; Line 3
     ldy rolledDice + 0
-    lda LP_2_0,y
+    lda faceL2P0,y
     sta SPF0
 
     ldy rolledDice + 1
     ldx rolledDice + 2
-    lda LP_2_1,y
-    ora LP_2_2,x
+    lda faceL2P1,y
+    ora faceL2P2,x
     sta SPF1
 
     ldy rolledDice + 3
     ldx rolledDice + 4
-    lda LP_2_3,y
-    ora LP_2_4,x
+    lda faceL2P3,y
+    ora faceL2P4,x
     sta SPF2
 
     jsr showDice
