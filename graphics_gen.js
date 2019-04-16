@@ -59,85 +59,6 @@
 // (cheaper) decreasing counter loops
 
 const glyphs = `
-;;;;;;;;;;;;;;
-;; GRAPHICS ;;
-;;;;;;;;;;;;;;
-
-; Actually, the value-colored kernel can't really
-; update the rightmost pixel on the first tile, so
-; if you want to roll your own tiles...
-;
-;       ┌─── ...don't set THIS bit
-;       ↓;
-
-Digits:
-
-! XXXXXX !
-! XX  XX !
-! XX  XX !
-! XX  XX !
-! XXXXXX !
-
-!   XX   !
-! XXXX   !
-!   XX   !
-!   XX   !
-! XXXXXX !
-
-! XXXXXX !
-!     XX !
-! XXXXXX !
-! XX     !
-! XXXXXX !
-
-! XXXXXX !
-!     XX !
-!   XXXX !
-!     XX !
-! XXXXXX !
-
-! XX  XX !
-! XX  XX !
-! XXXXXX !
-!     XX !
-!     XX !
-
-! XXXXXX !
-! XX     !
-! XXXXXX !
-!     XX !
-! XXXXXX !
-
-! XXXXXX !
-! XX     !
-! XXXXXX !
-! XX  XX !
-! XXXXXX !
-
-! XXXXXX !
-!     XX !
-!     XX !
-!     XX !
-!     XX !
-
-! XXXXXX !
-! XX  XX !
-! XXXXXX !
-! XX  XX !
-! XXXXXX !
-
-! XXXXXX !
-! XX  XX !
-! XXXXXX !
-!     XX !
-! XXXXXX !
-
-! XXXXXX !
-! X    X !
-! XXXXXX !
-! X    X !
-! X    X !
-
 @score L1s:
 !   XX    XXX    !
 ! XXXX   X       !
@@ -310,6 +231,7 @@ const diceFaceBitmaps = [
       "0.0 1.1 2.2 3.3 4.4                     ",
     ],
   ];
+
 
 const fs = require('fs');
 let glyph = [];
@@ -525,12 +447,12 @@ function generateScoreSub(line, lineNo) {
     bytes1.push(b1);
   }
 
-  gfx.push(`${textLabel}Low:`);
+  gfx.push(`${textLabel}_0:`);
   bytes0.reverse().forEach(b => {
     gfx.push(`  .byte %${b}`);
   });
 
-  gfx.push(`${textLabel}High:`);
+  gfx.push(`${textLabel}_1:`);
   bytes1.reverse().forEach(b => {
     gfx.push(`  .byte %${b}`);
   });
@@ -560,18 +482,22 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
 createDiceBitmaps();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
+const LINE_BUFFER_SIZE = 0;
 
-const drawMap0 = [`drawMap0:`];
+const drawMap0 = [
+  `DisplayBufferSize = ${LINE_BUFFER_SIZE}`,
+  `drawMap0:`
+];
 const drawMap1 = [`drawMap1:`];
 const drawMap2 = [`drawMap2:`];
 const drawMap3 = [`drawMap3:`];
 const ram = [];
 
 gfx_names.forEach(textLabel => {
-  drawMap0.push(`  .byte <${textLabel}Low`);
-  drawMap1.push(`  .byte >${textLabel}Low`);
-  drawMap2.push(`  .byte <${textLabel}High`);
-  drawMap3.push(`  .byte >${textLabel}High`);
+  drawMap0.push(`  .byte <${textLabel}_0`);
+  drawMap1.push(`  .byte >${textLabel}_0`);
+  drawMap2.push(`  .byte <${textLabel}_1`);
+  drawMap3.push(`  .byte >${textLabel}_1`);
 });
 
 ram.push(`scores_low:`);
@@ -583,6 +509,8 @@ ram.push(`scores_high:`);
 gfx_names.forEach(textLabel => {
   ram.push(`score_high_${textLabel}:  .ds 1`);
 });
+
+
 
 const newData = []
   .concat(drawMap0)

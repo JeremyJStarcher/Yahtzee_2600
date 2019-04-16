@@ -15,6 +15,10 @@ NAME=yahtzee
 # Expected ROM size in bytes
 ROM_SIZE=4096
 
+cd ./tools
+node digits.js
+cd ..
+
 node graphics_gen.js
 
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -lbuild/${NAME}.lst -f3

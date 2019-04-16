@@ -103,6 +103,7 @@ rolledDice:     ds 5
     SEG CODE
     ORG $F000
 startofrom: ds 0
+    INCLUDE "build/digits.asm"
     INCLUDE "build/graphics.asm"
 
 ; Order: NTSC, PAL. (thanks @SvOlli)
