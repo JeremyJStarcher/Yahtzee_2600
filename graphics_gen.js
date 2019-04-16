@@ -560,12 +560,8 @@ glyphs.split(/\r\n|\r|\n/).forEach((line, lineNo) => {
 createDiceBitmaps();
 
 fs.writeFileSync('build/graphics.asm', gfx.join("\n"));
-const LINE_BUFFER_SIZE = 0;
 
-const drawMap0 = [
-  `DisplayBufferSize = ${LINE_BUFFER_SIZE}`,
-  `drawMap0:`
-];
+const drawMap0 = [`drawMap0:`];
 const drawMap1 = [`drawMap1:`];
 const drawMap2 = [`drawMap2:`];
 const drawMap3 = [`drawMap3:`];
