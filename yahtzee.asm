@@ -199,7 +199,6 @@ MaxScoreLines = 25
 ;; BOOTSTRAP ;;
 ;;;;;;;;;;;;;;;
 
-
 Initialize: subroutine            ; Cleanup routine from macro.h (by Andrew Davie/DASM)
     sei
     cld

@@ -21,7 +21,6 @@ node scoresheet.js
 node dice_faces.js
 cd ..
 
-
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -lbuild/${NAME}.lst -f3
 if [ -e build/${NAME}.bin ] &&  [ `wc -c < build/${NAME}.bin` -eq $ROM_SIZE ]
 then

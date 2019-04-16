@@ -185,7 +185,6 @@ function convertScoreInfo() {
             const s = `    .byte ${sym}${name}${byte}`;
             lookup.push(s);
         });
-
     });
 
     const ram = [];
@@ -202,8 +201,6 @@ function convertScoreInfo() {
             ram.push(s);
         });
     });
-
-
 
     fs.writeFileSync('../build/score_bitmap.asm', [].concat(out[0]).concat(out[1]).join("\n"));
     fs.writeFileSync('../build/score_lookup.asm', lookup.join("\n"));

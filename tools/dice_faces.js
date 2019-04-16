@@ -85,7 +85,6 @@ const diceFaceBitmaps = [
   ],
 ];
 
-
 const fs = require('fs');
 
 function pfToRegisters(_pf) {
