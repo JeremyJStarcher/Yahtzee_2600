@@ -18,9 +18,9 @@ ROM_SIZE=4096
 cd ./tools
 node digits.js
 node scoresheet.js
+node dice_faces.js
 cd ..
 
-node graphics_gen.js
 
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -lbuild/${NAME}.lst -f3
 if [ -e build/${NAME}.bin ] &&  [ `wc -c < build/${NAME}.bin` -eq $ROM_SIZE ]
