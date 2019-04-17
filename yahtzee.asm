@@ -289,9 +289,9 @@ ScoreSetup:
     lda GameState
     cmp #TitleScreen
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Start showing the score ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Start showing each scoreline in a loop ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 YesScore:   subroutine
     lda #0                   ; No players until we start
     sta GRP0
