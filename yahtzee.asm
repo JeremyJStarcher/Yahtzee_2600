@@ -73,7 +73,7 @@ SPF2:                       ; Shadow PF2
     ds 1
 
 ; Address of the graphic for for each digit (6x2 bytes)
-DigitBmpPtr:
+GraphicBmpPtr:
     ds 6 * 2
 
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)
@@ -226,7 +226,7 @@ Initialize: subroutine            ; Cleanup routine from macro.h (by Andrew Davi
     lda #>Digits        ; MSB of tiles/digits page
     ldx #11            ; 12-byte table (6 digits), zero-based
 .FillMsbLoop1:
-    sta DigitBmpPtr,x
+    sta GraphicBmpPtr,x
     dex                ; Skip to the next MSB
     dex
     bpl .FillMsbLoop1
@@ -422,7 +422,7 @@ YesScore:   subroutine
     asl               ; (2)  ; A = digit x 4
     adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
     adc #<Digits      ; (2)  ; take from the first digit
-    sta DigitBmpPtr,x ; (4)  ; Store lower nibble graphic
+    sta GraphicBmpPtr,x ; (4)  ; Store lower nibble graphic
     dex               ; (2)
     dex               ; (2)
 
@@ -437,7 +437,7 @@ YesScore:   subroutine
     asl               ; (2)  ; A = digit x 4
     adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
     adc #<Digits      ; (2)  ; take from the first digit
-    sta DigitBmpPtr,x ; (4)  ; store higher nibble graphic
+    sta GraphicBmpPtr,x ; (4)  ; store higher nibble graphic
     dex               ; (2)
     dex               ; (2)
     dey               ; (2)
@@ -486,33 +486,31 @@ YesScore:   subroutine
 ShowRealScoreLine: subroutine
     ; Point the symbol map at the current label to draw
     lda scoreglyph0lsb,x
-    sta DigitBmpPtr+0
+    sta GraphicBmpPtr+0
     lda #>scoreglyphs0
-    sta DigitBmpPtr+1
+    sta GraphicBmpPtr+1
 
     lda scoreglyph1lsb,x
-    sta DigitBmpPtr+2
+    sta GraphicBmpPtr+2
     lda #>scoreglyphs1
-    sta DigitBmpPtr+3
+    sta GraphicBmpPtr+3
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
 .loop:
     ldy ScanLineCounter          ; 6-digit loop is heavily inspired on Berzerk's
-    lda (DigitBmpPtr+0),y
+    lda (GraphicBmpPtr+0),y
     sta GRP0
     sta WSYNC
-    lda (DigitBmpPtr+2),y
+    lda (GraphicBmpPtr+2),y
     sta GRP1
-    lda #$00                ; Blank space after the label
-    nop                     ; Timing...
-    nop                     ; Timing
+    lda (GraphicBmpPtr+4),y
     sta GRP0
-    lda (DigitBmpPtr+6),y
+    lda (GraphicBmpPtr+6),y
     sta TempDigitBmp
-    lda (DigitBmpPtr+8),y
+    lda (GraphicBmpPtr+8),y
     tax
-    lda (DigitBmpPtr+10),y
+    lda (GraphicBmpPtr+10),y
     tay
     lda TempDigitBmp
     sta GRP1
