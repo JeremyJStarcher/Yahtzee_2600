@@ -84,7 +84,6 @@ ScoreLineIndex: ds 1            ; The index of which actual scoreline
 ScreenLineIndex: ds 1           ; The index of which score screen line
 OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
 
-DrawSymbolsMap: ds 4
 rolledDice:     ds 5
 
     INCLUDE "build/score_ram.asm";
@@ -487,23 +486,23 @@ YesScore:   subroutine
 ShowRealScoreLine: subroutine
     ; Point the symbol map at the current label to draw
     lda scoreglyph0lsb,x
-    sta DrawSymbolsMap+0
+    sta DigitBmpPtr+0
     lda #>scoreglyphs0
-    sta DrawSymbolsMap+1
+    sta DigitBmpPtr+1
 
     lda scoreglyph1lsb,x
-    sta DrawSymbolsMap+2
+    sta DigitBmpPtr+2
     lda #>scoreglyphs1
-    sta DrawSymbolsMap+3
+    sta DigitBmpPtr+3
 
 ;; This loop is so tight there isn't room for *any* additional calculations.
 ;; So we have to calculate DrawSymbolsMap *before* we hit this code.
 .loop:
     ldy ScanLineCounter          ; 6-digit loop is heavily inspired on Berzerk's
-    lda (DrawSymbolsMap+0),y
+    lda (DigitBmpPtr+0),y
     sta GRP0
     sta WSYNC
-    lda (DrawSymbolsMap+2),y
+    lda (DigitBmpPtr+2),y
     sta GRP1
     lda #$00                ; Blank space after the label
     nop                     ; Timing...
