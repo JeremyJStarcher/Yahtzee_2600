@@ -234,65 +234,6 @@ Initialize: subroutine            ; Cleanup routine from macro.h (by Andrew Davi
     lda #0
     sta OffsetIntoScoreList   ; Reset te top line
 
-ShowTitleScreen:
-    jmp StartFrame
-
-;;;;;;;;;;;;;;
-;; NEW GAME ;;
-;;;;;;;;;;;;;;
-
-StartNewGame:
-    ; Prefill the rolled dice with test data
-    lda #6
-    sta rolledDice + 0
-
-    lda #2
-    sta rolledDice + 1
-
-    lda #3
-    sta rolledDice + 2
-
-    lda #4
-    sta rolledDice + 3
-
-    lda #6
-    sta rolledDice + 4
-
-    ; Prefill scores with dummy values
-    lda #$34
-    sta score_high_L1s
-    lda #$12
-    sta score_low_L1s
-
-    lda #$78
-    sta score_high_L2s
-    lda #$56
-    sta score_low_L2s
-
-    lda #$33
-    sta score_high_L3s
-    sta score_low_L3s
-
-    lda #$44
-    sta score_high_L4s
-    sta score_low_L4s
-
-    lda #$55
-    sta score_high_L5s
-    sta score_low_L5s
-
-    lda #$66
-    sta score_high_L6s
-    sta score_low_L6s
-
-    lda #$78
-    sta score_high_LChance
-    sta score_low_LChance
-
-    ; Continue into real prep
-    lda #WaitingJoyPress
-    sta GameState
-
 ;;;;;;;;;;;;;;;;;
 ;; FRAME START ;;
 ;;;;;;;;;;;;;;;;;
@@ -867,6 +808,64 @@ PosObject:  subroutine
             sta RESP0,x              ; 21/ 26/31/36/41/46/51/56/61/66/71 - Set the rough position./Pos
 
             rts
+
+;;;;;;;;;;;;;;
+;; NEW GAME ;;
+;;;;;;;;;;;;;;
+
+StartNewGame:
+    ; Prefill the rolled dice with test data
+    lda #6
+    sta rolledDice + 0
+
+    lda #2
+    sta rolledDice + 1
+
+    lda #3
+    sta rolledDice + 2
+
+    lda #4
+    sta rolledDice + 3
+
+    lda #6
+    sta rolledDice + 4
+
+    ; Prefill scores with dummy values
+    lda #$34
+    sta score_high_L1s
+    lda #$12
+    sta score_low_L1s
+
+    lda #$78
+    sta score_high_L2s
+    lda #$56
+    sta score_low_L2s
+
+    lda #$33
+    sta score_high_L3s
+    sta score_low_L3s
+
+    lda #$44
+    sta score_high_L4s
+    sta score_low_L4s
+
+    lda #$55
+    sta score_high_L5s
+    sta score_low_L5s
+
+    lda #$66
+    sta score_high_L6s
+    sta score_low_L6s
+
+    lda #$78
+    sta score_high_LChance
+    sta score_low_LChance
+
+    ; Continue into real prep
+    lda #WaitingJoyPress
+    sta GameState
+    jmp StartFrame
+
 
 ;===============================================================================
 ; free space check before End of Cartridge
