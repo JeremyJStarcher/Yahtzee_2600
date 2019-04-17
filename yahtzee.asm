@@ -160,9 +160,9 @@ fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
 
 ; Values of GameState (it's a state machine!)
 TitleScreen       = 0  ; => AddingRandomTitle
-AddingRandomTile  = 1  ; => WaitingJoyRelease
 WaitingJoyRelease = 2  ; => WaitingJoyPress
 WaitingJoyPress   = 3  ; => ShiftingA
+
 JoyVectorUp       = 1  ; Last joystick action
 JoyVectorDown     = 2  ; last joystick action
 
