@@ -68,6 +68,7 @@ TempVar2:                   ; General use variable
 TempDigitBmp:               ; Stores intermediate part of 6-digit score
     ds 1
 
+ActiveScoreLineColor:      ; What color to display the active scoreline as
 TempVar3:                   ; General use variable
 SPF2:                       ; Shadow PF2
     ds 1
@@ -83,6 +84,8 @@ ScoreLineCounter: ds 1          ; How many score lines have been drawn?
 ScoreLineIndex: ds 1            ; The index of which actual scoreline
 ScreenLineIndex: ds 1           ; The index of which score screen line
 OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
+
+ActiveArea: ds 1                ; What area is active for inputs?
 
 rolledDice:     ds 5
 
@@ -162,6 +165,9 @@ fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
 TitleScreen       = 0  ; => AddingRandomTitle
 WaitingJoyRelease = 2  ; => WaitingJoyPress
 WaitingJoyPress   = 3  ; => ShiftingA
+
+ActiveAreaScores  = 1
+ActiveAreaDice    = 2
 
 JoyVectorUp       = 1  ; Last joystick action
 JoyVectorDown     = 2  ; last joystick action
@@ -297,6 +303,23 @@ YesScore:   subroutine
     sta GRP0
     sta GRP1
 
+    ; What color to make this particular score line?
+    ldx #ScoreColor
+
+    lda ActiveArea
+    cmp #ActiveAreaScores
+    bne .UseInactiveColor
+
+    lda ScoreLineCounter
+    cmp ActiveScoreLine
+    beq .UsePrimaryColor
+
+.UseInactiveColor
+    ldx #InactiveScoreColor
+
+.UsePrimaryColor:
+    stx ActiveScoreLineColor
+
 ; Copy the score to the scratch buffer
     clc
     lda ScreenLineIndex
@@ -338,13 +361,8 @@ YesScore:   subroutine
     sta WSYNC
     sta HMOVE   ; (3)
 
-    ldx #ScoreColor
-    lda ScoreLineCounter
-    cmp ActiveScoreLine
-    beq .UsePrimaryColor
-    ldx #InactiveScoreColor
+    ldx ActiveScoreLineColor
 
-.UsePrimaryColor:
     stx COLUP0
     stx COLUP1
 
@@ -664,7 +682,7 @@ DiceRowScanLines = 4
 ;    asl
 ;    asl
 VerifyGameStateForJoyCheck:
-    and #JoyMask           ; Only player 0 bits
+    and #JoyMask             ; Only player 0 bits
 
     ldx GameState            ; We only care for states in which we are waiting
     cpx #WaitingJoyRelease   ; for a joystick press or release
@@ -864,8 +882,12 @@ StartNewGame:
     ; Continue into real prep
     lda #WaitingJoyPress
     sta GameState
-    jmp StartFrame
 
+    lda #ActiveAreaScores
+    ; lda #ActiveAreaDice
+    sta ActiveArea
+
+    jmp StartFrame
 
 ;===============================================================================
 ; free space check before End of Cartridge
