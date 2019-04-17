@@ -724,41 +724,51 @@ CheckJoyRelease:
     cmp #JoyMask
     bne EndJoyCheck
 
+    lda ActiveArea
+    cmp #ActiveAreaScores
+    bne CheckJoyReleaseDice
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Handle the joystick actions for the ScoreArea ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+checkJoyReleaseScores: subroutine
     ldy OffsetIntoScoreList            ; Save value
 
     lda MoveVector
     cmp #JoyVectorUp
-    bne checkDownVector
+    bne .checkDownVector
     inc OffsetIntoScoreList
-    jmp CheckJoyReleaseEnd
+    jmp .CheckJoyReleaseEnd
 
-checkDownVector
+.checkDownVector
     lda MoveVector
     cmp #JoyVectorDown
-    bne checkRightVector
+    bne .checkRightVector
     dec OffsetIntoScoreList
-    jmp CheckJoyReleaseEnd
+    jmp .CheckJoyReleaseEnd
 
-checkRightVector:
+.checkRightVector:
 
-CheckJoyReleaseEnd:
+.CheckJoyReleaseEnd:
     clc
     lda ScreenLineIndex
     adc OffsetIntoScoreList
 
-    ; adc #TopPadding         ; Move into the a good compare range
-    bcs CheckJoyReleaseRangeNotValid
+    bcs .CheckJoyReleaseRangeNotValid
 
     cmp #MaxScoreLines-1
-    bcc CheckJoyReleaseRangeValid
-    jmp CheckJoyReleaseRangeNotValid
+    bcc .CheckJoyReleaseRangeValid
+    jmp .CheckJoyReleaseRangeNotValid
 
-CheckJoyReleaseRangeNotValid:
+.CheckJoyReleaseRangeNotValid:
     sty OffsetIntoScoreList
 
-CheckJoyReleaseRangeValid:
+.CheckJoyReleaseRangeValid:
     lda #WaitingJoyPress       ; Joystick released, can accept shifts again
     sta GameState
+    jmp EndJoyCheck
+
+CheckJoyReleaseDice:
 
 EndJoyCheck:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
