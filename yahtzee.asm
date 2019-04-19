@@ -52,6 +52,7 @@
 
 ; Some positions are shared between different coroutines
 ; (think of them as local variables)
+.startOfRam:
 
 GameMode: ds 1              ; One or Two players
 GameState: ds 1
@@ -96,13 +97,18 @@ BlinkPhase: ds 1                ; Which mode is the blink in?
 
 rolledDice:     ds 5
 
+.preScoreRamTop:
     INCLUDE "build/score_ram.asm";
-;===============================================================================
+.postScoreRamTop:
+;========================================j=======================================
 ; free space check before End of Cartridge
 ;===============================================================================
 
     if (* & $FF)
-        echo "------", [$FF - *]d, "bytes free before end of RAM"
+        echo "......", [.postScoreRamTop - .preScoreRamTop]d, "bytes RAM used by scores."
+        echo "......", [.preScoreRamTop - .startOfRam]d, "bytes RAM used by other."
+        echo "######", [$FF - *]d, "bytes free before end of RAM."
+        echo "######", [127 - [$FF - *]]d, "Total bytes of RAM used."
     endif
 
 ;===============================================================================
