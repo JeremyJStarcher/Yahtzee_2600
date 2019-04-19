@@ -174,6 +174,8 @@ ActiveAreaDice    = 2
 
 JoyVectorUp       = 1  ; Last joystick action
 JoyVectorDown     = 2  ; last joystick action
+JoyVectorLeft     = 3  ; last joystick action
+JoyVectorRight    = 4  ; last joystick action
 
 ScoreColor         = $28 ; Colors were chosen to get equal or equally nice
 InactiveScoreColor = $04 ; on both PAL and NTSC, avoiding adjust branches
@@ -728,11 +730,13 @@ CheckJoyDown:
 CheckJoyLeft:
     cmp #JoyLeft
     bne CheckJoyRight
+    lda #JoyVectorLeft
     jmp TriggerShift
 
 CheckJoyRight:
     cmp #JoyRight
     bne EndJoyCheck
+    lda #JoyVectorRight
 
 TriggerShift:
     sta MoveVector
@@ -763,9 +767,16 @@ checkJoyReleaseScores: subroutine
 .checkDownVector
     lda MoveVector
     cmp #JoyVectorDown
-    bne .checkRightVector
+    bne .checkLeftVector
     dec OffsetIntoScoreList
     jmp .CheckJoyReleaseEnd
+
+
+.checkLeftVector:
+    cmp #JoyVectorLeft
+    bne .checkRightVector
+    lda #ActiveAreaDice
+    sta ActiveArea
 
 .checkRightVector:
 
