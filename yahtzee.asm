@@ -216,6 +216,8 @@ TopPadding = ScoreLinesPerPage - ActiveScoreLine
 MaxScoreLines = 25
 BlinkRate = 40
 
+DiceCount = 5               ; Total number of dice to display
+
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
 ;;;;;;;;;;;;;;;
@@ -848,7 +850,7 @@ CheckJoyReleaseDice: subroutine
     cmp #-1
     bcs .CheckJoyReleaseRangeNotValid
 
-    cmp #5  ; THe number of dice
+    cmp #DiceCount  ; THe number of dice
     bcc .CheckJoyReleaseRangeValid
     jmp .CheckJoyReleaseRangeNotValid
 
