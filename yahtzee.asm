@@ -98,6 +98,9 @@ BlinkPhase: ds 1                ; Which mode is the blink in?
 rolledDice:     ds 5
 rerollMask: ds 1
 
+Rand8: ds 1                     ; Random number collector
+; Rand16: ds 1                     ; Random number collector
+
 .preScoreRamTop:
     INCLUDE "build/score_ram.asm";
 .postScoreRamTop:
@@ -260,6 +263,9 @@ Initialize: subroutine            ; Cleanup routine from macro.h (by Andrew Davi
     lda #0
     sta OffsetIntoScoreList   ; Reset te top line
 
+    lda #$4c
+    sta Rand8                   ; Seed
+
 ;;;;;;;;;;;;;;;;;
 ;; FRAME START ;;
 ;;;;;;;;;;;;;;;;;
@@ -300,7 +306,8 @@ StartFrame: subroutine
 
 .noToggleBlink
 
-    jsr CalcBlinkMask
+     jsr CalcBlinkMask
+     jsr random
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
@@ -574,8 +581,8 @@ DiceRowScanLines = 4
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Calculate the dice PF fields and put them in shadow registers
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    lda #%00010000
-    sta rerollMask
+    ; lda #%00010000
+    ; sta rerollMask
 
     MAC merge
         ;; {1} - The face offset
@@ -983,19 +990,19 @@ PosObject:  subroutine
 
 StartNewGame:
     ; Prefill the rolled dice with test data
-    lda #1
+    jsr random_dice;
     sta rolledDice + 0
 
-    lda #2
+    jsr random_dice;
     sta rolledDice + 1
 
-    lda #3
+    jsr random_dice;
     sta rolledDice + 2
 
-    lda #4
+    jsr random_dice;
     sta rolledDice + 3
 
-    lda #6
+    jsr random_dice;
     sta rolledDice + 4
 
     ; Prefill scores with dummy values
@@ -1042,6 +1049,38 @@ StartNewGame:
 
     jmp StartFrame
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Random number generator ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The RNG must be seeded with a non-zero value
+;; To keep things "fresh" its recommended this be
+;; called on every VBLANK.
+
+random: subroutine
+        lda Rand8
+        lsr
+ ifconst Rand16
+        rol Rand16      ; this command is only used if Rand16 has been defined
+ endif
+        bcc .noeor
+        eor #$B4
+.noeor
+        sta Rand8
+ ifconst Rand16
+        eor Rand16      ; this command is only used if Rand16 has been defined
+ endif
+        rts
+
+;; Die value in the A register
+random_dice:
+    jsr random
+    lda Rand8
+    and #%0000111
+    cmp #6
+    bcs random_dice
+    clc
+    adc #1
+    rts
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
