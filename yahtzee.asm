@@ -611,7 +611,7 @@ DiceRowScanLines = 4
 
     jsr showDice
 
-    ;; Line 3
+    ;; Line 2
     ldy rolledDice + 0
     lda faceL2P0,y
     sta SPF0
