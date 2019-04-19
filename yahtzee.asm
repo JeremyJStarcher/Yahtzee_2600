@@ -685,6 +685,13 @@ DiceRowScanLines = 4
     lda INPT5                 ; P1 fire button pressed?
     bmi .NoRestart
 .ButtonPressed:
+    lda ActiveArea
+    cmp #ActiveAreaDice
+    bne .checkAreaScore
+    jsr handleAreaDiceFire
+
+.checkAreaScore:
+
     lda GameState
     cmp #TitleScreen
     beq .Restart               ; Start game if title screen
@@ -962,6 +969,16 @@ blinkLookup:
     word .blink3 -1
     word .blink4 -1
 
+handleAreaDiceFire: subroutine
+    lda #1                          ; Load the first bit
+    ldx HighlightedDie              ; And find which position
+.l  asl                             ; Shift it along
+    dex                             ; Counting down
+    bne .l                          ; Until we are there
+    eor rerollMask                  ; Toggle the bit
+    sta rerollMask                  ; And re-save
+    rts
+
 ; Positions an object horizontally
 ; Inputs: A = Desired position.
 ; X = Desired object to be positioned (0-5).
@@ -1044,8 +1061,11 @@ StartNewGame:
     ; lda #ActiveAreaDice
     sta ActiveArea
 
-    lda #3
+    lda #0
     sta HighlightedDie
+
+    lda #$00
+    sta rerollMask
 
     jmp StartFrame
 
