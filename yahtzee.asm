@@ -928,7 +928,7 @@ showDice: subroutine
     rts
 
 CalcBlinkMask: subroutine
-    lda #$FF
+    lda #$FF                    ; Don't mask out any bits
     sta MaskPF0
     sta MaskPF1
     sta MaskPF2
