@@ -86,6 +86,9 @@ ScreenLineIndex: ds 1           ; The index of which score screen line
 OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
 
 ActiveArea: ds 1                ; What area is active for inputs?
+HighlightedDie: ds 1            ; Highlight die
+BlinkClock: ds 1                ; Time the blink-blink
+BlinkPhase: ds 1                ; Which mode is the blink in?
 
 rolledDice:     ds 5
 
@@ -199,6 +202,7 @@ ActiveScoreLine = ScoreLinesPerPage / 2
 TopPadding = ScoreLinesPerPage - ActiveScoreLine
 
 MaxScoreLines = 25
+BlinkRate = 40
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -268,7 +272,17 @@ StartFrame: subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OTHER FRAME CONFIGURATION ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    inc BlinkClock
+    lda BlinkClock
+    cmp #BlinkRate
+    bne .noToggleBlink
+    lda BlinkPhase
+    eor #%00000001
+    sta BlinkPhase
+    lda #0
+    sta BlinkClock
 
+.noToggleBlink
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -599,12 +613,18 @@ DiceRowScanLines = 4
 
     jsr showDice
 
+    ; Let the sprites extend a little more
+    sta WSYNC
+    sta WSYNC
+    sta WSYNC
+    sta WSYNC
+
     lda #0
     sta GRP0
     sta GRP1
 
     ; 262 scan lines total
-    ldx #36 + 6 - (DiceRowScanLines * 3)
+    ldx #36 + 1 - (DiceRowScanLines * 3)
 .loop:
     sta WSYNC
     dex
@@ -789,31 +809,83 @@ showDice: subroutine
     ;; We use shadow registers because we turn the PF   ;;
     ;; on and then off every scan line, keeping the     ;;
     ;; dice display oo just the left-hand side.         ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;A
+        lda BlinkPhase
+        bne .skip
 
+        ; lddoShow
+        ; sta HighlightedDie
+        lda HighlightedDie
+
+        tax
+        lda blinkLookup+1,y
+        pha
+        lda blinkLookup,x
+        pha
+        rts
+.skip
+        REPEAT 10-1
+          nop
+        REPEND
+doShow:
+    subroutine
     REPEAT DiceRowScanLines
         sta WSYNC
-
         ; Copy the shadow registers
-        lda SPF0
-        sta PF0
-        lda SPF1
-        sta PF1
-        lda SPF2
-        sta PF2
+        ldy SPF0
+        sty PF0
+        ldy SPF1
+        sty PF1
+        ldy SPF2
+        sty PF2
 
         ; Wait for playfield to be drawn
-        REPEAT  10
+        REPEAT 10-1
             nop
         REPEND
 
         ; And clear it before the other side.
-        lda #0
-        sta PF0
-        sta PF1
-        sta PF2
+        ldy #0
+        sty PF0
+        sty PF1
+        sty PF2
     REPEND
     rts
+
+.blink0
+.test0
+blinkRoutines:
+    lda #$00
+    and SPF0
+    sta SPF0
+    jmp doShow
+.blink1
+    lda #$0F
+    and SPF1
+    sta SPF1
+    jmp doShow
+.blink2
+    lda #$F0
+    and SPF1
+    sta SPF1
+    jmp doShow
+.blink3
+    lda #$F0
+    and SPF2
+    sta SPF2
+    jmp doShow
+.blink4
+    lda #$0F
+    and SPF2
+    sta SPF2
+    jmp doShow
+
+blinkLookup:
+    word .blink0 -1
+    word .blink1 -1
+    word .blink2 -1
+    word .blink3 -1
+    word .blink4 -1
 
 ; Positions an object horizontally
 ; Inputs: A = Desired position.
@@ -896,6 +968,9 @@ StartNewGame:
     lda #ActiveAreaScores
     ; lda #ActiveAreaDice
     sta ActiveArea
+
+    lda #0
+    sta HighlightedDie
 
     jmp StartFrame
 
