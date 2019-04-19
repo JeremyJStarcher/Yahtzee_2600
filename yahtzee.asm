@@ -718,7 +718,7 @@ VerifyGameStateForJoyCheck:
     beq CheckJoyRelease
 
     cpx #WaitingJoyPress
-    bne EndJoyCheck
+    bne .scoresEndJoyCheck
 
 ; If the joystick is in one of these directions, trigger the shift by
 ; setting the ShiftVector and changing mode
@@ -742,22 +742,26 @@ CheckJoyLeft:
 
 CheckJoyRight:
     cmp #JoyRight
-    bne EndJoyCheck
+    bne .scoresEndJoyCheck
     lda #JoyVectorRight
 
 TriggerShift:
     sta MoveVector
     lda #WaitingJoyRelease
     sta GameState
-    jmp EndJoyCheck
+    jmp .scoresEndJoyCheck
 
 CheckJoyRelease:
     cmp #JoyMask
-    bne EndJoyCheck
+    bne .scoresEndJoyCheck
 
     lda ActiveArea
     cmp #ActiveAreaScores
     bne CheckJoyReleaseDice
+    jmp checkJoyReleaseScores
+
+.scoresEndJoyCheck
+    jmp EndJoyCheck
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Handle the joystick actions for the ScoreArea ;;
@@ -783,6 +787,7 @@ checkJoyReleaseScores: subroutine
     bne .checkRightVector
     lda #ActiveAreaDice
     sta ActiveArea
+    jmp .CheckJoyReleaseEnd
 
 .checkRightVector:
 
@@ -805,7 +810,49 @@ checkJoyReleaseScores: subroutine
     sta GameState
     jmp EndJoyCheck
 
-CheckJoyReleaseDice:
+CheckJoyReleaseDice: subroutine
+    ldy HighlightedDie
+
+    lda MoveVector
+    cmp #JoyVectorUp
+    bne .checkDownVector
+    lda #ActiveAreaScores
+    sta ActiveArea
+    jmp .CheckJoyReleaseEnd
+
+.checkDownVector
+    lda MoveVector
+    cmp #JoyVectorDown
+    bne .checkLeftVector
+    jmp .CheckJoyReleaseEnd
+
+.checkLeftVector:
+    cmp #JoyVectorLeft
+    bne .checkRightVector
+    dec HighlightedDie
+    jmp .CheckJoyReleaseEnd
+
+.checkRightVector:
+    cmp #JoyVectorRight
+    bne .CheckJoyReleaseEnd
+    inc HighlightedDie
+
+.CheckJoyReleaseEnd:
+    lda HighlightedDie
+    cmp #-1
+    bcs .CheckJoyReleaseRangeNotValid
+
+    cmp #5  ; THe number of dice
+    bcc .CheckJoyReleaseRangeValid
+    jmp .CheckJoyReleaseRangeNotValid
+
+.CheckJoyReleaseRangeNotValid:
+    sty HighlightedDie
+
+.CheckJoyReleaseRangeValid:
+    lda #WaitingJoyPress       ; Joystick released, can accept shifts again
+    sta GameState
+    jmp EndJoyCheck
 
 EndJoyCheck:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
