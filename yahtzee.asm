@@ -38,6 +38,7 @@
 
     PROCESSOR 6502
     INCLUDE "vcs.h"
+    INCLUDE "macros.h"
 
 ;===============================================================================
 ; Define RAM Usage
@@ -100,6 +101,8 @@ rerollMask: ds 1
 
 Rand8: ds 1                     ; Random number collector
 ; Rand16: ds 1                     ; Random number collector
+
+statusBits: ds 1                ; Various status things
 
 .preScoreRamTop:
     INCLUDE "build/score_ram.asm";
@@ -222,6 +225,8 @@ BlinkRate = 40
 
 DiceCount = 5               ; Total number of dice to display
 MaskedDieFace = 7           ; The face when a die is masked
+
+StatusFireDown = %0000001   ; The fire button is pressed
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -680,14 +685,21 @@ DiceRowScanLines = 4
     beq .Restart
 .NoSwitchChange:
     lda INPT4
-    bpl .ButtonPressed         ; P0 Fire button pressed?
-    ldx #1                    ; P1 fire button always starts two-player game
-    lda INPT5                 ; P1 fire button pressed?
-    bmi .NoRestart
+    bpl .ButtonPressed        ; P0 Fire button pressed?
+
+    clearBit StatusFireDown, statusBits
+    jmp .NoRestart
+
+
 .ButtonPressed:
+    lda #StatusFireDown
+    bit statusBits
+    bne .NoRestart
+
     lda ActiveArea
     cmp #ActiveAreaDice
     bne .checkAreaScore
+
     jsr handleAreaDiceFire
 
 .checkAreaScore:
@@ -970,13 +982,18 @@ blinkLookup:
     word .blink4 -1
 
 handleAreaDiceFire: subroutine
+
     lda #1                          ; Load the first bit
     ldx HighlightedDie              ; And find which position
+    inx                             ; Start counting at 1
 .l  asl                             ; Shift it along
     dex                             ; Counting down
     bne .l                          ; Until we are there
+    lsr                             ; Make up for us starting at 1
     eor rerollMask                  ; Toggle the bit
     sta rerollMask                  ; And re-save
+
+    setBit StatusFireDown, statusBits
     rts
 
 ; Positions an object horizontally
