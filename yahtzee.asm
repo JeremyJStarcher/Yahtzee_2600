@@ -573,62 +573,30 @@ DiceRowScanLines = 4
     ;; Calculate the dice PF fields and put them in shadow registers
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    ;; Line 0
-    ldy rolledDice + 0
-    lda faceL0P0,y
-    sta SPF0
+    MAC showLineForAllFaces
+        ;; {1} -- Which line of the dice graphic we are currently rendering
+        ldy rolledDice + 0          ; The value of face 0
+        lda faceL{1}P0,y            ; The bitmap for that face/line
+        sta SPF0                    ; Store it
 
-    ldy rolledDice + 1
-    ldx rolledDice + 2
-    lda faceL0P1,y
-    ora faceL0P2,x
-    sta SPF1
+        ldy rolledDice + 1          ; The value of face 1
+        ldx rolledDice + 2          ; The value of face 2
+        lda faceL{1}P1,y            ; Get the face1 bitmap
+        ora faceL{1}P2,x            ; merge in the face2 bitmap
+        sta SPF1                    ; Store it
 
-    ldy rolledDice + 3
-    ldx rolledDice + 4
-    lda faceL0P3,y
-    ora faceL0P4,x
-    sta SPF2
+        ldy rolledDice + 3          ; The value of face 3
+        ldx rolledDice + 4          ; The value of face 4
+        lda faceL{1}P3,y            ; The the face3 bitmap
+        ora faceL{1}P4,x            ; merge in the face4 bitmap
+        sta SPF2                    ; Store it
 
-    jsr showDice
+        jsr showDice
+    ENDM
 
-    ;; Line 1
-    ldy rolledDice + 0
-    lda faceL1P0,y
-    sta SPF0
-
-    ldy rolledDice + 1
-    ldx rolledDice + 2
-    lda faceL1P1,y
-    ora faceL1P2,x
-    sta SPF1
-
-    ldy rolledDice + 3
-    ldx rolledDice + 4
-    lda faceL1P3,y
-    ora faceL1P4,x
-    sta SPF2
-
-    jsr showDice
-
-    ;; Line 2
-    ldy rolledDice + 0
-    lda faceL2P0,y
-    sta SPF0
-
-    ldy rolledDice + 1
-    ldx rolledDice + 2
-    lda faceL2P1,y
-    ora faceL2P2,x
-    sta SPF1
-
-    ldy rolledDice + 3
-    ldx rolledDice + 4
-    lda faceL2P3,y
-    ora faceL2P4,x
-    sta SPF2
-
-    jsr showDice
+    showLineForAllFaces 0
+    showLineForAllFaces 1
+    showLineForAllFaces 2
 
     ; Let the sprites extend a little more
     sta WSYNC
