@@ -58,6 +58,10 @@ GameState: ds 1
 LastSWCHB: ds 1             ; Avoid multiple detection of console switches
 MoveVector: ds 1            ; Movement Vector
 
+MaskPF0: ds 1               ; Pre-calculate blink masks
+MaskPF1: ds 1
+MaskPF2: ds 1
+
 SPF0:                       ; Shadow PF0
 TempVar1:                   ; General use variable
 ScanLineCounter:            ; Counts lines while drawing the score
@@ -285,6 +289,9 @@ StartFrame: subroutine
     sta BlinkClock
 
 .noToggleBlink
+
+    jsr CalcBlinkMask
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -771,7 +778,6 @@ checkJoyReleaseScores: subroutine
     dec OffsetIntoScoreList
     jmp .CheckJoyReleaseEnd
 
-
 .checkLeftVector:
     cmp #JoyVectorLeft
     bne .checkRightVector
@@ -821,24 +827,18 @@ showDice: subroutine
     ;; on and then off every scan line, keeping the     ;;
     ;; dice display oo just the left-hand side.         ;;
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;A
-        lda BlinkPhase
-        bne .skip
+    lda MaskPF0
+    and SPF0
+    sta SPF0
 
-        ; lddoShow
-        ; sta HighlightedDie
-        lda HighlightedDie
+    lda MaskPF1
+    and SPF1
+    sta SPF1
 
-        tax
-        lda blinkLookup+1,y
-        pha
-        lda blinkLookup,x
-        pha
-        rts
-.skip
-        REPEAT 10-1
-          nop
-        REPEND
-doShow:
+    lda MaskPF2
+    and SPF2
+    sta SPF2
+
     subroutine
     REPEAT DiceRowScanLines
         sta WSYNC
@@ -863,33 +863,52 @@ doShow:
     REPEND
     rts
 
+CalcBlinkMask: subroutine
+    lda #$FF
+    sta MaskPF0
+    sta MaskPF1
+    sta MaskPF2
+
+    lda BlinkPhase
+    bne .checkRegion
+    rts
+
+.checkRegion
+    lda ActiveArea
+    cmp #ActiveAreaDice
+    beq .setMasks
+    rts
+
+.setMasks:
+    lda HighlightedDie
+    asl
+    tax
+    lda blinkLookup+1,x
+    pha
+    lda blinkLookup,x
+    pha
+    rts
+
 .blink0
-.test0
-blinkRoutines:
     lda #$00
-    and SPF0
-    sta SPF0
-    jmp doShow
+    sta MaskPF0
+    rts
 .blink1
     lda #$0F
-    and SPF1
-    sta SPF1
-    jmp doShow
+    sta MaskPF1
+    rts
 .blink2
     lda #$F0
-    and SPF1
-    sta SPF1
-    jmp doShow
+    sta MaskPF1
+    rts
 .blink3
     lda #$F0
-    and SPF2
-    sta SPF2
-    jmp doShow
+    sta MaskPF2
+    rts
 .blink4
     lda #$0F
-    and SPF2
-    sta SPF2
-    jmp doShow
+    sta MaskPF2
+    rts
 
 blinkLookup:
     word .blink0 -1
@@ -980,7 +999,7 @@ StartNewGame:
     ; lda #ActiveAreaDice
     sta ActiveArea
 
-    lda #0
+    lda #3
     sta HighlightedDie
 
     jmp StartFrame
