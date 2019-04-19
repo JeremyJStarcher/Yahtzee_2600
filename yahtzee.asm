@@ -96,6 +96,7 @@ BlinkClock: ds 1                ; Time the blink-blink
 BlinkPhase: ds 1                ; Which mode is the blink in?
 
 rolledDice:     ds 5
+rerollMask: ds 1
 
 .preScoreRamTop:
     INCLUDE "build/score_ram.asm";
@@ -572,24 +573,37 @@ DiceRowScanLines = 4
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Calculate the dice PF fields and put them in shadow registers
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda #%00010000
+    sta rerollMask
+
+    MAC merge
+        ;; {1} - The face offset
+        ;; {2} - Which line of the dice
+        ;; {3} - which shadow register
+
+        ldx #0                      ; Blank face is the default
+        lda #[1 << {1}]             ; Calculate the bitmask position
+        bit rerollMask              ; Compare against the mask
+        bne .keepBlank              ; masked? Keep it
+        ldx [rolledDice + {1}]      ; The value of the face
+
+.keepBlank:
+        lda {3}                     ; Load the shadow register
+        ora faceL{2}P{1},x          ; merge in the face bitmap
+        sta {3}                     ; And re-save
+    ENDM
 
     MAC showLineForAllFaces
-        ;; {1} -- Which line of the dice graphic we are currently rendering
-        ldy rolledDice + 0          ; The value of face 0
-        lda faceL{1}P0,y            ; The bitmap for that face/line
-        sta SPF0                    ; Store it
+        lda #0
+        sta SPF0
+        sta SPF1
+        sta SPF2
 
-        ldy rolledDice + 1          ; The value of face 1
-        ldx rolledDice + 2          ; The value of face 2
-        lda faceL{1}P1,y            ; Get the face1 bitmap
-        ora faceL{1}P2,x            ; merge in the face2 bitmap
-        sta SPF1                    ; Store it
-
-        ldy rolledDice + 3          ; The value of face 3
-        ldx rolledDice + 4          ; The value of face 4
-        lda faceL{1}P3,y            ; The the face3 bitmap
-        ora faceL{1}P4,x            ; merge in the face4 bitmap
-        sta SPF2                    ; Store it
+        merge 0, {1}, SPF0
+        merge 1, {1}, SPF1
+        merge 2, {1}, SPF1
+        merge 3, {1}, SPF2
+        merge 4, {1}, SPF2
 
         jsr showDice
     ENDM
