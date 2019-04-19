@@ -218,6 +218,7 @@ MaxScoreLines = 25
 BlinkRate = 40
 
 DiceCount = 5               ; Total number of dice to display
+MaskedDieFace = 7           ; The face when a die is masked
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -581,7 +582,7 @@ DiceRowScanLines = 4
         ;; {2} - Which line of the dice
         ;; {3} - which shadow register
 
-        ldx #0                      ; Blank face is the default
+        ldx #MaskedDieFace
         lda #[1 << {1}]             ; Calculate the bitmask position
         bit rerollMask              ; Compare against the mask
         bne .keepBlank              ; masked? Keep it
@@ -982,7 +983,7 @@ PosObject:  subroutine
 
 StartNewGame:
     ; Prefill the rolled dice with test data
-    lda #6
+    lda #1
     sta rolledDice + 0
 
     lda #2

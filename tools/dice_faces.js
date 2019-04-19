@@ -83,6 +83,11 @@ const diceFaceBitmaps = [
     "0.0 1.1 2.2 3.3 4.4                     ",
     "0.0 1.1 2.2 3.3 4.4                     ",
   ],
+  [
+    "000 111 222 333 444                     ",
+    "000 111 222 333 444                     ",
+    "000 111 222 333 444                     ",
+  ],
 ];
 
 const fs = require('fs');
@@ -195,7 +200,7 @@ function bitmapsToRegisterMasks(bitmaps, maxLine, maxPosition, maxFace) {
 function createDiceBitmaps() {
   const maxLine = 2;
   const maxPosition = 4;
-  const maxFace = 6;
+  const maxFace = diceFaceBitmaps.length-1;
 
   const dataLeft = bitmapsToRegisterMasks(diceFaceBitmaps, maxLine, maxPosition, maxFace);
 
@@ -217,8 +222,8 @@ function createDiceBitmaps() {
         values.push(oneByte);
       }
 
-      if (values.length !== 7) {
-        throw new Error("Something broke.....");
+      if (values.length !== maxFace+1) {
+        throw new Error(`Something broke. ${values.length}`);
       }
 
       const binaryValues = values.map(v => {
