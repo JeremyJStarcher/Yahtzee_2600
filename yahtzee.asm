@@ -79,6 +79,9 @@ TempVar3:                   ; General use variable
 SPF2:                       ; Shadow PF2
     ds 1
 
+TempWord1:
+    ds 2
+
 ; Address of the graphic for for each digit (6x2 bytes)
 GraphicBmpPtr:
     ds 6 * 2
