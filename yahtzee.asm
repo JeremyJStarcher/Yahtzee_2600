@@ -1183,8 +1183,9 @@ StartNewGame:
     sta score_high_L4s
     sta score_low_L4s
 
-    lda #$55
+    lda #$76
     sta score_high_L5s
+    lda #$98
     sta score_low_L5s
 
     lda #$66
