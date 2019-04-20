@@ -1011,6 +1011,13 @@ PrintLabel: subroutine
     sta GRP0
     sta GRP1
 
+    lda #$01
+    sta ScoreBCD + 0
+    lda #$23
+    sta ScoreBCD + 1
+    lda #$45
+    sta ScoreBCD + 2
+
     sta HMCLR
 
 ; Score setup scanlines 2-3:
