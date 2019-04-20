@@ -19,6 +19,7 @@ cd ./tools
 node digits.js
 node scoresheet.js
 node dice_faces.js
+node labels.js
 cd ..
 
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -lbuild/${NAME}.lst -f3
