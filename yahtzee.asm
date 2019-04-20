@@ -636,12 +636,16 @@ DiceRowScanLines = 4
     sta GRP0
     sta GRP1
 
+    sta WSYNC
+    jsr PrintLabel
+
     ; 262 scan lines total
-    ldx #36 + 1 - (DiceRowScanLines * 3)
+    ldx #20 + 1 - (DiceRowScanLines * 3)
 .loop:
     sta WSYNC
     dex
     bne .loop
+
 
 ;;;;;;;;;;;;;;
 ;; OVERSCAN ;;
@@ -996,6 +1000,126 @@ handleAreaDiceFire: subroutine
 
     setBit StatusFireDown, statusBits
     rts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+PrintLabel: subroutine
+    lda #0                   ; No players until we start
+    sta GRP0
+    sta GRP1
+
+    sta HMCLR
+
+; Score setup scanlines 2-3:
+; player graphics triplicated and positioned like this: P0 P1 P0 P1 P0 P1
+; also, set their colors
+    sta WSYNC  ; !!
+    lda #PlayerThreeCopies   ; (2)
+    sta NUSIZ0               ; (3)
+    sta NUSIZ1               ; (3)
+
+    lda #VerticalDelay       ; (2) ; Needed for precise timing of GRP0/GRP1
+    sta VDELP0               ; (3)
+    sta VDELP1               ; (3)
+
+    REPEAT 10                ; (20=10x2) ; Delay to position right
+        nop
+    REPEND
+    sta RESP0   ; (3)        ; Position P0
+    sta RESP1   ; (3)        ; Position P1
+    sta WSYNC
+
+    lda #$E0                 ; Fine-tune player positions to center on screen
+    sta HMP0
+    lda #$F0
+    sta HMP1
+    sta WSYNC
+    sta HMOVE   ; (3)
+
+; Score setup scanlines 4-5
+; set the graphic pointers for each score digit
+
+    ldy #2            ; (2)  ; Score byte counter (source)
+    ldx #10           ; (2)  ; Graphic pointer counter (target)
+    clc               ; (2)
+
+.ScorePtrLoop:
+    lda ScoreBCD,y    ; (4)
+    and #$0F          ; (2)  ; Lower nibble
+    sta TempVar1      ; (3)
+    asl               ; (2)  ; A = digit x 2
+    asl               ; (2)  ; A = digit x 4
+    adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
+    adc #<Digits      ; (2)  ; take from the first digit
+    sta GraphicBmpPtr,x ; (4)  ; Store lower nibble graphic
+    dex               ; (2)
+    dex               ; (2)
+
+    lda ScoreBCD,y    ; (4)
+    and #$F0          ; (2)
+    lsr               ; (2)
+    lsr               ; (2)
+    lsr               ; (2)
+    lsr               ; (2)
+    sta TempVar1      ; (3)  ; Higher nibble
+    asl               ; (2)  ; A = digit x 2
+    asl               ; (2)  ; A = digit x 4
+    adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
+    adc #<Digits      ; (2)  ; take from the first digit
+    sta GraphicBmpPtr,x ; (4)  ; store higher nibble graphic
+    dex               ; (2)
+    dex               ; (2)
+    dey               ; (2)
+    bpl .ScorePtrLoop ; (2*)
+    sta WSYNC         ;      ; We take less than 2 scanlines, round up
+
+; We may have been drawing the end of the grid (if it's P1 score)
+    lda #0
+    sta PF0
+    sta PF1
+    sta PF2
+
+;;;;;;;;;;;
+;; SCORE ;;
+;;;;;;;;;;;
+
+    ldy #4                   ; 5 scanlines
+    sty ScanLineCounter
+.DrawScoreLoop:
+    ldy ScanLineCounter          ; 6-digit loop is heavily inspired on Berzerk's
+    lda (GraphicBmpPtr),y
+    sta GRP0
+    sta WSYNC
+    lda (GraphicBmpPtr+2),y
+    sta GRP1
+    lda (GraphicBmpPtr+4),y
+    sta GRP0
+    lda (GraphicBmpPtr+6),y
+    sta TempDigitBmp
+    lda (GraphicBmpPtr+8),y
+    tax
+    lda (GraphicBmpPtr+10),y
+    tay
+    lda TempDigitBmp
+    sta GRP1
+    stx GRP0
+    sty GRP1
+    sta GRP0
+    dec ScanLineCounter
+    bpl .DrawScoreLoop
+
+.ScoreCleanup:                ; 1 scanline
+    lda #0
+    sta VDELP0
+    sta VDELP1
+    sta GRP0
+    sta GRP1
+    sta WSYNC
+    rts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Positions an object horizontally
 ; Inputs: A = Desired position.
