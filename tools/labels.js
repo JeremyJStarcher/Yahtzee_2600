@@ -7,7 +7,7 @@ function convertScoreInfo() {
 
     const source = `
 @header ScoreNames
-@glyph L1s
+@glyph Jeremy
 !##### #### #### #### ##   ## #   #              !
 !  #   #    #  # #    # # # #  # #               !
 !  #   ##   #### ##   #  #  #   #                !
@@ -23,12 +23,13 @@ function convertScoreInfo() {
 
     const glyphNames = [];
     const out = [];
+    out.push(`LabelBitmaps:`);
 
     glyphData.glyphs.forEach((bin, idx) => {
         const glyphName = `${glyphData.header}${glyphData.names[idx]}`;
         glyphNames.push(glyphName);
 
-        out.push(glyphName);
+        out.push(`${glyphName}:`);
 
         bin.forEach(binary => {
             const bb = binary.replace(/ /g, "0").replace(/#/g, "1");
