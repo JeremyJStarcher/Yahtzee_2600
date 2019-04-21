@@ -96,13 +96,13 @@ ActiveArea: ds 1                ; What area is active for inputs?
 HighlightedDie: ds 1            ; Highlight die
 BlinkClock: ds 1                ; Time the blink-blink
 
-rolledDice:     ds 5
-rerollMask: ds 1
+RolledDice:     ds 5
+RerollDiceMask: ds 1
 
 Rand8: ds 1                     ; Random number collector
 ; Rand16: ds 1                     ; Random number collector
 
-statusBits: ds 1                ; Various status things
+StatusBits: ds 1                ; Various status things
 
 .preScoreRamTop:
     INCLUDE "build/score_ram.asm";
@@ -299,9 +299,9 @@ StartFrame: subroutine
     lda BlinkClock          ; Load into into register "A"
     cmp #BlinkRate          ; Compare to the max value
     bne .noToggleBlink      ; Not equal? Skip ahead
-    lda statusBits          ; Otherwise get the current phase
+    lda StatusBits          ; Otherwise get the current phase
     eor #StatusBlinkOn      ; XOR the bit -- toggle
-    sta statusBits          ; Save the new phase
+    sta StatusBits          ; Save the new phase
     lda #0                  ; Load the new timer value
     sta BlinkClock          ; And save it
 
@@ -593,7 +593,7 @@ DiceRowScanLines = 4
     ;; Calculate the dice PF fields and put them in shadow registers
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ; lda #%00010000
-    ; sta rerollMask
+    ; sta RerollDiceMask
 
     MAC merge
         ;; {1} - The face offset
@@ -602,9 +602,9 @@ DiceRowScanLines = 4
 
         ldx #MaskedDieFace
         lda #[1 << {1}]             ; Calculate the bitmask position
-        bit rerollMask              ; Compare against the mask
+        bit RerollDiceMask              ; Compare against the mask
         bne .keepBlank              ; masked? Keep it
-        ldx [rolledDice + {1}]      ; The value of the face
+        ldx [RolledDice + {1}]      ; The value of the face
 
 .keepBlank:
         lda {3}                     ; Load the shadow register
@@ -698,12 +698,12 @@ DiceRowScanLines = 4
     lda INPT4
     bpl .ButtonPressed        ; P0 Fire button pressed?
 
-    clearBit StatusFireDown, statusBits
+    clearBit StatusFireDown, StatusBits
     jmp .NoRestart
 
 .ButtonPressed:
     lda #StatusFireDown
-    bit statusBits
+    bit StatusBits
     bne .NoRestart
 
     lda ActiveArea
@@ -944,7 +944,7 @@ CalcBlinkMask: subroutine
     sta MaskPF2
 
     lda #StatusBlinkOn
-    bit statusBits
+    bit StatusBits
     bne .checkRegion
     rts
 
@@ -1001,10 +1001,10 @@ handleAreaDiceFire: subroutine
     dex                             ; Counting down
     bne .l                          ; Until we are there
     lsr                             ; Make up for us starting at 1
-    eor rerollMask                  ; Toggle the bit
-    sta rerollMask                  ; And re-save
+    eor RerollDiceMask                  ; Toggle the bit
+    sta RerollDiceMask                  ; And re-save
 
-    setBit StatusFireDown, statusBits
+    setBit StatusFireDown, StatusBits
     rts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1155,19 +1155,19 @@ PosObject:  subroutine
 StartNewGame:
     ; Prefill the rolled dice with test data
     jsr random_dice;
-    sta rolledDice + 0
+    sta RolledDice + 0
 
     jsr random_dice;
-    sta rolledDice + 1
+    sta RolledDice + 1
 
     jsr random_dice;
-    sta rolledDice + 2
+    sta RolledDice + 2
 
     jsr random_dice;
-    sta rolledDice + 3
+    sta RolledDice + 3
 
     jsr random_dice;
-    sta rolledDice + 4
+    sta RolledDice + 4
 
     ; Prefill scores with dummy values
     lda #$34
@@ -1213,7 +1213,7 @@ StartNewGame:
     sta HighlightedDie
 
     lda #$00
-    sta rerollMask
+    sta RerollDiceMask
 
     jmp StartFrame
 
