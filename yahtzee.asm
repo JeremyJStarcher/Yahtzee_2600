@@ -96,6 +96,7 @@ ActiveArea: ds 1                ; What area is active for inputs?
 HighlightedDie: ds 1            ; Highlight die
 BlinkClock: ds 1                ; Time the blink-blink
 
+TurnCount: ds 1                 ; Turn counter
 RolledDice:     ds 5
 RerollDiceMask: ds 1
 
@@ -1148,11 +1149,61 @@ PosObject:  subroutine
 
             rts
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; REROLL DICE                ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+RerollDice: subroutine 
+    lda #[1 << 0]
+    bit RerollDiceMask
+    bne .reroll1
+
+    jsr random_dice;
+    sta RolledDice + 0
+
+.reroll1
+    lda #[1 << 1]
+    bit RerollDiceMask
+    bne .reroll2
+
+    jsr random_dice;
+    sta RolledDice + 1
+
+.reroll2
+    lda #[1 << 2]
+    bit RerollDiceMask
+    bne .reroll3
+
+    jsr random_dice;
+    sta RolledDice + 2
+
+.reroll3
+    lda #[1 << 3]
+    bit RerollDiceMask
+    bne .reroll4
+
+    jsr random_dice;
+    sta RolledDice + 3
+
+.reroll4
+    lda #[1 << 4]
+    bit RerollDiceMask
+    bne .rerollDone
+
+    jsr random_dice;
+    sta RolledDice + 4
+
+.rerollDone:
+    lda #0
+    sta RerollDiceMask
+
+    dec TurnCount
+    rts
+
 ;;;;;;;;;;;;;;
 ;; NEW GAME ;;
 ;;;;;;;;;;;;;;
 
-StartNewGame:
+StartNewGame: subroutine
     ; Prefill the rolled dice with test data
     jsr random_dice;
     sta RolledDice + 0
@@ -1212,8 +1263,12 @@ StartNewGame:
     lda #0
     sta HighlightedDie
 
-    lda #$00
+    lda #%00011111
     sta RerollDiceMask
+    jsr RerollDice
+
+    lda #3
+    sta TurnCount
 
     jmp StartFrame
 
