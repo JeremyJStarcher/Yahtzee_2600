@@ -26,8 +26,9 @@ function convertScoreInfo() {
         const glyphName = `label${glyphData.names[idx]}`;
         glyphNames.push(glyphName);
 
-        out[0].push(`${glyphName}0:`);
-        out[1].push(`${glyphName}1:`);
+        for (let i = 0; i < out.length; i++) {
+           out[i].push(`${glyphName}${i}:`);
+        }
 
         bin.forEach(binary => {
             binary = binary.replace(/#/g, "1").replace(/ /g, "0");
