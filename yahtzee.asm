@@ -97,7 +97,6 @@ OffsetIntoScoreList: ds 1       ; Which is the TOP scoreline to display
 ActiveArea: ds 1                ; What area is active for inputs?
 HighlightedDie: ds 1            ; Highlight die
 BlinkClock: ds 1                ; Time the blink-blink
-BlinkPhase: ds 1                ; Which mode is the blink in?
 
 rolledDice:     ds 5
 rerollMask: ds 1
@@ -230,7 +229,8 @@ BlinkRate = 40
 DiceCount = 5               ; Total number of dice to display
 MaskedDieFace = 7           ; The face when a die is masked
 
-StatusFireDown = %0000001   ; The fire button is pressed
+StatusFireDown = 1 << 0     ; The fire button is pressed
+StatusBlinkOn =  1 << 1     ; Blink mode active?
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -297,9 +297,9 @@ StartFrame: subroutine
     lda BlinkClock          ; Load into into register "A"
     cmp #BlinkRate          ; Compare to the max value
     bne .noToggleBlink      ; Not equal? Skip ahead
-    lda BlinkPhase          ; Otherwise get the current phase
-    eor #%00000001          ; XOR the bit -- toggle
-    sta BlinkPhase          ; Save the new phase
+    lda statusBits          ; Otherwise get the current phase
+    eor #StatusBlinkOn      ; XOR the bit -- toggle
+    sta statusBits          ; Save the new phase
     lda #0                  ; Load the new timer value
     sta BlinkClock          ; And save it
 
@@ -939,7 +939,8 @@ CalcBlinkMask: subroutine
     sta MaskPF1
     sta MaskPF2
 
-    lda BlinkPhase
+    lda #StatusBlinkOn
+    bit statusBits
     bne .checkRegion
     rts
 
