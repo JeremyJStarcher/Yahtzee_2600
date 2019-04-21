@@ -25,8 +25,10 @@ function convertScoreInfo() {
     const out = [];
     out.push(`LabelBitmaps:`);
 
+    const getName = (gd, idx) => `${glyphData.header}${glyphData.names[idx]}`;
+
     glyphData.glyphs.forEach((bin, idx) => {
-        const glyphName = `${glyphData.header}${glyphData.names[idx]}`;
+        const glyphName = getName(glyphData, idx);
         glyphNames.push(glyphName);
 
         out.push(`${glyphName}:`);
@@ -43,8 +45,8 @@ function convertScoreInfo() {
 
     const lookup = [];
     [
-        ['<', '0', 'scoreglyph0lsb'],
-        ['<', '1', 'scoreglyph1lsb'],
+        ['<', '', `${glyphData.header}lsb`],
+        // ['<', '1', `${glyphData.header}1lsb`],
     ].forEach(key => {
         const [sym, byte, header] = key;
 
@@ -56,7 +58,7 @@ function convertScoreInfo() {
     });
 
     fs.writeFileSync('../build/labels_bitmap.asm', [].concat(out).join("\n"));
-    // fs.writeFileSync('../build/score_lookup.asm', lookup.join("\n"));
+    fs.writeFileSync('../build/labels_lookup.asm', lookup.join("\n"));
 }
 
 convertScoreInfo();

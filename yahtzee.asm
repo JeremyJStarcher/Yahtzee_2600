@@ -152,6 +152,7 @@ page2start: = *
     include "build/faces.asm"
     include "build/score_lookup.asm"
     include "build/labels_bitmap.asm"
+    include "build/labels_lookup.asm"
 
 ;-----------------------------
 ; This table converts the "remainder" of the division by 15 (-1 to -15) to the correct
