@@ -152,7 +152,6 @@ page2start: = *
     include "build/faces.asm"
     include "build/score_lookup.asm"
     include "build/labels_bitmap.asm"
-    include "build/labels_lookup.asm"
 
 ;-----------------------------
 ; This table converts the "remainder" of the division by 15 (-1 to -15) to the correct
@@ -260,16 +259,6 @@ Initialize: subroutine            ; Cleanup routine from macro.h (by Andrew Davi
 ;; PROGRAM SETUP ;;
 ;;;;;;;;;;;;;;;;;;;
     subroutine
-; Pre-fill the graphic pointers' MSBs, so we only have to
-; figure out the LSBs for each tile or digit
-    lda #>Digits        ; MSB of tiles/digits page
-    ldx #11            ; 12-byte table (6 digits), zero-based
-.FillMsbLoop1:
-    sta GraphicBmpPtr,x
-    dex                ; Skip to the next MSB
-    dex
-    bpl .FillMsbLoop1
-
     lda #0
     sta OffsetIntoScoreList   ; Reset te top line
 
@@ -318,6 +307,16 @@ StartFrame: subroutine
 
      jsr CalcBlinkMask
      jsr random
+
+; Pre-fill the graphic pointers' MSBs, so we only have to
+; figure out the LSBs for each tile or digit
+    lda #>Digits        ; MSB of tiles/digits page
+    ldx #11            ; 12-byte table (6 digits), zero-based
+.FillMsbLoop1:
+    sta GraphicBmpPtr,x
+    dex                ; Skip to the next MSB
+    dex
+    bpl .FillMsbLoop1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF VBLANK ;;
@@ -1010,13 +1009,6 @@ PrintLabel: subroutine
     sta GRP0
     sta GRP1
 
-    lda #$01
-    sta ScoreBCD + 0
-    lda #$23
-    sta ScoreBCD + 1
-    lda #$45
-    sta ScoreBCD + 2
-
     lda #>LabelBitmaps0        ; MSB of tiles/digits page
     ldx #11            ; 12-byte table (6 digits), zero-based
 .FillMsbLoop1:
@@ -1060,35 +1052,23 @@ PrintLabel: subroutine
     ldx #10           ; (2)  ; Graphic pointer counter (target)
     clc               ; (2)
 
-.ScorePtrLoop:
-    lda ScoreBCD,y    ; (4)
-    and #$0F          ; (2)  ; Lower nibble
-    sta TempVar1      ; (3)
-    asl               ; (2)  ; A = digit x 2
-    asl               ; (2)  ; A = digit x 4
-    adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
-    adc #<LabelBitmaps0      ; (2)  ; take from the first digit
-    sta GraphicBmpPtr,x ; (4)  ; Store lower nibble graphic
-    dex               ; (2)
-    dex               ; (2)
+    lda #<labelJeremy5
+    sta GraphicBmpPtr + 10 ; (4)  ; Store lower nibble graphic
 
-    lda ScoreBCD,y    ; (4)
-    and #$F0          ; (2)
-    lsr               ; (2)
-    lsr               ; (2)
-    lsr               ; (2)
-    lsr               ; (2)
-    sta TempVar1      ; (3)  ; Higher nibble
-    asl               ; (2)  ; A = digit x 2
-    asl               ; (2)  ; A = digit x 4
-    adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
-    adc #<LabelBitmaps0      ; (2)  ; take from the first digit
-    sta GraphicBmpPtr,x ; (4)  ; store higher nibble graphic
-    dex               ; (2)
-    dex               ; (2)
-    dey               ; (2)
-    bpl .ScorePtrLoop ; (2*)
-    sta WSYNC         ;      ; We take less than 2 scanlines, round up
+    lda #<labelJeremy4
+    sta GraphicBmpPtr + 8 ; (4)  ; Store lower nibble graphic
+
+    lda #<labelJeremy3
+    sta GraphicBmpPtr + 6 ; (4)  ; Store lower nibble graphic
+
+    lda #<labelJeremy2
+    sta GraphicBmpPtr + 4 ; (4)  ; Store lower nibble graphic
+
+    lda #<labelJeremy1
+    sta GraphicBmpPtr + 2 ; (4)  ; Store lower nibble graphic
+
+    lda #<labelJeremy0
+    sta GraphicBmpPtr + 0 ; (4)  ; Store lower nibble graphic
 
 ; We may have been drawing the end of the grid (if it's P1 score)
     lda #0
@@ -1133,9 +1113,6 @@ PrintLabel: subroutine
     sta GRP1
     sta WSYNC
     rts
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Positions an object horizontally

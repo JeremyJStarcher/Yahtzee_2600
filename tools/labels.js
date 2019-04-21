@@ -62,7 +62,7 @@ function convertScoreInfo() {
     }
 
     fs.writeFileSync('../build/labels_bitmap.asm', out2.join("\n"));
-    fs.writeFileSync('../build/labels_lookup.asm', lookup.join("\n"));
+    // fs.writeFileSync('../build/labels_lookup.asm', lookup.join("\n"));
 }
 
 convertScoreInfo();
