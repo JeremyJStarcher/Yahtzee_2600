@@ -1017,13 +1017,13 @@ PrintLabel: subroutine
     lda #$45
     sta ScoreBCD + 2
 
-;    lda #>LabelBitmaps0        ; MSB of tiles/digits page
-;    ldx #11            ; 12-byte table (6 digits), zero-based
-;.FillMsbLoop1:
-;    sta GraphicBmpPtr,x
-;    dex                ; Skip to the next MSB
-;    dex
-;    bpl .FillMsbLoop1
+    lda #>LabelBitmaps0        ; MSB of tiles/digits page
+    ldx #11            ; 12-byte table (6 digits), zero-based
+.FillMsbLoop1:
+    sta GraphicBmpPtr,x
+    dex                ; Skip to the next MSB
+    dex
+    bpl .FillMsbLoop1
 
     sta HMCLR
 
