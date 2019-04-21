@@ -13,7 +13,6 @@ function convertScoreInfo() {
 !  #   ##   #### ##   #  #  #   #                !
 !# #   #    # #  #    #     #   #                !
 !###   #### #  # #### #     #   #                !
-!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX!
 `;
     const glyphData = lib.all.stringToObject(source);
 
