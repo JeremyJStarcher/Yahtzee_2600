@@ -304,15 +304,15 @@ StartFrame: subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OTHER FRAME CONFIGURATION ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    inc BlinkClock
-    lda BlinkClock
-    cmp #BlinkRate
-    bne .noToggleBlink
-    lda BlinkPhase
-    eor #%00000001
-    sta BlinkPhase
-    lda #0
-    sta BlinkClock
+    inc BlinkClock          ; Increment our timer
+    lda BlinkClock          ; Load into into register "A"
+    cmp #BlinkRate          ; Compare to the max value
+    bne .noToggleBlink      ; Not equal? Skip ahead
+    lda BlinkPhase          ; Otherwise get the current phase
+    eor #%00000001          ; XOR the bit -- toggle
+    sta BlinkPhase          ; Save the new phase
+    lda #0                  ; Load the new timer value
+    sta BlinkClock          ; And save it
 
 .noToggleBlink
 
