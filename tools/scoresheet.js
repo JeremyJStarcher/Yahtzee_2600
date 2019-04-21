@@ -147,14 +147,11 @@ function convertScoreInfo() {
     //
     const glyphData = lib.all.stringToObject(source);
 
-    const out = [
-        [],
-        [],
-    ];
-    const glyphNames = [];
+    const out = glyphData.glyphs.map((bin, idx) => {
+        return [`scoreglyphs${idx}:`];
+    });
 
-    out[0].push(`scoreglyphs0:`);
-    out[1].push(`scoreglyphs1:`);
+    const glyphNames = [];
 
     glyphData.glyphs.forEach((bin, idx) => {
         const glyphName = `glyph${glyphData.names[idx]}`;
@@ -208,4 +205,3 @@ function convertScoreInfo() {
 }
 
 convertScoreInfo();
-
