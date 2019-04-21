@@ -13,6 +13,13 @@ function convertScoreInfo() {
 !  #   ##   #### ##   #  #  #   #                !
 !# #   #    # #  #    #     #   #                !
 !###   #### #  # #### #     #   #                !
+
+@glyph Reroll
+! ###  #### ###  #### #   #    # #               !
+! #  # #    #  # #  # #   #   #####              !
+! #### ##   #### #  # #   #    # #               !
+! # #  #    # #  #  # #   #   #####              !
+! #  # #### #  # #### ### ###  # #               !
 `;
     const glyphData = lib.all.stringToObject(source);
 

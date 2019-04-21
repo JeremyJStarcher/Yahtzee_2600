@@ -69,6 +69,7 @@ TempVar1:                   ; General use variable
 ScanLineCounter:            ; Counts lines while drawing the score
     ds 1
 
+PrintLabelID:               ; The ID of the label to print
 SPF1:                       ; Shadow PF1
 TempVar2:                   ; General use variable
 TempDigitBmp:               ; Stores intermediate part of 6-digit score
@@ -78,9 +79,6 @@ ActiveScoreLineColor:      ; What color to display the active scoreline as
 TempVar3:                   ; General use variable
 SPF2:                       ; Shadow PF2
     ds 1
-
-TempWord1:
-    ds 2
 
 ; Address of the graphic for for each digit (6x2 bytes)
 GraphicBmpPtr:
@@ -231,6 +229,10 @@ MaskedDieFace = 7           ; The face when a die is masked
 
 StatusFireDown = 1 << 0     ; The fire button is pressed
 StatusBlinkOn =  1 << 1     ; Blink mode active?
+
+PrintLabelRoll1 = 1
+PrintLabelRoll2 = 2
+PrintLabelRoll3 = 3
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -640,6 +642,8 @@ DiceRowScanLines = 4
     sta GRP1
 
     sta WSYNC
+    lda #PrintLabelRoll1
+    sta PrintLabelID
     jsr PrintLabel
 
     ; 262 scan lines total
@@ -1046,30 +1050,36 @@ PrintLabel: subroutine
     sta WSYNC
     sta HMOVE   ; (3)
 
-; Score setup scanlines 4-5
 ; set the graphic pointers for each score digit
 
-    ldy #2            ; (2)  ; Score byte counter (source)
-    ldx #10           ; (2)  ; Graphic pointer counter (target)
-    clc               ; (2)
+    lda #<labelReroll5
+    sta GraphicBmpPtr + 10
 
-    lda #<labelJeremy5
-    sta GraphicBmpPtr + 10 ; (4)  ; Store lower nibble graphic
+    lda #<labelReroll4
+    sta GraphicBmpPtr + 8
 
-    lda #<labelJeremy4
-    sta GraphicBmpPtr + 8 ; (4)  ; Store lower nibble graphic
+    lda #<labelReroll3
+    sta GraphicBmpPtr + 6
 
-    lda #<labelJeremy3
-    sta GraphicBmpPtr + 6 ; (4)  ; Store lower nibble graphic
+    lda #<labelReroll2
+    sta GraphicBmpPtr + 4
 
-    lda #<labelJeremy2
-    sta GraphicBmpPtr + 4 ; (4)  ; Store lower nibble graphic
+    lda #<labelReroll1
+    sta GraphicBmpPtr + 2
 
-    lda #<labelJeremy1
-    sta GraphicBmpPtr + 2 ; (4)  ; Store lower nibble graphic
+    lda #<labelReroll0
+    sta GraphicBmpPtr + 0
 
-    lda #<labelJeremy0
-    sta GraphicBmpPtr + 0 ; (4)  ; Store lower nibble graphic
+    lda PrintLabelID
+    cmp PrintLabelRoll1
+    bne .tryRoll2
+
+    lda #<Digitnum1
+    sta GraphicBmpPtr + 10
+    lda #>Digits
+    sta GraphicBmpPtr + 11
+
+.tryRoll2
 
 ; We may have been drawing the end of the grid (if it's P1 score)
     lda #0

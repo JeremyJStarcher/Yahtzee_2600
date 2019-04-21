@@ -91,7 +91,7 @@ const source = `
     const out = [];
     out.push(`${glyphData.header}:`)
     glyphData.glyphs.forEach((bin, idx) => {
-        out.push(`;${glyphData.names[idx]}`);
+        out.push(`Digit${glyphData.names[idx]}`);
         bin.forEach(binary => {
             const comment = binary.replace(/0/g, ".").replace(/1/g, "#");
             out.push(`    .byte %${binary}; ${comment}`);
