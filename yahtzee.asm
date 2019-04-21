@@ -650,7 +650,6 @@ DiceRowScanLines = 4
     dex
     bne .loop
 
-
 ;;;;;;;;;;;;;;
 ;; OVERSCAN ;;
 ;;;;;;;;;;;;;;
@@ -698,7 +697,6 @@ DiceRowScanLines = 4
 
     clearBit StatusFireDown, statusBits
     jmp .NoRestart
-
 
 .ButtonPressed:
     lda #StatusFireDown
