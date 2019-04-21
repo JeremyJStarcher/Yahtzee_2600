@@ -146,10 +146,12 @@ function convertScoreInfo() {
     // and stored in two separate tables.
     //
     const glyphData = lib.all.stringToObject(source);
+    const out = [0, 1].map((bin, idx) =>
+        [`scoreglyphs${idx}:`]
+    );
 
-    const out = glyphData.glyphs.map((bin, idx) => {
-        return [`scoreglyphs${idx}:`];
-    });
+    console.log("-----------------------------------------");
+    console.log(out);
 
     const glyphNames = [];
 

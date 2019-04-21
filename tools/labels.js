@@ -6,7 +6,7 @@ const fs = require("fs");
 function convertScoreInfo() {
 
     const source = `
-@header ScoreNames
+@header Labels
 @glyph Jeremy
 !##### #### #### #### ##   ## #   #              !
 !  #   #    #  # #    # # # #  # #               !
@@ -15,38 +15,36 @@ function convertScoreInfo() {
 !###   #### #  # #### #     #   #                !
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX!
 `;
-
-    // These glyphs are actually broken up into separate 8-bit chunks.
-    // and stored in two separate tables.
-    //
     const glyphData = lib.all.stringToObject(source);
 
-    const glyphNames = [];
-    const out = [];
-    out.push(`LabelBitmaps:`);
+    const out = [0, 1, 2, 3, 4, 5].map((bin, idx) =>
+        [`LabelBitmaps${idx}:`]
+    );
 
-    const getName = (gd, idx) => `${glyphData.header}${glyphData.names[idx]}`;
+    const glyphNames = [];
 
     glyphData.glyphs.forEach((bin, idx) => {
-        const glyphName = getName(glyphData, idx);
+        const glyphName = `label${glyphData.names[idx]}`;
         glyphNames.push(glyphName);
 
-        out.push(`${glyphName}:`);
+        out[0].push(`${glyphName}0:`);
+        out[1].push(`${glyphName}1:`);
 
         bin.forEach(binary => {
-            const bb = binary.replace(/ /g, "0").replace(/#/g, "1");
-            const bytes = bb.match(/.{1,8}/g);
-            const str = bytes.map(b => `%${b}`).join(", ");
-            const comment = binary.replace(/0/g, ".").replace(/1/g, "#");
-            out.push(`    .byte ${str}; ${comment}`);
+            binary = binary.replace(/#/g, "1").replace(/ /g, "0");
+            const bytes = binary.match(/.{1,8}/g);
 
+            bytes.forEach((byte, offset) => {
+                const comment = byte.replace(/0/g, ".").replace(/1/g, "#");
+                out[offset].push(`    .byte %${byte}; ${comment}`);
+            });
         });
     });
 
     const lookup = [];
     [
-        ['<', '', `${glyphData.header}lsb`],
-        // ['<', '1', `${glyphData.header}1lsb`],
+        ['<', '0', 'labelglyph0lsb'],
+        ['<', '1', 'labelglyph1lsb'],
     ].forEach(key => {
         const [sym, byte, header] = key;
 
@@ -57,9 +55,14 @@ function convertScoreInfo() {
         });
     });
 
-    fs.writeFileSync('../build/labels_bitmap.asm', [].concat(out).join("\n"));
+    let out2 = [];
+    for (let i = 0; i < out.length; i++)
+    {
+        out2 = out2.concat(out[i]);
+    }
+
+    fs.writeFileSync('../build/labels_bitmap.asm', out2.join("\n"));
     fs.writeFileSync('../build/labels_lookup.asm', lookup.join("\n"));
 }
 
 convertScoreInfo();
-

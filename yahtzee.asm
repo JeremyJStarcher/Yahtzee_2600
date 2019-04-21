@@ -1017,6 +1017,14 @@ PrintLabel: subroutine
     lda #$45
     sta ScoreBCD + 2
 
+;    lda #>LabelBitmaps0        ; MSB of tiles/digits page
+;    ldx #11            ; 12-byte table (6 digits), zero-based
+;.FillMsbLoop1:
+;    sta GraphicBmpPtr,x
+;    dex                ; Skip to the next MSB
+;    dex
+;    bpl .FillMsbLoop1
+
     sta HMCLR
 
 ; Score setup scanlines 2-3:
@@ -1059,7 +1067,7 @@ PrintLabel: subroutine
     asl               ; (2)  ; A = digit x 2
     asl               ; (2)  ; A = digit x 4
     adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
-    adc #<Digits      ; (2)  ; take from the first digit
+    adc #<LabelBitmaps0      ; (2)  ; take from the first digit
     sta GraphicBmpPtr,x ; (4)  ; Store lower nibble graphic
     dex               ; (2)
     dex               ; (2)
@@ -1074,7 +1082,7 @@ PrintLabel: subroutine
     asl               ; (2)  ; A = digit x 2
     asl               ; (2)  ; A = digit x 4
     adc TempVar1      ; (3)  ; 4.digit + digit = 5.digit
-    adc #<Digits      ; (2)  ; take from the first digit
+    adc #<LabelBitmaps0      ; (2)  ; take from the first digit
     sta GraphicBmpPtr,x ; (4)  ; store higher nibble graphic
     dex               ; (2)
     dex               ; (2)
