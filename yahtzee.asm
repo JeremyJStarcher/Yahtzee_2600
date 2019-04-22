@@ -190,6 +190,7 @@ WaitingJoyPress   = 3  ; => ShiftingA
 
 ActiveAreaScores  = 1
 ActiveAreaDice    = 2
+ActiveAreaReRoll  = 3
 
 JoyVectorUp       = 1  ; Last joystick action
 JoyVectorDown     = 2  ; last joystick action
@@ -643,6 +644,14 @@ DiceRowScanLines = 4
     sta GRP1
 
     sta WSYNC
+    lda ActiveArea
+    cmp #ActiveAreaReRoll
+    bne .noChangeRerollColor
+    ldx #ScoreColor
+    stx COLUP0
+    stx COLUP1
+
+.noChangeRerollColor
     lda TurnCount
     sta PrintLabelID
     jsr PrintLabel
@@ -745,6 +754,7 @@ VerifyGameStateForJoyCheck:
     cpx #WaitingJoyRelease   ; for a joystick press or release
     beq CheckJoyRelease
 
+    ldx GameState            ; We only care for states in which we are waiting
     cpx #WaitingJoyPress
     bne .scoresEndJoyCheck
 
@@ -785,8 +795,20 @@ CheckJoyRelease:
 
     lda ActiveArea
     cmp #ActiveAreaScores
-    bne CheckJoyReleaseDice
+    bne .dice
     jmp checkJoyReleaseScores
+
+.dice:
+    lda ActiveArea
+    cmp #ActiveAreaDice
+    bne .reroll
+    jmp CheckJoyReleaseDice
+
+.reroll:
+    lda ActiveArea
+    cmp #ActiveAreaReRoll
+    bne .scoresEndJoyCheck
+    jmp CheckJoyReleaseReroll
 
 .scoresEndJoyCheck
     jmp EndJoyCheck
@@ -836,8 +858,11 @@ checkJoyReleaseScores: subroutine
 .CheckJoyReleaseRangeValid:
     lda #WaitingJoyPress       ; Joystick released, can accept shifts again
     sta GameState
-    jmp EndJoyCheck
+    jmp EndJoyRelease
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Handle the joystick actions for the Dice Area ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CheckJoyReleaseDice: subroutine
     ldy HighlightedDie
 
@@ -852,6 +877,8 @@ CheckJoyReleaseDice: subroutine
     lda MoveVector
     cmp #JoyVectorDown
     bne .checkLeftVector
+    lda #ActiveAreaReRoll
+    sta ActiveArea
     jmp .CheckJoyReleaseEnd
 
 .checkLeftVector:
@@ -880,9 +907,26 @@ CheckJoyReleaseDice: subroutine
 .CheckJoyReleaseRangeValid:
     lda #WaitingJoyPress       ; Joystick released, can accept shifts again
     sta GameState
-    jmp EndJoyCheck
+    jmp EndJoyRelease
+
+CheckJoyReleaseReroll: subroutine
+    lda MoveVector
+    cmp #JoyVectorUp
+    bne .checkDownVector
+    lda #ActiveAreaDice
+    sta ActiveArea
+    jmp EndJoyRelease
+
+.checkDownVector:
+    nop
+
+EndJoyRelease:
+    lda #WaitingJoyPress       ; Joystick released, can accept shifts again
+    sta GameState
 
 EndJoyCheck:
+    nop
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REMAINDER OF OVERSCAN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1177,7 +1221,7 @@ PosObject:  subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REROLL DICE                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-RerollDice: subroutine 
+RerollDice: subroutine
     lda #[1 << 0]
     bit RerollDiceMask
     beq .reroll1
