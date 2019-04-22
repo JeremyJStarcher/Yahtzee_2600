@@ -1071,6 +1071,7 @@ PrintLabel: subroutine
     lda #<labelReroll0
     sta GraphicBmpPtr + 0
 
+    ; Start checking custom values
     lda PrintLabelID
     cmp PrintLabelRoll1
     bne .tryRoll2
