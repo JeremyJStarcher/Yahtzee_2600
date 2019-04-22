@@ -897,7 +897,7 @@ CheckJoyReleaseDice: subroutine
     cmp #-1
     bcs .CheckJoyReleaseRangeNotValid
 
-    cmp #DiceCount  ; THe number of dice
+    cmp #DiceCount  ; The number of dice
     bcc .CheckJoyReleaseRangeValid
     jmp .CheckJoyReleaseRangeNotValid
 
