@@ -231,9 +231,9 @@ MaskedDieFace = 7           ; The face when a die is masked
 StatusFireDown = 1 << 0     ; The fire button is pressed
 StatusBlinkOn =  1 << 1     ; Blink mode active?
 
-PrintLabelRoll1 = 1
-PrintLabelRoll2 = 2
-PrintLabelRoll3 = 3
+PrintLabelRoll1 = 2
+PrintLabelRoll2 = 1
+PrintLabelRoll3 = 0
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
@@ -643,7 +643,7 @@ DiceRowScanLines = 4
     sta GRP1
 
     sta WSYNC
-    lda #PrintLabelRoll1
+    lda TurnCount
     sta PrintLabelID
     jsr PrintLabel
 
@@ -1079,9 +1079,33 @@ PrintLabel: subroutine
     sta GraphicBmpPtr + 10
     lda #>Digits
     sta GraphicBmpPtr + 11
+    jmp .doneChecking
 
 .tryRoll2
+    lda PrintLabelID
+    cmp PrintLabelRoll2
+    bne .tryRoll3
 
+    lda #<Digitnum2
+    sta GraphicBmpPtr + 10
+    lda #>Digits
+    sta GraphicBmpPtr + 11
+    jmp .doneChecking
+
+.tryRoll3
+    lda PrintLabelID
+    cmp PrintLabelRoll3
+    bne .nextTest
+
+    lda #<Digitnum2
+    sta GraphicBmpPtr + 10
+    lda #>Digits
+    sta GraphicBmpPtr + 11
+    jmp .doneChecking
+
+.nextTest
+
+.doneChecking
 ; We may have been drawing the end of the grid (if it's P1 score)
     lda #0
     sta PF0
@@ -1263,12 +1287,12 @@ StartNewGame: subroutine
     lda #0
     sta HighlightedDie
 
+    lda #3
+    sta TurnCount
+
     lda #%00011111
     sta RerollDiceMask
     jsr RerollDice
-
-    lda #3
-    sta TurnCount
 
     jmp StartFrame
 
