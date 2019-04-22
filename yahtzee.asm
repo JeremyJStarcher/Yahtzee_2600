@@ -1179,7 +1179,7 @@ PosObject:  subroutine
 RerollDice: subroutine 
     lda #[1 << 0]
     bit RerollDiceMask
-    bne .reroll1
+    beq .reroll1
 
     jsr random_dice;
     sta RolledDice + 0
@@ -1187,7 +1187,7 @@ RerollDice: subroutine
 .reroll1
     lda #[1 << 1]
     bit RerollDiceMask
-    bne .reroll2
+    beq .reroll2
 
     jsr random_dice;
     sta RolledDice + 1
@@ -1195,7 +1195,7 @@ RerollDice: subroutine
 .reroll2
     lda #[1 << 2]
     bit RerollDiceMask
-    bne .reroll3
+    beq .reroll3
 
     jsr random_dice;
     sta RolledDice + 2
@@ -1203,7 +1203,7 @@ RerollDice: subroutine
 .reroll3
     lda #[1 << 3]
     bit RerollDiceMask
-    bne .reroll4
+    beq .reroll4
 
     jsr random_dice;
     sta RolledDice + 3
@@ -1211,7 +1211,7 @@ RerollDice: subroutine
 .reroll4
     lda #[1 << 4]
     bit RerollDiceMask
-    bne .rerollDone
+    beq .rerollDone
 
     jsr random_dice;
     sta RolledDice + 4
@@ -1228,22 +1228,6 @@ RerollDice: subroutine
 ;;;;;;;;;;;;;;
 
 StartNewGame: subroutine
-    ; Prefill the rolled dice with test data
-    jsr random_dice;
-    sta RolledDice + 0
-
-    jsr random_dice;
-    sta RolledDice + 1
-
-    jsr random_dice;
-    sta RolledDice + 2
-
-    jsr random_dice;
-    sta RolledDice + 3
-
-    jsr random_dice;
-    sta RolledDice + 4
-
     ; Prefill scores with dummy values
     lda #$34
     sta score_high_L1s
@@ -1281,7 +1265,6 @@ StartNewGame: subroutine
     sta GameState
 
     lda #ActiveAreaScores
-    ; lda #ActiveAreaDice
     sta ActiveArea
 
     lda #0
