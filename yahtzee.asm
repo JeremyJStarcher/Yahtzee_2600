@@ -712,9 +712,11 @@ DiceRowScanLines = 4
     jmp .NoRestart
 
 .ButtonPressed:
-    lda #StatusFireDown
+    lda #StatusFireDown         ; Button still down?
     bit StatusBits
-    bne .NoRestart
+    bne .NoRestart              ; Then wait for release
+
+    setBit StatusFireDown, StatusBits
 
     lda ActiveArea
     cmp #ActiveAreaScores
@@ -1057,8 +1059,6 @@ handleAreaDiceFire: subroutine
     lsr                             ; Make up for us starting at 1
     eor RerollDiceMask              ; Toggle the bit
     sta RerollDiceMask              ; And re-save
-
-    setBit StatusFireDown, StatusBits
     rts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
