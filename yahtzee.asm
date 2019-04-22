@@ -717,13 +717,22 @@ DiceRowScanLines = 4
     bne .NoRestart
 
     lda ActiveArea
-    cmp #ActiveAreaDice
-    bne .checkAreaScore
+    cmp #ActiveAreaScores
+    bne .ButtonPressedReroll
+    jmp .NoRestart
 
+.ButtonPressedReroll
+    lda ActiveArea
+    cmp #ActiveAreaReRoll
+    bne .buttonPressedDice
+    jsr RerollDice
+    jmp .NoRestart
+
+.buttonPressedDice:
     jsr handleAreaDiceFire
+    jmp .NoRestart
 
 .checkAreaScore:
-
     lda GameState
     cmp #TitleScreen
     beq .Restart               ; Start game if title screen
