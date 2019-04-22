@@ -1155,7 +1155,7 @@ PrintLabel: subroutine
     cmp PrintLabelRoll3
     bne .nextTest
 
-    lda #<Digitnum2
+    lda #<Digitnum3
     sta GraphicBmpPtr + 10
     lda #>Digits
     sta GraphicBmpPtr + 11
