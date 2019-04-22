@@ -727,7 +727,11 @@ DiceRowScanLines = 4
     lda ActiveArea
     cmp #ActiveAreaReRoll
     bne .buttonPressedDice
+
+    lda TurnCount
+    beq .noReroll
     jsr RerollDice
+.noReroll
     jmp .NoRestart
 
 .buttonPressedDice:
