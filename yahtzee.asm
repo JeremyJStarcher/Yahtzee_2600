@@ -1055,8 +1055,8 @@ handleAreaDiceFire: subroutine
     dex                             ; Counting down
     bne .l                          ; Until we are there
     lsr                             ; Make up for us starting at 1
-    eor RerollDiceMask                  ; Toggle the bit
-    sta RerollDiceMask                  ; And re-save
+    eor RerollDiceMask              ; Toggle the bit
+    sta RerollDiceMask              ; And re-save
 
     setBit StatusFireDown, StatusBits
     rts
