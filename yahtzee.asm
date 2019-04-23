@@ -236,6 +236,9 @@ PrintLabelRoll1 = 2
 PrintLabelRoll2 = 1
 PrintLabelRoll3 = 0
 
+Unscored = $AA
+ScoreRamSize = .postScoreRamTop - .preScoreRamTop 
+
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
 ;;;;;;;;;;;;;;;
@@ -1289,7 +1292,7 @@ StartNewGame: subroutine
     ; Prefill scores with dummy values
     lda #$34
     sta score_high_L1s
-    lda #$12
+    lda #$92
     sta score_low_L1s
 
     lda #$78
@@ -1317,6 +1320,16 @@ StartNewGame: subroutine
     lda #$78
     sta score_high_LChance
     sta score_low_LChance
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Mark all the score slots as unscored
+    ;;;;;;;;;;;;;;;;;;;;;;;
+    lda #Unscored
+    ldx #ScoreRamSize
+.clearScores:
+    dex
+    sta score_low,x
+    bne .clearScores
 
     ; Continue into real prep
     lda #WaitingJoyPress

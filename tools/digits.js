@@ -79,11 +79,11 @@ const source = `
 ! XXXXXX !
 
 @glyph numA
-! XXXXXX !
-! X    X !
-! XXXXXX !
-! X    X !
-! X    X !
+!        !
+!        !
+!        !
+!        !
+!X X X X !
 `;
 
     const glyphData = lib.all.stringToObject(source);
