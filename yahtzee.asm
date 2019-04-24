@@ -384,10 +384,10 @@ YesScore:   subroutine
     sta ScoreLineIndex
 
     lda score_low,x
-    sta ScoreBCD+1
+    sta ScoreBCD+2
 
     lda score_high,x
-    sta ScoreBCD+2
+    sta ScoreBCD+1
 
     sta WSYNC
 
