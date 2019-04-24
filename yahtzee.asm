@@ -237,7 +237,7 @@ PrintLabelRoll2 = 1
 PrintLabelRoll3 = 0
 
 Unscored = $AA
-ScoreRamSize = .postScoreRamTop - .preScoreRamTop 
+ScoreRamSize = .postScoreRamTop - .preScoreRamTop
 
 ;;;;;;;;;;;;;;;
 ;; BOOTSTRAP ;;
