@@ -11,6 +11,8 @@ RUBY=ruby
 DASM=../bin/dasm-2.20.11-20140304/bin/dasm
 STELLA=stella
 NAME=yahtzee
+NAME=yahtest
+
 
 # Expected ROM size in bytes
 ROM_SIZE=4096
@@ -20,6 +22,7 @@ node digits.js
 node scoresheet.js
 node dice_faces.js
 node labels.js
+node testgraphics.js
 cd ..
 
 $DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -lbuild/${NAME}.lst -f3
