@@ -1355,6 +1355,7 @@ random_dice:
     rts
 
     include "tests.asm"
+    include "calcscoring.asm"
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
