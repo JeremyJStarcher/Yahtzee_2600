@@ -138,7 +138,18 @@ Calculate_L3k: subroutine
 .done
     rts
 
-Calculate_L4k:
+Calculate_L4k: subroutine
+    jsr ClearScratchpad
+    jsr CountFaces
+    lda #4
+    jsr HasAtLeast
+    bcs .done
+    lda #0
+    sta ScoreAcc
+    jmp .done
+.done
+    rts
+
 Calculate_LSmallStraight:
 Calculate_LLargeStraight:
 Calculate_LFullHouse:
