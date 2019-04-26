@@ -134,7 +134,6 @@ Calculate_L3k: subroutine
     bcs .done
     lda #0
     sta ScoreAcc
-    jmp .done
 .done
     rts
 
@@ -146,14 +145,27 @@ Calculate_L4k: subroutine
     bcs .done
     lda #0
     sta ScoreAcc
-    jmp .done
 .done
     rts
 
 Calculate_LSmallStraight:
 Calculate_LLargeStraight:
 Calculate_LFullHouse:
-Calculate_LYahtzee:
+Calculate_LYahtzee: subroutine
+    jsr ClearScratchpad
+    jsr CountFaces
+    lda #5
+    jsr HasAtLeast
+    bcs .setScore
+    lda #0
+    sta ScoreAcc
+    jmp .done
+.setScore
+    lda #$50
+    sta ScoreAcc
+.done
+    rts
+
 Calculate_LChance:
 Calculate_LYahtzeeBonus:
 Calculate_LLowerTotal:
