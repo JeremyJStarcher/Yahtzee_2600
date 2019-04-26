@@ -1,14 +1,34 @@
+FillDice:
+    ldy #0
+    lda (ScoreScratchpad),y
+    sta [RolledDice + 0]
+
+    iny
+    lda (ScoreScratchpad),y
+    sta [RolledDice + 1]
+
+    iny
+    lda (ScoreScratchpad),y
+    sta [RolledDice + 2]
+
+    iny
+    lda (ScoreScratchpad),y
+    sta [RolledDice + 3]
+
+    iny
+    lda (ScoreScratchpad),y
+    sta [RolledDice + 4]
+    rts
+
     MAC SetDice
-        lda #{1}
-        sta [RolledDice + 0]
-        lda #{2}
-        sta [RolledDice + 1]
-        lda #{3}
-        sta [RolledDice + 2]
-        lda #{4}
-        sta [RolledDice + 3]
-        lda #{5}
-        sta [RolledDice + 4]
+        jmp .g
+.d: byte {1}, {2}, {3}, {4}, {5}
+.g
+        lda #>.d
+        sta ScoreScratchpad + 1
+        lda #<.d
+        sta ScoreScratchpad + 0
+        jsr FillDice
     ENDM
 
     MAC RunTest
@@ -43,54 +63,54 @@
     ENDM
 RunTests: subroutine
 
-;    RunTest 1, 1, 1, 1, 1, Calculate_L1s, test01, $05
-;    RunTest 2, 2, 2, 2, 2, Calculate_L1s, test01, $00
+    RunTest 1, 1, 1, 1, 1, Calculate_L1s, test01, $05
+    RunTest 2, 2, 2, 2, 2, Calculate_L1s, test01, $00
 ;    RunTest 2, 2, 1, 2, 2, Calculate_L1s, test01, $01
 ;
-;    RunTest 2, 2, 2, 2, 2, Calculate_L2s, test02, $10
-;    RunTest 1, 1, 1, 1, 1, Calculate_L2s, test02, $00
+    RunTest 2, 2, 2, 2, 2, Calculate_L2s, test02, $10
+    RunTest 1, 1, 1, 1, 1, Calculate_L2s, test02, $00
 ;    RunTest 2, 1, 1, 1, 2, Calculate_L2s, test02, $04
 
-;    RunTest 2, 1, 3, 3, 2, Calculate_L3s, test03, $06
+    RunTest 2, 1, 3, 3, 2, Calculate_L3s, test03, $06
 
-;    RunTest 2, 4, 3, 3, 4, Calculate_L4s, test04, $08
+    RunTest 2, 4, 3, 3, 4, Calculate_L4s, test04, $08
 
-;    RunTest 5, 4, 5, 3, 5, Calculate_L5s, test05, $15
+    RunTest 5, 4, 5, 3, 5, Calculate_L5s, test05, $15
 
-;    RunTest 6, 6, 6, 6, 6, Calculate_L6s, test06, $30
+    RunTest 6, 6, 6, 6, 6, Calculate_L6s, test06, $30
 
 ;    RunTest 2, 2, 2, 2, 2, Calculate_L3k, test07, $10
-;    RunTest 6, 6, 6, 6, 4, Calculate_L3k, test07, $28
+    RunTest 6, 6, 6, 6, 4, Calculate_L3k, test07, $28
 ;    RunTest 6, 6, 6, 1, 1, Calculate_L3k, test07, $20
 ;    RunTest 1, 6, 6, 1, 4, Calculate_L3k, test07, $00
-;    RunTest 1, 2, 3, 4, 5, Calculate_L3k, test07, $00
+    RunTest 1, 2, 3, 4, 5, Calculate_L3k, test07, $00
 
-;    RunTest 1, 2, 3, 4, 5, Calculate_L4k, test08, $00
-;    RunTest 1, 1, 1, 4, 5, Calculate_L4k, test08, $00
+    RunTest 1, 2, 3, 4, 5, Calculate_L4k, test08, $00
 ;    RunTest 1, 1, 1, 1, 5, Calculate_L4k, test08, $09
-;    RunTest 1, 1, 1, 1, 1, Calculate_L4k, test08, $05
+    RunTest 1, 1, 1, 1, 1, Calculate_L4k, test08, $05
+;    RunTest 1, 1, 1, 4, 5, Calculate_L4k, test08, $00
 
-;    RunTest 1, 1, 1, 1, 1, Calculate_LYahtzee, test09, $50
-;    RunTest 1, 1, 1, 1, 2, Calculate_LYahtzee, test09, $00
+    RunTest 1, 1, 1, 1, 1, Calculate_LYahtzee, test09, $50
+    RunTest 1, 1, 1, 1, 2, Calculate_LYahtzee, test09, $00
 ;    RunTest 1, 2, 3, 4, 5, Calculate_LYahtzee, test09, $00
 
-;    RunTest 6, 1, 6, 1, 6, Calculate_LFullHouse, test10, $25
+    RunTest 6, 1, 6, 1, 6, Calculate_LFullHouse, test10, $25
 ;    RunTest 1, 1, 1, 2, 2, Calculate_LFullHouse, test10, $25
-;    RunTest 1, 2, 3, 4, 5, Calculate_LFullHouse, test10, $00
+    RunTest 1, 2, 3, 4, 5, Calculate_LFullHouse, test10, $00
 ;    RunTest 1, 1, 1, 1, 1, Calculate_LFullHouse, test10, $00
 
     RunTest 2, 3, 4, 5, 6, Calculate_LSmallStraight, test11, $30
-    RunTest 1, 2, 3, 4, 3, Calculate_LSmallStraight, test11, $30
-    RunTest 2, 3, 4, 5, 3, Calculate_LSmallStraight, test11, $30
-    RunTest 1, 2, 3, 4, 5, Calculate_LSmallStraight, test11, $30
-    RunTest 1, 3, 2, 1, 4, Calculate_LSmallStraight, test11, $30
+;    RunTest 1, 2, 3, 4, 3, Calculate_LSmallStraight, test11, $30
+;    RunTest 2, 3, 4, 5, 3, Calculate_LSmallStraight, test11, $30
+;    RunTest 1, 2, 3, 4, 5, Calculate_LSmallStraight, test11, $30
+;    RunTest 1, 3, 2, 1, 4, Calculate_LSmallStraight, test11, $30
     RunTest 6, 1, 3, 1, 6, Calculate_LSmallStraight, test11, $00
 
     RunTest 2, 3, 4, 5, 6, Calculate_LLargeStraight, test12, $40
-    RunTest 1, 2, 3, 4, 3, Calculate_LLargeStraight, test12, $00
-    RunTest 2, 3, 4, 5, 3, Calculate_LLargeStraight, test12, $00
-    RunTest 1, 2, 3, 4, 5, Calculate_LLargeStraight, test12, $40
-    RunTest 1, 3, 2, 1, 4, Calculate_LLargeStraight, test12, $00
+;    RunTest 1, 2, 3, 4, 3, Calculate_LLargeStraight, test12, $00
+;    RunTest 2, 3, 4, 5, 3, Calculate_LLargeStraight, test12, $00
+;    RunTest 1, 2, 3, 4, 5, Calculate_LLargeStraight, test12, $40
+;    RunTest 1, 3, 2, 1, 4, Calculate_LLargeStraight, test12, $00
     RunTest 6, 1, 3, 1, 6, Calculate_LLargeStraight, test12, $00
 
 

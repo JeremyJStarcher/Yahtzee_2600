@@ -10,7 +10,7 @@ mkdir build;
 RUBY=ruby
 DASM=../bin/dasm-2.20.11-20140304/bin/dasm
 STELLA=stella
-NAME=yahtzee
+#NAME=yahtzee
 NAME=yahtest
 
 # Expected ROM size in bytes
