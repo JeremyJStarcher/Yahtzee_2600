@@ -11,8 +11,6 @@ MaskPF0: ds 1               ; Pre-calculate blink masks
 MaskPF1: ds 1
 MaskPF2: ds 1
 
-
-
 SPF0:                       ; Shadow PF0
 TempVar1:                   ; General use variable
 ScanLineCounter:            ; Counts lines while drawing the score
@@ -34,6 +32,7 @@ ScoreAcc:                   ; The accumulator for the score
 
 ; Address of the graphic for for each digit (6x2 bytes)
 GraphicBmpPtr:
+ScoreScratchpad:
     ds 6 * 2
 
 ; 6-digit score is stored in BCD (each nibble = 1 digit => 3 bytes)

@@ -13,7 +13,6 @@ STELLA=stella
 NAME=yahtzee
 NAME=yahtest
 
-
 # Expected ROM size in bytes
 ROM_SIZE=4096
 

@@ -264,11 +264,10 @@ StartFrame: subroutine
     sta StatusBits          ; Save the new phase
     lda #0                  ; Load the new timer value
     sta BlinkClock          ; And save it
-
 .noToggleBlink
 
-     jsr CalcBlinkMask
-     jsr random
+    jsr CalcBlinkMask
+    jsr random
 
 ; Pre-fill the graphic pointers' MSBs, so we only have to
 ; figure out the LSBs for each tile or digit

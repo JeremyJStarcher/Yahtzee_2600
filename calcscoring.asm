@@ -18,6 +18,7 @@ Calc_scores_lookup:
     .word Calculate_LLowerTotal
     .word Calculate_LUpperTotal
     .word Calculate_LGrandTotal
+ScratchpadLength = 7;
 
 CalculateTopHandValues: subroutine
     sed                         ; Set decimal mode
@@ -40,6 +41,58 @@ CalculateTopHandValues: subroutine
     cld                         ; Clear decimal mode
     rts
 
+ClearScratchpad: subroutine
+    lda #0                      ; Our value
+    sta ScoreAcc                ; And save it.
+    ldx #ScratchpadLength       ; Enough room for all the faces
+.l: dex
+    sta ScoreScratchpad,x
+    bne .l
+    rts
+
+CountFaces: subroutine
+    sed
+    ldy #DiceCount              ; And the number of dice
+.loop
+    dey                         ; start the loop
+    sty ScoreDie                ; Save it
+    lda RolledDice,y            ; Get the face
+    tax                         ; Save to our offset
+    dex                         ; range 0-5
+
+    clc                         ; Clear carry
+    adc ScoreAcc                ; Build up the total
+    sta ScoreAcc                ; Save it
+
+    inc ScoreScratchpad,x
+
+    ldy ScoreDie                ; Get our value
+    bne .loop
+    cld                         ; Clear decimal mode
+    rts
+
+HasAtLeast: subroutine
+    ; A = The qty we are looking for
+    ; C -> 1 SUCCESS
+    sed
+    sta ScoreDie
+    ldy #ScratchpadLength
+.loop
+    dey                         ; start the loop
+    sty ScoreFace
+
+   lda ScoreScratchpad,y       ; Get the next size
+   cmp ScoreDie
+   bcc .skip
+   sec                         ; Set the flag
+   jmp .done
+.skip
+    ldy ScoreFace              ; Get our value
+    bne .loop
+    clc
+.done
+    cld                         ; Clear decimal mode
+    rts
 
 Calculate_L1s: subroutine
     lda #1                      ; The face we are counting
@@ -73,7 +126,18 @@ Calculate_L6s:
 
 Calculate_TopSubtotal:
 Calculate_TopBonus:
-Calculate_L3k:
+Calculate_L3k: subroutine
+    jsr ClearScratchpad
+    jsr CountFaces
+    lda #3
+    jsr HasAtLeast
+    bcs .done
+    lda #0
+    sta ScoreAcc
+    jmp .done
+.done
+    rts
+
 Calculate_L4k:
 Calculate_LSmallStraight:
 Calculate_LLargeStraight:

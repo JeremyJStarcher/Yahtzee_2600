@@ -27,7 +27,7 @@
         SetDice {1}, {2}, {3}, {4}, {5}
         jsr {6}                     ; Call the test
         lda ScoreAcc                ; Get the test result
-        sta score_low_{7}           ; Show it to the user 
+        sta score_low_{7}           ; Show it to the user
         lda #$AA                    ; Clear out the high byte
         sta score_high_{7}          ; Save it
 
@@ -59,10 +59,15 @@ RunTests: subroutine
 
     RunTest 6, 6, 6, 6, 6, Calculate_L6s, test06, $30
 
+    RunTest 2, 2, 2, 2, 2, Calculate_L3k, test07, $10
+    RunTest 6, 6, 6, 6, 4, Calculate_L3k, test07, $28
+    RunTest 6, 6, 6, 1, 1, Calculate_L3k, test07, $20
+    RunTest 1, 6, 6, 1, 4, Calculate_L3k, test07, $00
+    RunTest 1, 2, 3, 4, 5, Calculate_L3k, test07, $00
 
     lda TestsFailed                 ; Check if tests passed
-    beq .allPassed                  ; Hurrah, they did. 
+    beq .allPassed                  ; Hurrah, they did.
     lda #$F2                        ; NTSC Ugly color
     sta COLUBK                      ; Make the tester suffer
 .allPassed
-    rts 
+    rts
