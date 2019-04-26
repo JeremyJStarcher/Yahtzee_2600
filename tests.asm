@@ -43,9 +43,22 @@
     ENDM
 RunTests: subroutine
 
-    RunTest 1, 1, 1, 1, 1, Calculate_L1s, test01, 5
-    RunTest 2, 2, 2, 2, 2, Calculate_L1s, test01, 0
-    RunTest 2, 2, 1, 2, 2, Calculate_L1s, test01, 1
+    RunTest 1, 1, 1, 1, 1, Calculate_L1s, test01, $05
+    RunTest 2, 2, 2, 2, 2, Calculate_L1s, test01, $00
+    RunTest 2, 2, 1, 2, 2, Calculate_L1s, test01, $01
+
+    RunTest 2, 2, 2, 2, 2, Calculate_L2s, test02, $10
+    RunTest 1, 1, 1, 1, 1, Calculate_L2s, test02, $00
+    RunTest 2, 1, 1, 1, 2, Calculate_L2s, test02, $04
+
+    RunTest 2, 1, 3, 3, 2, Calculate_L3s, test03, $06
+
+    RunTest 2, 4, 3, 3, 4, Calculate_L4s, test04, $08
+
+    RunTest 5, 4, 5, 3, 5, Calculate_L5s, test05, $15
+
+    RunTest 6, 6, 6, 6, 6, Calculate_L6s, test06, $30
+
 
     lda TestsFailed                 ; Check if tests passed
     beq .allPassed                  ; Hurrah, they did. 

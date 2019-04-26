@@ -18,14 +18,11 @@ Calc_scores_lookup:
     .word Calculate_LLowerTotal
     .word Calculate_LUpperTotal
     .word Calculate_LGrandTotal
-  
-Calculate_L1s: subroutine
+
+CalculateTopHandValues: subroutine
     sed                         ; Set decimal mode
     lda #$00                    ; Zero the counter
     sta ScoreAcc                ; And save it.
-
-    lda #1                      ; The face we are counting
-    sta ScoreFace               ; Save it
 
     ldy #DiceCount              ; And the number of dice
 .loop
@@ -43,11 +40,37 @@ Calculate_L1s: subroutine
     cld                         ; Clear decimal mode
     rts
 
+
+Calculate_L1s: subroutine
+    lda #1                      ; The face we are counting
+    sta ScoreFace               ; Save it
+    jmp CalculateTopHandValues
+
 Calculate_L2s:
+    lda #2                      ; The face we are counting
+    sta ScoreFace               ; Save it
+    jmp CalculateTopHandValues
+
 Calculate_L3s:
+    lda #3                      ; The face we are counting
+    sta ScoreFace               ; Save it
+    jmp CalculateTopHandValues
+
 Calculate_L4s:
+    lda #4                      ; The face we are counting
+    sta ScoreFace               ; Save it
+    jmp CalculateTopHandValues
+
 Calculate_L5s:
+    lda #5                      ; The face we are counting
+    sta ScoreFace               ; Save it
+    jmp CalculateTopHandValues
+
 Calculate_L6s:
+    lda #6                      ; The face we are counting
+    sta ScoreFace               ; Save it
+    jmp CalculateTopHandValues
+
 Calculate_TopSubtotal:
 Calculate_TopBonus:
 Calculate_L3k:
