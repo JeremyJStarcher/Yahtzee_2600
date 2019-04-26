@@ -86,6 +86,14 @@ RunTests: subroutine
     RunTest 1, 3, 2, 1, 4, Calculate_LSmallStraight, test11, $30
     RunTest 6, 1, 3, 1, 6, Calculate_LSmallStraight, test11, $00
 
+    RunTest 2, 3, 4, 5, 6, Calculate_LLargeStraight, test12, $40
+    RunTest 1, 2, 3, 4, 3, Calculate_LLargeStraight, test12, $00
+    RunTest 2, 3, 4, 5, 3, Calculate_LLargeStraight, test12, $00
+    RunTest 1, 2, 3, 4, 5, Calculate_LLargeStraight, test12, $40
+    RunTest 1, 3, 2, 1, 4, Calculate_LLargeStraight, test12, $00
+    RunTest 6, 1, 3, 1, 6, Calculate_LLargeStraight, test12, $00
+
+
     lda TestsFailed                 ; Check if tests passed
     beq .allPassed                  ; Hurrah, they did.
     lda #$F2                        ; NTSC Ugly color

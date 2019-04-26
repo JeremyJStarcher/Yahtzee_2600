@@ -117,6 +117,25 @@ HasExactly: subroutine
     cld                         ; Clear decimal mode
     rts
 
+CreateBitmask: subroutine
+    lda #0
+    sta ScoreAcc
+    ldx #DiceCount + 1
+.l: dex
+    stx ScoreFace
+    lda ScoreScratchpad,x
+    beq .nobit
+    inc ScoreAcc
+.nobit:
+    lda ScoreAcc                ; Load the value
+    clc
+    asl
+    sta ScoreAcc
+    ldx ScoreFace
+    bne .l
+    rts
+
+
 Calculate_L1s: subroutine
     lda #1                      ; The face we are counting
     sta ScoreFace               ; Save it
@@ -171,30 +190,7 @@ Calculate_L4k: subroutine
 .done
     rts
 
-CreateBitmask: subroutine
-    lda #0
-    sta ScoreAcc
-    ldx #DiceCount + 1
-.l: dex
-    stx ScoreFace
-    lda ScoreScratchpad,x
-    beq .nobit
-    inc ScoreAcc
-.nobit:
-    lda ScoreAcc                ; Load the value
-    clc
-    asl
-    sta ScoreAcc
-    ldx ScoreFace
-    bne .l
-    rts
-
-Calculate_LSmallStraight: subroutine
-.mask = %00001111
-    jsr ClearScratchpad
-    jsr CountFaces
-    jsr CreateBitmask
-
+CheckStraightBitmask: subroutine
 ; at this point, we could have our dice in a nice bitmask
 ; with trailing zeros, we we shift through all the possibilities
 ; and slide them into the lower bits for comparison
@@ -204,9 +200,9 @@ Calculate_LSmallStraight: subroutine
     lda ScoreAcc
     ror
     sta ScoreAcc
-    lda #.mask                      ; Do the compare
-    and ScoreAcc
-    cmp #.mask
+    lda ScoreFace                   ; Get the mask
+    and ScoreAcc                    ; Check it against our incoming mask
+    cmp ScoreFace                   ; Do we have overlap?
     beq .found
     cpx #0                          ; End of loop?
     bne .l
@@ -221,7 +217,32 @@ Calculate_LSmallStraight: subroutine
 .rts
     rts
 
-Calculate_LLargeStraight:
+Calculate_LSmallStraight: subroutine
+    jsr ClearScratchpad
+    jsr CountFaces
+    jsr CreateBitmask
+
+.mask = %00001111
+    lda #.mask
+    sta ScoreFace
+    jsr CheckStraightBitmask
+    rts
+
+Calculate_LLargeStraight: subroutine
+    jsr ClearScratchpad
+    jsr CountFaces
+    jsr CreateBitmask
+
+.mask = %00011111
+    lda #.mask
+    sta ScoreFace
+    jsr CheckStraightBitmask
+    lda ScoreAcc                        ; Do we have straight?
+    beq .skip                           ; Skip if not
+    lda #$40                            ; Load value of a large straight
+    sta ScoreAcc                        ; And save it
+.skip
+    rts
 
 Calculate_LFullHouse: subroutine
     jsr ClearScratchpad
