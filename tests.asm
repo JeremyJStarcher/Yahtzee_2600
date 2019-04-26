@@ -44,7 +44,7 @@
 RunTests: subroutine
 
     RunTest 1, 1, 1, 1, 1, Calculate_L1s, test01, 5
-    RunTest 2, 2, 2, 2, 2, Calculate_L1s, test01, 1
+    RunTest 2, 2, 2, 2, 2, Calculate_L1s, test01, 0
     RunTest 2, 2, 1, 2, 2, Calculate_L1s, test01, 1
 
     lda TestsFailed                 ; Check if tests passed
