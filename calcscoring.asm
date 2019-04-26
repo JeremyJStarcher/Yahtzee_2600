@@ -171,7 +171,56 @@ Calculate_L4k: subroutine
 .done
     rts
 
-Calculate_LSmallStraight:
+CreateBitmask: subroutine
+    lda #0
+    sta ScoreAcc
+    ldx #DiceCount + 1
+.l: dex
+    stx ScoreFace
+    lda ScoreScratchpad,x
+    beq .nobit
+    inc ScoreAcc
+.nobit:
+    lda ScoreAcc                ; Load the value
+    clc
+    asl
+    sta ScoreAcc
+    ldx ScoreFace
+    bne .l
+    rts
+
+Calculate_LSmallStraight: subroutine
+.mask = %00001111
+    jsr ClearScratchpad
+    jsr CountFaces
+    jsr CreateBitmask
+
+; at this point, we could have our dice in a nice bitmask
+; with trailing zeros, we we shift through all the possibilities
+; and slide them into the lower bits for comparison
+    ldx #DiceCount + 0              ; The number of shifts to make
+.l: dex
+    clc                             ; Perform the shift
+    lda ScoreAcc
+    ror
+    sta ScoreAcc
+    lda #.mask                      ; Do the compare
+    and ScoreAcc
+    cmp #.mask
+    beq .found
+    cpx #0                          ; End of loop?
+    bne .l
+    jmp .notfound
+.found:
+    lda #$30
+    sta ScoreAcc
+    jmp .rts
+.notfound
+    lda #0
+    sta ScoreAcc
+.rts
+    rts
+
 Calculate_LLargeStraight:
 
 Calculate_LFullHouse: subroutine

@@ -85,6 +85,42 @@ const source = `
 !        !
 !X X X X !
 `;
+/*
+@glyph numB
+! X      !
+! X      !
+! XXXXXX !
+! X    X !
+! XXXXXX !
+
+@glyph numC
+!        !
+!        !
+! XXXXXX !
+! X      !
+! XXXXXX !
+
+@glyph numD
+!      X !
+!      X !
+! XXXXXX !
+! X    X !
+! XXXXXX !
+
+@glyph numE
+! XXXXXX !
+! X      !
+! XXXXXX !
+! X      !
+! XXXXXX !
+
+@glyph numF
+! XXXXXX !
+! X      !
+! XXX    !
+! X      !
+! X      !
+*/
 
     const glyphData = lib.all.stringToObject(source);
 
