@@ -1,41 +1,64 @@
-calc_scores_lookup:
-    .word calculate_L1s
-    .word calculate_L2s
-    .word calculate_L3s
-    .word calculate_L4s
-    .word calculate_L5s
-    .word calculate_L6s
-    .word calculate_TopSubtotal
-    .word calculate_TopBonus
-    .word calculate_L3k
-    .word calculate_L4k
-    .word calculate_LSmallStraight
-    .word calculate_LLargeStraight
-    .word calculate_LFullHouse
-    .word calculate_LYahtzee
-    .word calculate_LChance
-    .word calculate_LYahtzeeBonus
-    .word calculate_LLowerTotal
-    .word calculate_LUpperTotal
-    .word calculate_LGrandTotal
+Calc_scores_lookup:
+    .word Calculate_L1s
+    .word Calculate_L2s
+    .word Calculate_L3s
+    .word Calculate_L4s
+    .word Calculate_L5s
+    .word Calculate_L6s
+    .word Calculate_TopSubtotal
+    .word Calculate_TopBonus
+    .word Calculate_L3k
+    .word Calculate_L4k
+    .word Calculate_LSmallStraight
+    .word Calculate_LLargeStraight
+    .word Calculate_LFullHouse
+    .word Calculate_LYahtzee
+    .word Calculate_LChance
+    .word Calculate_LYahtzeeBonus
+    .word Calculate_LLowerTotal
+    .word Calculate_LUpperTotal
+    .word Calculate_LGrandTotal
   
-calculate_L1s:
-calculate_L2s:
-calculate_L3s:
-calculate_L4s:
-calculate_L5s:
-calculate_L6s:
-calculate_TopSubtotal:
-calculate_TopBonus:
-calculate_L3k:
-calculate_L4k:
-calculate_LSmallStraight:
-calculate_LLargeStraight:
-calculate_LFullHouse:
-calculate_LYahtzee:
-calculate_LChance:
-calculate_LYahtzeeBonus:
-calculate_LLowerTotal:
-calculate_LUpperTotal:
-calculate_LGrandTotal:
+Calculate_L1s: subroutine
+    sed                         ; Set decimal mode
+    lda #$00                    ; Zero the counter
+    sta ScoreAcc                ; And save it.
+
+    lda #1                      ; The face we are counting
+    sta ScoreFace               ; Save it
+
+    ldy #DiceCount              ; And the number of dice
+.loop
+    dey                         ; start the loop
+    sty ScoreDie                ; Save it
+    lda RolledDice,y            ; Get the face
+    cmp ScoreFace               ; Is it the face we want?
+    bne .skip                   ; Nope
+    clc                         ; Clear carry
+    adc ScoreAcc                ; Build up the total
+    sta ScoreAcc                ; Save it
+.skip:
+    ldy ScoreDie                ; Get our value
+    bne .loop
+    cld                         ; Clear decimal mode
+    rts
+
+Calculate_L2s:
+Calculate_L3s:
+Calculate_L4s:
+Calculate_L5s:
+Calculate_L6s:
+Calculate_TopSubtotal:
+Calculate_TopBonus:
+Calculate_L3k:
+Calculate_L4k:
+Calculate_LSmallStraight:
+Calculate_LLargeStraight:
+Calculate_LFullHouse:
+Calculate_LYahtzee:
+Calculate_LChance:
+Calculate_LYahtzeeBonus:
+Calculate_LLowerTotal:
+Calculate_LUpperTotal:
+Calculate_LGrandTotal:
     rts
