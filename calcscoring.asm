@@ -94,6 +94,29 @@ HasAtLeast: subroutine
     cld                         ; Clear decimal mode
     rts
 
+HasExactly: subroutine
+    ; A = The qty we are looking for
+    ; C -> 1 SUCCESS
+    sed
+    sta ScoreDie
+    ldy #ScratchpadLength
+.loop
+    dey                         ; start the loop
+    sty ScoreFace
+
+   lda ScoreScratchpad,y       ; Get the next size
+   cmp ScoreDie
+   bne .skip
+   sec                         ; Set the flag
+   jmp .done
+.skip
+    ldy ScoreFace              ; Get our value
+    bne .loop
+    clc
+.done
+    cld                         ; Clear decimal mode
+    rts
+
 Calculate_L1s: subroutine
     lda #1                      ; The face we are counting
     sta ScoreFace               ; Save it
@@ -150,12 +173,32 @@ Calculate_L4k: subroutine
 
 Calculate_LSmallStraight:
 Calculate_LLargeStraight:
-Calculate_LFullHouse:
+
+Calculate_LFullHouse: subroutine
+    jsr ClearScratchpad
+    jsr CountFaces
+    lda #3
+    jsr HasExactly
+    bcc .none
+
+    lda #2
+    jsr HasExactly
+    bcc .none
+
+    lda #$25
+    sta ScoreAcc
+    jmp .done
+.none
+    lda #0
+    sta ScoreAcc
+.done
+    rts
+
 Calculate_LYahtzee: subroutine
     jsr ClearScratchpad
     jsr CountFaces
     lda #5
-    jsr HasAtLeast
+    jsr HasExactly
     bcs .setScore
     lda #0
     sta ScoreAcc

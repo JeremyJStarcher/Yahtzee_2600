@@ -74,6 +74,11 @@ RunTests: subroutine
     RunTest 1, 1, 1, 1, 2, Calculate_LYahtzee, test09, $00
     RunTest 1, 2, 3, 4, 5, Calculate_LYahtzee, test09, $00
 
+    RunTest 6, 1, 6, 1, 6, Calculate_LFullHouse, test10, $25
+    RunTest 1, 1, 1, 2, 2, Calculate_LFullHouse, test10, $25
+    RunTest 1, 2, 3, 4, 5, Calculate_LFullHouse, test10, $00
+    RunTest 1, 1, 1, 1, 1, Calculate_LFullHouse, test10, $00
+
     lda TestsFailed                 ; Check if tests passed
     beq .allPassed                  ; Hurrah, they did.
     lda #$F2                        ; NTSC Ugly color
