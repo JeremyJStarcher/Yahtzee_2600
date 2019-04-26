@@ -87,49 +87,10 @@ VBlankTime64T:
 OverscanTime64T:
     .byte 35,65
 
-;===============================================================================
-; free space check on this page
-;===============================================================================
-
- if (* & $FF)
-    echo "------", [* - startofrom]d, "bytes of graphics.asm.  ", [startofrom - * + 256]d, "bytes wasted."
-  endif
-
-    ; We ran out of room with graphics.asm.
-    ; start a new page.
-    align 256
-page2start: = *
     include "build/faces.asm"
     include "build/test_lookup.asm"
     include "build/labels_bitmap.asm"
 
-;-----------------------------
-; This table converts the "remainder" of the division by 15 (-1 to -15) to the correct
-; fine adjustment value. This table is on a page boundary to guarantee the processor
-; will cross a page boundary and waste a cycle in order to be at the precise position
-; for a RESP0,x write
-fineAdjustBegin:
-            DC.B %01110000; Left 7
-            DC.B %01100000; Left 6
-            DC.B %01010000; Left 5
-            DC.B %01000000; Left 4
-            DC.B %00110000; Left 3
-            DC.B %00100000; Left 2
-            DC.B %00010000; Left 1
-            DC.B %00000000; No movement.
-            DC.B %11110000; Right 1
-            DC.B %11100000; Right 2
-            DC.B %11010000; Right 3
-            DC.B %11000000; Right 4
-            DC.B %10110000; Right 5
-            DC.B %10100000; Right 6
-            DC.B %10010000; Right 7
-
-fineAdjustTable = fineAdjustBegin - %11110001; NOTE: %11110001 = -15
-
-    echo "------", [ * - [startofrom + 256]  ]d, "bytes of page 2"
-
-    align 256
     include "constants.asm"
 
 ;;;;;;;;;;;;;;;
