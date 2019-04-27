@@ -135,6 +135,32 @@ CreateBitmask: subroutine
     bne .l
     rts
 
+CheckStraightBitmask: subroutine
+; at this point, we could have our dice in a nice bitmask
+; with trailing zeros, we we shift through all the possibilities
+; and slide them into the lower bits for comparison
+    ldx #DiceCount + 0              ; The number of shifts to make
+.l: dex
+    clc                             ; Perform the shift
+    lda ScoreAcc
+    ror
+    sta ScoreAcc
+    lda ScoreFace                   ; Get the mask
+    and ScoreAcc                    ; Check it against our incoming mask
+    cmp ScoreFace                   ; Do we have overlap?
+    beq .found
+    cpx #0                          ; End of loop?
+    bne .l
+    jmp .notfound
+.found:
+    lda #$30
+    sta ScoreAcc
+    jmp .rts
+.notfound
+    lda #0
+    sta ScoreAcc
+.rts
+    rts
 
 Calculate_L1s: subroutine
     lda #1                      ; The face we are counting
@@ -188,33 +214,6 @@ Calculate_L4k: subroutine
     lda #0
     sta ScoreAcc
 .done
-    rts
-
-CheckStraightBitmask: subroutine
-; at this point, we could have our dice in a nice bitmask
-; with trailing zeros, we we shift through all the possibilities
-; and slide them into the lower bits for comparison
-    ldx #DiceCount + 0              ; The number of shifts to make
-.l: dex
-    clc                             ; Perform the shift
-    lda ScoreAcc
-    ror
-    sta ScoreAcc
-    lda ScoreFace                   ; Get the mask
-    and ScoreAcc                    ; Check it against our incoming mask
-    cmp ScoreFace                   ; Do we have overlap?
-    beq .found
-    cpx #0                          ; End of loop?
-    bne .l
-    jmp .notfound
-.found:
-    lda #$30
-    sta ScoreAcc
-    jmp .rts
-.notfound
-    lda #0
-    sta ScoreAcc
-.rts
     rts
 
 Calculate_LSmallStraight: subroutine
