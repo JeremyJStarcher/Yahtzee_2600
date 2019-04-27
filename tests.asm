@@ -113,6 +113,8 @@ RunTests: subroutine
 ;    RunTest 1, 3, 2, 1, 4, Calculate_LLargeStraight, test12, $00
     RunTest 6, 1, 3, 1, 6, Calculate_LLargeStraight, test12, $00
 
+    RunTest 1, 2, 3, 4, 5, Calculate_LChance, test13, $15
+    RunTest 6, 6, 6, 6, 6, Calculate_LChance, test13, $30]
 
     lda TestsFailed                 ; Check if tests passed
     beq .allPassed                  ; Hurrah, they did.

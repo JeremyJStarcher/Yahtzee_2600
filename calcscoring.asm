@@ -279,6 +279,10 @@ Calculate_LYahtzee: subroutine
     rts
 
 Calculate_LChance:
+    jsr ClearScratchpad
+    jsr CountFaces
+    rts
+
 Calculate_LYahtzeeBonus:
 Calculate_LLowerTotal:
 Calculate_LUpperTotal:
