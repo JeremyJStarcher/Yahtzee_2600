@@ -970,23 +970,28 @@ PrintLabel: subroutine
 
 ; set the graphic pointers for each score digit
 
-    lda #<labelReroll5
+    lda #<labelTest5
     sta GraphicBmpPtr + 10
 
-    lda #<labelReroll4
+    lda #<labelTest4
     sta GraphicBmpPtr + 8
 
-    lda #<labelReroll3
+    lda #<labelTest3
     sta GraphicBmpPtr + 6
 
-    lda #<labelReroll2
+    lda #<labelTest2
     sta GraphicBmpPtr + 4
 
-    lda #<labelReroll1
+    lda #<labelTest1
     sta GraphicBmpPtr + 2
 
-    lda #<labelReroll0
+    lda #<labelTest0
     sta GraphicBmpPtr + 0
+
+    ldx #TESTMODE
+    dex
+    txa
+    sta PrintLabelID
 
     ; Start checking custom values
     lda PrintLabelID

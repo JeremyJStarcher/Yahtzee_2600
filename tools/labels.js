@@ -7,19 +7,19 @@ function convertScoreInfo() {
 
     const source = `
 @header Labels
-@glyph Jeremy
-!##### #### #### #### ##   ## #   #              !
-!  #   #    #  # #    # # # #  # #               !
-!  #   ##   #### ##   #  #  #   #                !
-!# #   #    # #  #    #     #   #                !
-!###   #### #  # #### #     #   #                !
-
 @glyph Reroll
 ! ###  #### ###  #### #   #    # #               !
 ! #  # #    #  # #  # #   #   #####              !
 ! #### ##   #### #  # #   #    # #               !
 ! # #  #    # #  #  # #   #   #####              !
 ! #  # #### #  # #### ### ###  # #               !
+
+@glyph Test
+!  # #                                           !
+! #####                                          !
+!  # #                                           !
+! #####                                          !
+!  # #                                           !
 `;
     const glyphData = lib.all.stringToObject(source);
 
