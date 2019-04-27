@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This is my (ugly) build script. You'll likely need to adapt it
 # (at least set the proper program locations)
