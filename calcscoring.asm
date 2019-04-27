@@ -60,8 +60,7 @@ CalculateTopHandValues: subroutine
 .skip:
     ldy ScoreDie                ; Get our value
     bne .loop
-    cld                         ; Clear decimal mode
-    rts
+    jmp FinishedCalculations
 
 ClearScratchpad: subroutine
     lda #0                      ; Our value
@@ -70,7 +69,7 @@ ClearScratchpad: subroutine
 .l: dex
     sta ScoreScratchpad,x
     bne .l
-    jmp FinishedCalculations
+    rts
 
 CountFaces: subroutine
     sed
@@ -315,4 +314,10 @@ Calculate_LGrandTotal:
 
 FinishedCalculations:
     cld
-    rts
+    IFCONST TESTMODE
+        ;; The tests call the calculate functions directly.
+        rts
+    ELSE
+        ;; The game uses an indirect jump to get here.
+        jmp AfterCalc
+    ENDIF

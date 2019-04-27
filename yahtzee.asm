@@ -175,22 +175,13 @@ StartFrame: subroutine
     jsr CalcBlinkMask
     jsr random
 
-    lda #$20                ; JSR instructions
-    sta JumpPad + 0
     ldy OffsetIntoScoreList     ; The address
     lda CalcScoreslookupLow,y
-    sta JumpPad + 1
+    sta GraphicBmpPtr + 0
     lda CalcScoreslookupHigh,y
-    sta JumpPad + 2
+    sta GraphicBmpPtr + 1
 
-    lda #$4C                    ; A jump instructions
-    sta JumpPad + 3
-    lda #<AfterCalc
-    sta JumpPad + 4
-    lda #>AfterCalc
-    sta JumpPad + 5
-
-    jmp JumpPad
+    jmp (GraphicBmpPtr)
 AfterCalc:
 
     ldy OffsetIntoScoreList     ; The address

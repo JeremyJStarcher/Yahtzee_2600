@@ -35,7 +35,7 @@ node labels.js
 node testgraphics.js
 cd ..
 
-#build ${TEST_NAME} 1
+build ${TEST_NAME} 1
 #build ${TEST_NAME} 2
 #build ${TEST_NAME} 3
 #build ${TEST_NAME} 4
