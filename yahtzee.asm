@@ -185,13 +185,13 @@ StartFrame: subroutine
 
     lda #$4C                    ; A jump instructions
     sta JumpPad + 3
-    lda #<.next
+    lda #<AfterCalc
     sta JumpPad + 4
-    lda #>.next
+    lda #>AfterCalc
     sta JumpPad + 5
 
     jmp JumpPad
-.next
+AfterCalc:
 
     ldy OffsetIntoScoreList     ; The address
     lda #$1A
