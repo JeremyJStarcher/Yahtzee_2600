@@ -70,7 +70,7 @@ ClearScratchpad: subroutine
 .l: dex
     sta ScoreScratchpad,x
     bne .l
-    rts
+    jmp FinishedCalculations
 
 CountFaces: subroutine
     sed
@@ -223,7 +223,7 @@ Calculate_L3k: subroutine
     lda #0
     sta ScoreAcc
 .done
-    rts
+    jmp FinishedCalculations
 
 Calculate_L4k: subroutine
     jsr ClearScratchpad
@@ -234,7 +234,7 @@ Calculate_L4k: subroutine
     lda #0
     sta ScoreAcc
 .done
-    rts
+    jmp FinishedCalculations
 
 Calculate_LSmallStraight: subroutine
     jsr ClearScratchpad
@@ -245,7 +245,7 @@ Calculate_LSmallStraight: subroutine
     lda #.mask
     sta ScoreFace
     jsr CheckStraightBitmask
-    rts
+    jmp FinishedCalculations
 
 Calculate_LLargeStraight: subroutine
     jsr ClearScratchpad
@@ -261,7 +261,7 @@ Calculate_LLargeStraight: subroutine
     lda #$40                            ; Load value of a large straight
     sta ScoreAcc                        ; And save it
 .skip
-    rts
+    jmp FinishedCalculations
 
 Calculate_LFullHouse: subroutine
     jsr ClearScratchpad
@@ -281,7 +281,7 @@ Calculate_LFullHouse: subroutine
     lda #0
     sta ScoreAcc
 .done
-    rts
+    jmp FinishedCalculations
 
 Calculate_LYahtzee: subroutine
     jsr ClearScratchpad
@@ -296,12 +296,12 @@ Calculate_LYahtzee: subroutine
     lda #$50
     sta ScoreAcc
 .done
-    rts
+    jmp FinishedCalculations
 
 Calculate_LChance:
     jsr ClearScratchpad
     jsr CountFaces
-    rts
+    jmp FinishedCalculations
 
 Calculate_LYahtzeeBonus:
 Calculate_TopSubtotal:
@@ -311,4 +311,8 @@ Calculate_LUpperTotal:
 Calculate_LGrandTotal:
     lda #$00
     sta ScoreAcc
+    jmp FinishedCalculations
+
+FinishedCalculations:
+    cld
     rts
