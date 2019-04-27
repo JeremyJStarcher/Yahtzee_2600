@@ -55,3 +55,5 @@ Rand8: ds 1                     ; Random number collector
 ; Rand16: ds 1                     ; Random number collector
 
 StatusBits: ds 1                ; Various status things
+
+JumpPad: ds 7                   ; Used to fake jumps

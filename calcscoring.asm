@@ -1,23 +1,45 @@
-Calc_scores_lookup:
-    .word Calculate_L1s
-    .word Calculate_L2s
-    .word Calculate_L3s
-    .word Calculate_L4s
-    .word Calculate_L5s
-    .word Calculate_L6s
-    .word Calculate_TopSubtotal
-    .word Calculate_TopBonus
-    .word Calculate_L3k
-    .word Calculate_L4k
-    .word Calculate_LSmallStraight
-    .word Calculate_LLargeStraight
-    .word Calculate_LFullHouse
-    .word Calculate_LYahtzee
-    .word Calculate_LChance
-    .word Calculate_LYahtzeeBonus
-    .word Calculate_LLowerTotal
-    .word Calculate_LUpperTotal
-    .word Calculate_LGrandTotal
+CalcScoreslookupLow:
+    .byte <Calculate_L1s
+    .byte <Calculate_L2s
+    .byte <Calculate_L3s
+    .byte <Calculate_L4s
+    .byte <Calculate_L5s
+    .byte <Calculate_L6s
+    .byte <Calculate_TopSubtotal
+    .byte <Calculate_TopBonus
+    .byte <Calculate_L3k
+    .byte <Calculate_L4k
+    .byte <Calculate_LSmallStraight
+    .byte <Calculate_LLargeStraight
+    .byte <Calculate_LFullHouse
+    .byte <Calculate_LYahtzee
+    .byte <Calculate_LChance
+    .byte <Calculate_LYahtzeeBonus
+    .byte <Calculate_LLowerTotal
+    .byte <Calculate_LUpperTotal
+    .byte <Calculate_LGrandTotal
+
+CalcScoreslookupHigh:
+    .byte >Calculate_L1s
+    .byte >Calculate_L2s
+    .byte >Calculate_L3s
+    .byte >Calculate_L4s
+    .byte >Calculate_L5s
+    .byte >Calculate_L6s
+    .byte >Calculate_TopSubtotal
+    .byte >Calculate_TopBonus
+    .byte >Calculate_L3k
+    .byte >Calculate_L4k
+    .byte >Calculate_LSmallStraight
+    .byte >Calculate_LLargeStraight
+    .byte >Calculate_LFullHouse
+    .byte >Calculate_LYahtzee
+    .byte >Calculate_LChance
+    .byte >Calculate_LYahtzeeBonus
+    .byte >Calculate_LLowerTotal
+    .byte >Calculate_LUpperTotal
+    .byte >Calculate_LGrandTotal
+
 ScratchpadLength = 7;
 
 CalculateTopHandValues: subroutine
@@ -192,8 +214,6 @@ Calculate_L6s:
     sta ScoreFace               ; Save it
     jmp CalculateTopHandValues
 
-Calculate_TopSubtotal:
-Calculate_TopBonus:
 Calculate_L3k: subroutine
     jsr ClearScratchpad
     jsr CountFaces
@@ -284,7 +304,11 @@ Calculate_LChance:
     rts
 
 Calculate_LYahtzeeBonus:
+Calculate_TopSubtotal:
+Calculate_TopBonus:
 Calculate_LLowerTotal:
 Calculate_LUpperTotal:
 Calculate_LGrandTotal:
+    lda #$00
+    sta ScoreAcc
     rts

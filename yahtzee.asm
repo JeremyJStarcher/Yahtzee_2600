@@ -172,8 +172,33 @@ StartFrame: subroutine
 
 .noToggleBlink
 
-     jsr CalcBlinkMask
-     jsr random
+    jsr CalcBlinkMask
+    jsr random
+
+    lda #$20                ; JSR instructions
+    sta JumpPad + 0
+    ldy OffsetIntoScoreList     ; The address
+    lda CalcScoreslookupLow,y
+    sta JumpPad + 1
+    lda CalcScoreslookupHigh,y
+    sta JumpPad + 2
+
+    lda #$4C                    ; A jump instructions
+    sta JumpPad + 3
+    lda #<.next
+    sta JumpPad + 4
+    lda #>.next
+    sta JumpPad + 5
+
+    jmp JumpPad
+.next
+
+    ldy OffsetIntoScoreList     ; The address
+    lda #$1A
+    sta score_high,y
+    lda ScoreAcc
+    sta score_low,y
+
 
 ; Pre-fill the graphic pointers' MSBs, so we only have to
 ; figure out the LSBs for each tile or digit
@@ -1242,6 +1267,8 @@ random_dice:
     clc
     adc #1
     rts
+
+    include "calcscoring.asm"
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================
