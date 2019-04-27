@@ -39,6 +39,7 @@
     PROCESSOR 6502
     INCLUDE "vcs.h"
     INCLUDE "macros.h"
+    INCLUDE "build/testmode.asm"
 
 ;===============================================================================
 ; Define RAM Usage

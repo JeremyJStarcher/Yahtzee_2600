@@ -2,6 +2,17 @@
 #
 # This is my (ugly) build script. You'll likely need to adapt it
 # (at least set the proper program locations)
+function build {
+  echo "TESTMODE = ${2}" > build/testmode.asm
+
+  $DASM $1.asm -obuild/$1.bin -sbuild/$1.sym -lbuild/$1.lst -f3
+  if [ -e build/$1.bin ] &&  [ `wc -c < build/$1.bin` -eq $ROM_SIZE ]
+  then
+    $STELLA build/$1.bin
+  else
+    echo ROM issue
+  fi
+}
 
 rm -rf build;
 mkdir build;
@@ -24,20 +35,8 @@ node labels.js
 node testgraphics.js
 cd ..
 
-$DASM ${TEST_NAME}.asm -obuild/${TEST_NAME}.bin -sbuild/${TEST_NAME}.sym -lbuild/${TEST_NAME}.lst -f3
-if [ -e build/${TEST_NAME}.bin ] &&  [ `wc -c < build/${TEST_NAME}.bin` -eq $ROM_SIZE ]
-then
-  $STELLA build/${TEST_NAME}.bin
-else
-  echo ROM issue
-fi
-
-
-$DASM ${NAME}.asm -obuild/${NAME}.bin -sbuild/${NAME}.sym -lbuild/${NAME}.lst -f3
-if [ -e build/${NAME}.bin ] &&  [ `wc -c < build/${NAME}.bin` -eq $ROM_SIZE ]
-then
-  $STELLA build/${NAME}.bin
-else
-  echo ROM issue
-fi
-
+build ${TEST_NAME} 1
+build ${TEST_NAME} 2
+build ${TEST_NAME} 3
+build ${TEST_NAME} 4
+# build ${NAME}
