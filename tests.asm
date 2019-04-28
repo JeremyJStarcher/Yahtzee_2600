@@ -124,9 +124,56 @@ RunTests: subroutine
         RunTest 6, 6, 6, 6, 6, Calculate_LChance, test13, $30
     ENDIF
 
+    MAC TestTotal
+        ;; {1} - Address
+        ;; {2} - word value
+        lda score_high_{1}          ; Compare the high bytes
+        cmp #>{2}
+        bne .failed
+
+        lda score_low_{1}
+        cmp #<{2}
+        beq .good
+
+.failed
+        lda #1                      ; Set the flag
+        sta TestsFailed             ; Save the flag
+        jmp EndOfTests
+.good
+    ENDM
+
+    IF TESTMODE=5
+        jsr ClearScoresTest
+        lda #$12
+        sta score_low_test01
+        SetByte test01, $45
+        SetByte test02, $23
+        SetByte test03, $31
+
+        sed
+        clc
+        ClearWord test05
+        AddB test01, test05
+        AddB test02, test05
+        AddB test03, test05
+        TestTotal test05, $0068
+    ENDIF
+
+EndOfTests
     lda TestsFailed                 ; Check if tests passed
     beq .allPassed                  ; Hurrah, they did.
     lda #$F2                        ; NTSC Ugly color
     sta COLUBK                      ; Make the tester suffer
 .allPassed
+    cld
     rts
+
+ClearScoresTest:
+    lda #$99
+    ldx #ScoreRamSize
+.clearScores:
+    dex
+    sta score_low,x
+    bne .clearScores
+    rts
+

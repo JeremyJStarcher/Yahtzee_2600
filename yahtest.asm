@@ -1213,8 +1213,8 @@ random_dice:
     adc #1
     rts
 
-    include "tests.asm"
     include "calcscoring.asm"
+    include "tests.asm"
 ;===============================================================================
 ; free space check before End of Cartridge
 ;===============================================================================

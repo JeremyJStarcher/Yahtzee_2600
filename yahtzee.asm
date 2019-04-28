@@ -180,12 +180,10 @@ StartFrame: subroutine
 
     clearBit StatusPlayHand, StatusBits
 
-
     ldy OffsetIntoScoreList     ; The address
     lda score_low,y             ; Slow already filled?
     cmp #Unscored
     bne .noplay                 ; Don't play again
-
 
     lda CalcScoreslookupLow,y
     sta GraphicBmpPtr + 0
@@ -617,7 +615,6 @@ DiceRowScanLines = 4
     setBit StatusPlayHand, StatusBits
 
     jmp .NoRestart
-
 
 .ButtonPressedReroll
     lda ActiveArea

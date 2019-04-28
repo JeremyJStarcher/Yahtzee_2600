@@ -321,3 +321,24 @@ FinishedCalculations:
         ;; The game uses an indirect jump to get here.
         jmp AfterCalc
     ENDIF
+
+    MAC SetByte
+        lda #{2}
+        sta score_low_{1}
+        lda #0
+        sta score_high_{1}
+    ENDM
+
+    MAC AddB
+        clc
+        lda score_low_{2}
+        adc score_low_{1}
+        sta score_low_{2}
+    ENDM
+
+    MAC ClearWord
+        lda $0
+        sta score_low_{1}
+        sta score_high_{1}
+    ENDM
+
