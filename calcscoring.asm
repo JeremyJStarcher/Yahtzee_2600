@@ -312,8 +312,6 @@ Calculate_LGrandTotal:
     sta ScoreAcc
     jmp FinishedCalculations
 
-
-
 ConvertSpacerNibble: subroutine
 ;; For display purposes, we don't want leading zeros on the numbers, so
 ;; we use the "BCD" value of "$A" a leading zero.
@@ -342,9 +340,9 @@ ConvertSpacerNibble: subroutine
     eor TempVar3        ; Strip those bits off
     sta TempVar3        ; Re-save the value
 l4:
-    lda TempVar3        ; Retrieve the value 
+    lda TempVar3        ; Retrieve the value
     rts
-    
+
 Add16Bit: subroutine
     ; TempVar1 lsb
     ; TempVar2 msb
@@ -384,7 +382,7 @@ FinishedCalculations:
     ENDM
 
     MAC AddByteToWord
-        lda score_low_{1}  
+        lda score_low_{1}
         sta TempWord1 + 0
         lda #0
         sta TempWord1 + 1
@@ -401,15 +399,6 @@ FinishedCalculations:
         lda AddResult + 1
         sta score_high_{2}
     ENDM
-
-    MAC Cmp16
-        lda {1}+1
-        cmp {2}+1
-        bne .done
-        lda {1}+0
-        cmp {2}+0
-.done:
-		ENDM
 
     MAC ClearWord
         lda $0
@@ -431,13 +420,25 @@ CalcSubtotals: subroutine
         AddByteToWord L5s, TopSubtotal
         AddByteToWord L6s, TopSubtotal
 
-        ldx #0
-;        lda #$65
-;        cmp TopSubtotal
-;        bne .noUpperBonus
-;        ldx #35
-;.noUpperBonus:
-;        stx TopBonus
+        ;; Calculate the upper bonus
+        ;; Compare words, not just bytes, because the top hand subtotal
+        ;; can actually be 105.
+        ;; (6 * 5) + (5 * 5) + (4 * 5) + (3 * 5) + (2 * 5) + (1 *5)
+        ldx #0              ; The 'default' bonus
+        lda #$00            ; MSB
+        cmp score_high_TopSubtotal
+        bne .compareBonus
+        lda #$65
+        cmp score_low_TopSubtotal
+.compareBonus:
+        bcs .noTopBonus
+        ldx #$35
+.noTopBonus
+        stx score_low_TopBonus
+
+        ClearWord LUpperTotal
+        AddByteToWord TopSubtotal, LUpperTotal
+        AddByteToWord TopBonus, LUpperTotal
 
         cld
         rts
