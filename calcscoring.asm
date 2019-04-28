@@ -312,9 +312,52 @@ Calculate_LGrandTotal:
     sta ScoreAcc
     jmp FinishedCalculations
 
-Add16Bit
+
+
+ConvertSpacerNibble: subroutine
+;; For display purposes, we don't want leading zeros on the numbers, so
+;; we use the "BCD" value of "$A" a leading zero.
+;; Convert those nibbles to real zeros to make the math work.
+
+.bitmask1 = $0A
+.bitmask2 = $A0
+
+    tay                 ; Save the original value for the second nibble
+    sty TempVar3        ; We will strip the nibbles out of this value as needed
+
+    and #.bitmask2      ; Check to see of the bits for the mask are set
+    cmp #.bitmask2      ; And *only* those bits
+    bne .l3             ; Nope, bail
+.l2:
+    lda #.bitmask2      ; Load our bit mask
+    eor TempVar3        ; Strip just those bits off
+    sta TempVar3        ; Resave
+.l3:
+    tya                 ; Get our original value
+    and #.bitmask1      ; Was the bit mask found?
+    cmp #.bitmask1      ; And only the bit mask?
+    bne l4              ; Nope  bail
+
+    lda #.bitmask1      ; Load our mask
+    eor TempVar3        ; Strip those bits off
+    sta TempVar3        ; Re-save the value
+l4:
+    lda TempVar3        ; Retrieve the value 
+    rts
+    
+Add16Bit: subroutine
     ; TempVar1 lsb
     ; TempVar2 msb
+
+    lda TempVar1
+    jsr ConvertSpacerNibble
+    sta TempVar1
+
+    lda TempVar2
+    jsr ConvertSpacerNibble
+    sta TempVar2
+
+
     clc
     lda AddResult + 0
     adc TempVar1

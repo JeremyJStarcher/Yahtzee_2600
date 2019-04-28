@@ -148,8 +148,8 @@ RunTests: subroutine
         sta score_low_test01
         SetByte test01, $45
         SetByte test02, $23
-        SetByte test03, $30
-        SetByte test04, $03
+        SetByte test03, $3A
+        SetByte test04, $A3
 
         sed
         clc
