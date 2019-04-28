@@ -349,20 +349,19 @@ Add16Bit: subroutine
     ; TempVar1 lsb
     ; TempVar2 msb
 
-    lda TempVar1
+    lda TempWord1 + 0
     jsr ConvertSpacerNibble
-    sta TempVar1
+    sta TempWord1 + 0
 
-    lda TempVar2
+    lda TempWord1 + 1
     jsr ConvertSpacerNibble
-    sta TempVar2
-
+    sta TempWord1 + 1
 
     clc
     lda AddResult + 0
-    adc TempVar1
+    adc TempWord1 + 0
     sta AddResult + 0
-    lda TempVar2
+    lda TempWord1 + 1
     adc AddResult + 1
     sta AddResult + 1
     rts
@@ -384,11 +383,11 @@ FinishedCalculations:
         sta score_high_{1}
     ENDM
 
-    MAC AddB
+    MAC AddByteToWord
         lda score_low_{1}  
-        sta TempVar1
+        sta TempWord1 + 0
         lda #0
-        sta TempVar2
+        sta TempWord1 + 1
 
         lda score_low_{2}
         sta AddResult + 0
@@ -403,6 +402,15 @@ FinishedCalculations:
         sta score_high_{2}
     ENDM
 
+    MAC Cmp16
+        lda {1}+1
+        cmp {2}+1
+        bne .done
+        lda {1}+0
+        cmp {2}+0
+.done:
+		ENDM
+
     MAC ClearWord
         lda $0
         sta score_low_{1}
@@ -416,12 +424,20 @@ CalcSubtotals: subroutine
 
         clc
         ClearWord TopSubtotal
-        AddB L1s, TopSubtotal
-        AddB L2s, TopSubtotal
-        AddB L3s, TopSubtotal
-        AddB L4s, TopSubtotal
-        AddB L5s, TopSubtotal
-        AddB L6s, TopSubtotal
+        AddByteToWord L1s, TopSubtotal
+        AddByteToWord L2s, TopSubtotal
+        AddByteToWord L3s, TopSubtotal
+        AddByteToWord L4s, TopSubtotal
+        AddByteToWord L5s, TopSubtotal
+        AddByteToWord L6s, TopSubtotal
+
+        ldx #0
+;        lda #$65
+;        cmp TopSubtotal
+;        bne .noUpperBonus
+;        ldx #35
+;.noUpperBonus:
+;        stx TopBonus
 
         cld
         rts

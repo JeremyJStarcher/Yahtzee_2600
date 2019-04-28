@@ -154,10 +154,10 @@ RunTests: subroutine
         sed
         clc
         ClearWord test05
-        AddB test01, test05
-        AddB test02, test05
-        AddB test03, test05
-        AddB test04, test05
+        AddByteToWord test01, test05
+        AddByteToWord test02, test05
+        AddByteToWord test03, test05
+        AddByteToWord test04, test05
         TestTotal test05, $0101
     ENDIF
 
