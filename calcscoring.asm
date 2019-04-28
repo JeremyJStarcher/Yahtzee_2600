@@ -312,6 +312,18 @@ Calculate_LGrandTotal:
     sta ScoreAcc
     jmp FinishedCalculations
 
+Add16Bit
+    ; TempVar1 lsb
+    ; TempVar2 msb
+    clc
+    lda AddResult + 0
+    adc TempVar1
+    sta AddResult + 0
+    lda TempVar2
+    adc AddResult + 1
+    sta AddResult + 1
+    rts
+
 FinishedCalculations:
     cld
     IFCONST TESTMODE
@@ -330,10 +342,22 @@ FinishedCalculations:
     ENDM
 
     MAC AddB
-        clc
+        lda score_low_{1}  
+        sta TempVar1
+        lda #0
+        sta TempVar2
+
         lda score_low_{2}
-        adc score_low_{1}
+        sta AddResult + 0
+        lda score_high_{2}
+        sta AddResult + 1
+
+        jsr Add16Bit
+
+        lda AddResult + 0
         sta score_low_{2}
+        lda AddResult + 1
+        sta score_high_{2}
     ENDM
 
     MAC ClearWord
@@ -342,3 +366,20 @@ FinishedCalculations:
         sta score_high_{1}
     ENDM
 
+    IFCONST TESTMODE
+    ELSE
+CalcSubtotals: subroutine
+        sed
+
+        clc
+        ClearWord TopSubtotal
+        AddB L1s, TopSubtotal
+        AddB L2s, TopSubtotal
+        AddB L3s, TopSubtotal
+        AddB L4s, TopSubtotal
+        AddB L5s, TopSubtotal
+        AddB L6s, TopSubtotal
+
+        cld
+        rts
+    ENDIF

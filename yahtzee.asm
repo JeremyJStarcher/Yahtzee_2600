@@ -202,6 +202,8 @@ AfterCalc:
     jsr StartNewRound
 .noplay
 
+    jsr CalcSubtotals
+
 ; Pre-fill the graphic pointers' MSBs, so we only have to
 ; figure out the LSBs for each tile or digit
     lda #>Digits        ; MSB of tiles/digits page

@@ -30,6 +30,8 @@ SPF2:                       ; Shadow PF2
 ScoreAcc:                   ; The accumulator for the score
     ds 1
 
+AddResult: ds 2
+
 ; Address of the graphic for for each digit (6x2 bytes)
 GraphicBmpPtr:
 ScoreScratchpad:

@@ -148,7 +148,8 @@ RunTests: subroutine
         sta score_low_test01
         SetByte test01, $45
         SetByte test02, $23
-        SetByte test03, $31
+        SetByte test03, $30
+        SetByte test04, $03
 
         sed
         clc
@@ -156,7 +157,8 @@ RunTests: subroutine
         AddB test01, test05
         AddB test02, test05
         AddB test03, test05
-        TestTotal test05, $0068
+        AddB test04, test05
+        TestTotal test05, $0101
     ENDIF
 
 EndOfTests
