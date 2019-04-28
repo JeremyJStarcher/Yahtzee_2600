@@ -8,52 +8,52 @@ function convertScoreInfo() {
     const source = `
 @header ScoreNames
 @glyph L1s
-!   XX    XXX    !
-! XXXX   X       !
-!   XX    XX     !
-!   XX      X    !
-! XXXXXX XXX     !
+!   X    XXX     !
+! XXX   X        !
+!   X    XX      !
+!   X      X     !
+! XXXXX XXX      !
 
 @glyph L2s
-! XXXXXX  XXX    !
-!     XX X       !
-! XXXXXX  XX     !
-! XX        X    !
-! XXXXXX XXX     !
+! XXXXX  XXX     !
+!     X X        !
+! XXXXX  XX      !
+! X        X     !
+! XXXXX XXX      !
 
 @glyph L3s
-! XXXXXX  XXX    !
-!     XX X       !
-!   XXXX  XX     !
-!     XX    X    !
-! XXXXXX XXX     !
+! XXXXX  XXX     !
+!     X X        !
+!   XXX  XX      !
+!     X    X     !
+! XXXXX XXX      !
 
 @glyph L4s
-! XX  XX  XXX    !
-! XX  XX X       !
-! XXXXXX  XX     !
-!     XX    X    !
-!     XX XXX     !
+! X   X  XXX     !
+! X   X X        !
+! XXXXX  XX      !
+!     X    X     !
+!     X XXX      !
 
 @glyph L5s
-! XXXXXX  XXX    !
-! XX     X       !
-! XXXXXX  XX     !
-!     XX    X    !
-! XXXXXX XXX     !
+! XXXXX  XXX     !
+! X     X        !
+! XXXXX  XX      !
+!     X    X     !
+! XXXXX XXX      !
 
 @glyph L6s
-! XXXXXX  XXX    !
-! XX     X       !
-! XXXXXX  XX     !
-! XX  XX    X    !
-! XXXXXX XXX     !
+! XXXXX  XXX     !
+! X     X        !
+! XXXXX  XX      !
+! X   X    X     !
+! XXXXX XXX      !
 
 @glyph TopSubtotal
 !                !
-! XXXXXXXXXXX    !
+! XXXXXXXXXX     !
 !                !
-! XXXXXXXXXXX    !
+! XXXXXXXXXX     !
 !                !
 
 @glyph TopBonus
@@ -64,18 +64,18 @@ function convertScoreInfo() {
 !     XXX XXX    !
 
 @glyph L3k
-! XXXXXX X  X    !
-!     XX X X     !
-!   XXXX XX      !
-!     XX X X     !
-! XXXXXX X  X    !
+! XXXXX X  X     !
+!     X X X      !
+!   XXX XX       !
+!     X X X      !
+! XXXXX X  X     !
 
 @glyph L4k
-! XX  XX X  X    !
-! XX  XX X X     !
-! XXXXXX XX      !
-!     XX X X     !
-!     XX X  X    !
+! X   X X  X     !
+! X   X X X      !
+! XXXXX XX       !
+!     X X X      !
+!     X X  X     !
 
 @glyph LSmallStraight
 !   XXX  XXX     !
