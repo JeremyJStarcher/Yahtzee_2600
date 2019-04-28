@@ -47,7 +47,7 @@ ActiveArea: ds 1                ; What area is active for inputs?
 HighlightedDie: ds 1            ; Highlight die
 BlinkClock: ds 1                ; Time the blink-blink
 
-TurnCount: ds 1                 ; Turn counter
+RollCount: ds 1                 ; Turn counter
 RolledDice:     ds 5
 RerollDiceMask: ds 1
 

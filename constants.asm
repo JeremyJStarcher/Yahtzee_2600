@@ -51,12 +51,14 @@ MaskedDieFace = 7           ; The face when a die is masked
 
 StatusFireDown = 1 << 0     ; The fire button is pressed
 StatusBlinkOn =  1 << 1     ; Blink mode active?
+StatusPlayHand = 1 << 2     ; Play the given hand
 
 PrintLabelRoll1 = 2
 PrintLabelRoll2 = 1
 PrintLabelRoll3 = 0
 
 Unscored = $AA
+RollsPerHand = 3
 ScoreRamSize = .postScoreRamTop - .preScoreRamTop
 
 ;-----------------------------

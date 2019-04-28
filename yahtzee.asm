@@ -171,11 +171,22 @@ StartFrame: subroutine
     sta BlinkClock          ; And save it
 
 .noToggleBlink
-
     jsr CalcBlinkMask
     jsr random
 
+    lda #StatusPlayHand
+    and StatusBits
+    beq .noplay
+
+    clearBit StatusPlayHand, StatusBits
+
+
     ldy OffsetIntoScoreList     ; The address
+    lda score_low,y             ; Slow already filled?
+    cmp #Unscored
+    bne .noplay                 ; Don't play again
+
+
     lda CalcScoreslookupLow,y
     sta GraphicBmpPtr + 0
     lda CalcScoreslookupHigh,y
@@ -185,11 +196,13 @@ StartFrame: subroutine
 AfterCalc:
 
     ldy OffsetIntoScoreList     ; The address
-    lda #$1A
+    lda #$AA
     sta score_high,y
     lda ScoreAcc
     sta score_low,y
 
+    jsr StartNewRound
+.noplay
 
 ; Pre-fill the graphic pointers' MSBs, so we only have to
 ; figure out the LSBs for each tile or digit
@@ -531,7 +544,7 @@ DiceRowScanLines = 4
     stx COLUP1
 
 .noChangeRerollColor
-    lda TurnCount
+    lda RollCount
     sta PrintLabelID
     jsr PrintLabel
 
@@ -600,14 +613,18 @@ DiceRowScanLines = 4
     lda ActiveArea
     cmp #ActiveAreaScores
     bne .ButtonPressedReroll
+
+    setBit StatusPlayHand, StatusBits
+
     jmp .NoRestart
+
 
 .ButtonPressedReroll
     lda ActiveArea
     cmp #ActiveAreaReRoll
     bne .buttonPressedDice
 
-    lda TurnCount
+    lda RollCount
     beq .noReroll
     jsr RerollDice
 .noReroll
@@ -1157,7 +1174,7 @@ RerollDice: subroutine
     lda #0
     sta RerollDiceMask
 
-    dec TurnCount
+    dec RollCount
     rts
 
 ;;;;;;;;;;;;;;
@@ -1214,17 +1231,22 @@ StartNewGame: subroutine
     lda #ActiveAreaScores
     sta ActiveArea
 
+    jsr StartNewRound
+
+    jmp StartFrame
+
+StartNewRound: subroutine
     lda #0
     sta HighlightedDie
 
-    lda #3
-    sta TurnCount
+    lda #RollsPerHand
+    sta RollCount
 
     lda #%00011111
     sta RerollDiceMask
     jsr RerollDice
 
-    jmp StartFrame
+    rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Random number generator ;;

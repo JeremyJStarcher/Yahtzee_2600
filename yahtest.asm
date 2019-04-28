@@ -512,7 +512,7 @@ DiceRowScanLines = 4
     stx COLUP1
 
 .noChangeRerollColor
-    lda TurnCount
+    lda RollCount
     sta PrintLabelID
     jsr PrintLabel
 
@@ -588,7 +588,7 @@ DiceRowScanLines = 4
     cmp #ActiveAreaReRoll
     bne .buttonPressedDice
 
-    lda TurnCount
+    lda RollCount
     beq .noReroll
     jsr RerollDice
 .noReroll
@@ -1143,7 +1143,7 @@ RerollDice: subroutine
     lda #0
     sta RerollDiceMask
 
-    dec TurnCount
+    dec RollCount
     rts
 
 ;;;;;;;;;;;;;;
@@ -1172,7 +1172,7 @@ StartNewGame: subroutine
     sta HighlightedDie
 
     lda #3
-    sta TurnCount
+    sta RollCount
 
     lda #%00011111
     sta RerollDiceMask
