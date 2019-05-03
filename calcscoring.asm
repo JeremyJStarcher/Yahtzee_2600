@@ -1,5 +1,23 @@
     PROCESSOR 6502
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The scores are held in two non-contiguous sequences, which           ;;
+;; complicates access.  However, it *does* allow much faster look up    ;;
+;; for the msb/lsb during the time-critial drawing sections, so we'll   ;;
+;; live with the slightly more complex code here.                       ;;
+;;                                                                      ;;
+;; In addition, we have two kinds of '0' characters.  The $x0 indicates ;;
+;; a normal zero which should be displayed, while $xA indicates a       ;;
+;; a leading zero, which is displayed as a blank.                       ;;
+;;                                                                      ;;
+;; Any math routines have to convert the $xA nibble to be a zero prior  ;;
+;; to any calculations.                                                 ;;
+;; It is a LOT more complicated, but I believe the appearance results   ;;
+;; are well worth it.                                                   ;;
+;;                                                                      ;;
+;; See: ConvertSpacerNibble                                             ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 CalcScoreslookupLow:
     .byte <Calculate_L1s
     .byte <Calculate_L2s
@@ -315,10 +333,6 @@ Calculate_LGrandTotal:
     jmp FinishedCalculations
 
 ConvertSpacerNibble: subroutine
-;; For display purposes, we don't want leading zeros on the numbers, so
-;; we use the "BCD" value of "$A" a leading zero.
-;; Convert those nibbles to real zeros to make the math work.
-
 .bitmask1 = $0A
 .bitmask2 = $A0
 
@@ -484,3 +498,115 @@ CalcSubtotals: subroutine
         cld
         rts
     ENDIF
+
+AddByteColumn1: subroutine
+    sed                         ; Set decimal mode
+    clc                         ; Start from fresh
+    lda #0                      ; Zero out values
+    sta AddResult + 0
+    sta AddResult + 1
+
+    ldy #0                          ; A constant value, we'll always be bouncing off this
+    lda (AddColPtr),y               ; Get the number of items
+.loop
+    ldy #0                          ; A constant value, we'll always be bouncing off this
+    pha                             ; Store it
+
+    inc AddColPtr                   ; First/Next item
+
+    lda (AddColPtr),y               ; Double indirect - low byte
+    sta TempWord2                   ; Save it
+    lda #0                          ; Zero page     j
+    sta TempWord2 + 1               ; Save it
+    lda (TempWord2),y               ; Read the actual value
+
+    sta TempWord1 + 0
+    lda #0                          ; Fake the high byte
+    sta TempWord1 + 1
+
+    jsr Add16Bit
+
+    pla                             ; Get the saved count
+    cmp #0
+    beq .skip
+    tax
+    dex
+    txa
+    jmp .loop
+.skip
+    rts
+
+AddWordColumn1: subroutine
+    sed                         ; Set decimal mode
+    clc                         ; Start from fresh
+    lda #0                      ; Zero out values
+    sta AddResult + 0
+    sta AddResult + 1
+
+    ldy #0                          ; A constant value, we'll always be bouncing off this
+    lda (AddColPtr),y               ; Get the number of items
+.loop
+    pha                             ; Store it
+    ldy #0                          ; A constant value, we'll always be bouncing off this
+
+    inc AddColPtr                   ; Low byte
+    lda (AddColPtr),y               ; Double indirect - low byte
+    sta TempWord2                   ; Save it
+    lda #0                          ; Zero page     j
+    sta TempWord2 + 1               ; Save it
+    lda (TempWord2),y               ; Read the actual value
+    sta TempWord1 + 0
+
+    inc AddColPtr                   ; High Byte
+    lda (AddColPtr),y               ; Double indirect - low byte
+    sta TempWord2                   ; Save it
+    lda #0                          ; Zero page     j
+    sta TempWord2 + 1               ; Save it
+    lda (TempWord2),y               ; Read the actual value
+    sta TempWord1 + 1
+
+    jsr Add16Bit
+
+    pla                             ; Get the saved count
+    cmp #0
+    beq .skip
+    tax
+    dex
+    txa
+    jmp .loop
+.skip
+    rts
+
+    MAC AddByteColumn
+        ;; {1} == Pointer to the column list
+        ;; {2} == The result name
+
+        lda #<{1}
+        sta AddColPtr + 0
+        lda #>{1}
+        sta AddColPtr + 1
+
+        jsr AddByteColumn1
+
+        lda AddResult + 0
+        sta score_low_{2}
+        lda AddResult + 1
+        sta score_high_{2}
+    ENDM
+
+    MAC AddWordColumn
+        ;; {1} == Pointer to the column list
+        ;; {2} == The result name
+
+        lda #<{1}
+        sta AddColPtr + 0
+        lda #>{1}
+        sta AddColPtr + 1
+
+        jsr AddWordColumn1
+
+        lda AddResult + 0
+        sta score_low_{2}
+        lda AddResult + 1
+        sta score_high_{2}
+    ENDM

@@ -32,6 +32,8 @@ ScoreAcc:                   ; The accumulator for the score
 
 AddResult: ds 2
 TempWord1: ds 2
+TempWord2: ds 2
+AddColPtr: ds 2             ; When adding a column
 
 ; Address of the graphic for for each digit (6x2 bytes)
 GraphicBmpPtr:

@@ -149,20 +149,13 @@ RunTests: subroutine
         SetByte test03, $3A
         SetByte test04, $A3
 
-        sed
-        clc
-        ClearWord test05
-        AddByteToWord test01, test05
-        AddByteToWord test02, test05
-        AddByteToWord test03, test05
-        AddByteToWord test04, test05
+        AddByteColumn TestValues1, test05
         TestTotal test05, $0101
 
-        ClearWord test08
         SetWord test06, $1234
         SetWord test07, $1999
-        AddWordToWord test06, test08
-        AddWordToWord test07, test08
+
+        AddWordColumn TestValues2, test08
         TestTotal test08, $3233
     ENDIF
 
@@ -184,3 +177,14 @@ ClearScoresTest:
     bne .clearScores
     rts
 
+TestValues1:
+    .byte 4
+    .byte <score_low_test01
+    .byte <score_low_test02
+    .byte <score_low_test03
+    .byte <score_low_test04
+TestValues2:
+    .byte 2
+    .byte <score_low_test06, <score_high_test06
+    .byte <score_low_test07, <score_high_test07
+    ENDIF
