@@ -1,3 +1,5 @@
+    PROCESSOR 6502
+
 CalcScoreslookupLow:
     .byte <Calculate_L1s
     .byte <Calculate_L2s
@@ -381,10 +383,36 @@ FinishedCalculations:
         sta score_high_{1}
     ENDM
 
+    MAC SetWord
+        lda #<{2}
+        sta score_low_{1}
+        lda #>{2}
+        sta score_high_{1}
+    ENDM
+
     MAC AddByteToWord
         lda score_low_{1}
         sta TempWord1 + 0
         lda #0
+        sta TempWord1 + 1
+
+        lda score_low_{2}
+        sta AddResult + 0
+        lda score_high_{2}
+        sta AddResult + 1
+
+        jsr Add16Bit
+
+        lda AddResult + 0
+        sta score_low_{2}
+        lda AddResult + 1
+        sta score_high_{2}
+    ENDM
+
+    MAC AddWordToWord
+        lda score_low_{1}
+        sta TempWord1 + 0
+        lda score_high_{1}
         sta TempWord1 + 1
 
         lda score_low_{2}
@@ -439,6 +467,19 @@ CalcSubtotals: subroutine
         ClearWord LUpperTotal
         AddByteToWord TopSubtotal, LUpperTotal
         AddByteToWord TopBonus, LUpperTotal
+
+        ClearWord LLowerTotal
+        AddByteToWord L3k, LLowerTotal
+        AddByteToWord L4k, LLowerTotal
+        AddByteToWord LSmallStraight, LLowerTotal
+        AddByteToWord LLargeStraight, LLowerTotal
+        AddByteToWord LFullHouse, LLowerTotal
+        AddByteToWord LYahtzee, LLowerTotal
+        AddByteToWord LChance, LLowerTotal
+
+        ;ClearWord LGrandTotal
+        ;AddByteToWord LUpperTotal, LGrandTotal
+        ;AddByteToWord LLowerTotal, LGrandTotal
 
         cld
         rts

@@ -144,8 +144,6 @@ RunTests: subroutine
 
     IF TESTMODE=5
         jsr ClearScoresTest
-        lda #$12
-        sta score_low_test01
         SetByte test01, $45
         SetByte test02, $23
         SetByte test03, $3A
@@ -159,6 +157,13 @@ RunTests: subroutine
         AddByteToWord test03, test05
         AddByteToWord test04, test05
         TestTotal test05, $0101
+
+        ClearWord test08
+        SetWord test06, $1234
+        SetWord test07, $1999
+        AddWordToWord test06, test08
+        AddWordToWord test07, test08
+        TestTotal test08, $3233
     ENDIF
 
 EndOfTests
