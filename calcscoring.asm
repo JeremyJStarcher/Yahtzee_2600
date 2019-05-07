@@ -404,18 +404,16 @@ FinishedCalculations:
         sta score_high_{1}
     ENDM
 
-    MAC AddByteToWord
-        lda score_low_{1}
-        sta TempWord1 + 0
-        lda #0
-        sta TempWord1 + 1
+    MAC AddByteColumn
+        ;; {1} == Pointer to the column list
+        ;; {2} == The result name
 
-        lda score_low_{2}
-        sta AddResult + 0
-        lda score_high_{2}
-        sta AddResult + 1
+        lda #<{1}
+        sta AddColPtr + 0
+        lda #>{1}
+        sta AddColPtr + 1
 
-        jsr Add16Bit
+        jsr AddByteColumn1
 
         lda AddResult + 0
         sta score_low_{2}
@@ -423,45 +421,73 @@ FinishedCalculations:
         sta score_high_{2}
     ENDM
 
-    MAC AddWordToWord
-        lda score_low_{1}
-        sta TempWord1 + 0
-        lda score_high_{1}
-        sta TempWord1 + 1
+    MAC AddWordColumn
+        ;; {1} == Pointer to the column list
+        ;; {2} == The result name
 
-        lda score_low_{2}
-        sta AddResult + 0
-        lda score_high_{2}
-        sta AddResult + 1
+        lda #<{1}
+        sta AddColPtr + 0
+        lda #>{1}
+        sta AddColPtr + 1
 
-        jsr Add16Bit
+        jsr AddWordColumn1
 
         lda AddResult + 0
         sta score_low_{2}
         lda AddResult + 1
         sta score_high_{2}
-    ENDM
-
-    MAC ClearWord
-        lda $0
-        sta score_low_{1}
-        sta score_high_{1}
     ENDM
 
     IFCONST TESTMODE
     ELSE
+
+TopSubtotalValues:
+    .byte 5
+    .byte <score_low_L1s
+    .byte <score_low_L2s
+    .byte <score_low_L3s
+    .byte <score_low_L4s
+    .byte <score_low_L5s
+    .byte <score_low_L6s
+
+LowerTotalValues:
+    .byte 6
+    .byte <score_low_L3k
+    .byte <score_low_L4k
+    .byte <score_low_LSmallStraight
+    .byte <score_low_LLargeStraight
+    .byte <score_low_LFullHouse
+    .byte <score_low_LYahtzee
+    .byte <score_low_LChance
+
+LUpperTotalValues:
+    .byte 1
+    .byte <score_low_TopBonus, <score_high_TopBonus
+    .byte <score_low_TopSubtotal, <score_high_TopSubtotal
+
+LGrandTotalValues
+    .byte 1
+    .byte <score_low_LUpperTotal, <score_high_LUpperTotal
+    .byte <score_low_LLowerTotal, <score_high_LLowerTotal
+
 CalcSubtotals: subroutine
         sed
 
-        clc
-        ClearWord TopSubtotal
-        AddByteToWord L1s, TopSubtotal
-        AddByteToWord L2s, TopSubtotal
-        AddByteToWord L3s, TopSubtotal
-        AddByteToWord L4s, TopSubtotal
-        AddByteToWord L5s, TopSubtotal
-        AddByteToWord L6s, TopSubtotal
+        lda ScorePhase 
+        cmp #ScorePhaseCalcUpper
+        bne .tryLower
+        AddByteColumn TopSubtotalValues, TopSubtotal
+        jmp .done
 
+.tryLower
+        cmp #ScorePhaseCalcLower
+        bne .tryCalcUpperBonus
+        AddByteColumn LowerTotalValues, LLowerTotal
+        jmp .done
+
+.tryCalcUpperBonus
+        cmp #ScorePhaseCalcUpperBonus
+        bne .tryUpperTotal
         ;; Calculate the upper bonus
         ;; Compare words, not just bytes, because the top hand subtotal
         ;; can actually be 105.
@@ -477,32 +503,32 @@ CalcSubtotals: subroutine
         ldx #$35
 .noTopBonus
         stx score_low_TopBonus
+        jmp .done
 
-        ClearWord LUpperTotal
-        AddByteToWord TopSubtotal, LUpperTotal
-        AddByteToWord TopBonus, LUpperTotal
+.tryUpperTotal
+        cmp #ScorePhaseCalcLowerGrandTotal
+        bne .tryCalcGrandTotal
+        AddWordColumn LUpperTotalValues, LUpperTotal
+        jmp .done
 
-        ClearWord LLowerTotal
-        AddByteToWord L3k, LLowerTotal
-        AddByteToWord L4k, LLowerTotal
-        AddByteToWord LSmallStraight, LLowerTotal
-        AddByteToWord LLargeStraight, LLowerTotal
-        AddByteToWord LFullHouse, LLowerTotal
-        AddByteToWord LYahtzee, LLowerTotal
-        AddByteToWord LChance, LLowerTotal
+.tryCalcGrandTotal
+        AddWordColumn LGrandTotalValues, LGrandTotal
 
-        ;ClearWord LGrandTotal
-        ;AddByteToWord LUpperTotal, LGrandTotal
-        ;AddByteToWord LLowerTotal, LGrandTotal
-
+.done
+        inc ScorePhase
+        lda ScorePhase
+        cmp #6
+        bcc .noreset
+        lda #0
+        sta ScorePhase
+.noreset
         cld
         rts
     ENDIF
 
 AddByteColumn1: subroutine
-    sed                         ; Set decimal mode
     clc                         ; Start from fresh
-    lda #0                      ; Zero out values
+    lda #$00                    ; Zero out values
     sta AddResult + 0
     sta AddResult + 1
 
@@ -535,9 +561,9 @@ AddByteColumn1: subroutine
     jmp .loop
 .skip
     rts
+    ENDIF
 
 AddWordColumn1: subroutine
-    sed                         ; Set decimal mode
     clc                         ; Start from fresh
     lda #0                      ; Zero out values
     sta AddResult + 0
@@ -576,37 +602,3 @@ AddWordColumn1: subroutine
     jmp .loop
 .skip
     rts
-
-    MAC AddByteColumn
-        ;; {1} == Pointer to the column list
-        ;; {2} == The result name
-
-        lda #<{1}
-        sta AddColPtr + 0
-        lda #>{1}
-        sta AddColPtr + 1
-
-        jsr AddByteColumn1
-
-        lda AddResult + 0
-        sta score_low_{2}
-        lda AddResult + 1
-        sta score_high_{2}
-    ENDM
-
-    MAC AddWordColumn
-        ;; {1} == Pointer to the column list
-        ;; {2} == The result name
-
-        lda #<{1}
-        sta AddColPtr + 0
-        lda #>{1}
-        sta AddColPtr + 1
-
-        jsr AddWordColumn1
-
-        lda AddResult + 0
-        sta score_low_{2}
-        lda AddResult + 1
-        sta score_high_{2}
-    ENDM

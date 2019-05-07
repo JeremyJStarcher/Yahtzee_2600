@@ -58,6 +58,14 @@ PrintLabelRoll1 = 2
 PrintLabelRoll2 = 1
 PrintLabelRoll3 = 0
 
+ScorePhaseCalcUpper = 0
+ScorePhaseCalcLower = 1
+ScorePhaseCalcUpperBonus = 2
+ScorePhaseCalcYahtzeeBonus  = 3
+ScorePhaseCalcUpperGrandTotal =  4
+ScorePhaseCalcLowerGrandTotal = 5
+ScorePhaseCalcGrandTotal = 6
+
 Unscored = $AA
 RollsPerHand = 3
 ScoreRamSize = .postScoreRamTop - .preScoreRamTop

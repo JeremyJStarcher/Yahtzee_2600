@@ -145,6 +145,7 @@ RunTests: subroutine
     ENDM
 
     IF TESTMODE=5
+        sed
         jsr ClearScoresTest
         SetByte test01, $45
         SetByte test02, $23
@@ -180,13 +181,13 @@ ClearScoresTest:
     rts
 
 TestValues1:
-    .byte 4
+    .byte 3
     .byte <score_low_test01
     .byte <score_low_test02
     .byte <score_low_test03
     .byte <score_low_test04
 TestValues2:
-    .byte 2
+    .byte 1
     .byte <score_low_test06, <score_high_test06
     .byte <score_low_test07, <score_high_test07
     ENDIF
