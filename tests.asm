@@ -1,3 +1,5 @@
+    PROCESSOR 6502
+
 FillDice:
     ldy #0
     lda (ScoreScratchpad),y

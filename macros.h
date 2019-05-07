@@ -1,3 +1,4 @@
+    PROCESSOR 6502
     mac clearBit
         ;; {1} the bit pattern
         ;; {2} the address

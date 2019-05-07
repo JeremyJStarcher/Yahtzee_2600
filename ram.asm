@@ -1,3 +1,4 @@
+    PROCESSOR 6502
 ; Some positions are shared between different coroutines
 ; (think of them as local variables)
 .startOfRam:

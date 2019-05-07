@@ -1,3 +1,4 @@
+    PROCESSOR 6502
 
 ;;;;;;;;;;;;;;;
 ;; CONSTANTS ;;
