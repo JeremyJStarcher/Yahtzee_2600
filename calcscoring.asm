@@ -605,10 +605,34 @@ AddWordColumn1: subroutine
 
     pla                             ; Get the saved count
     cmp #0
-    beq .skip
+    beq .exitloop
     tax
     dex
     txa
     jmp .loop
-.skip
+.exitloop
+
+    ; Check the Highest byte
+    lda AddResult+1         ; Get the score
+    and #$F0                ; Anything in the high nibble?
+    bne .bail               ; Yes, keep it
+    lda AddResult+1         ; Reget the value
+    and #$0F                ; Strip off the high nibble
+    ora #$A0                ; Set to our blank character
+    sta AddResult+1         ; Save again
+
+    and #$0F                ; Anything in the lower nibble?
+    bne .bail               ; Yes, keep it
+    lda #$AA                ; Just wipe out the whole thing
+    sta AddResult+1         ; and save it
+
+    lda AddResult+0         ; Get the score
+    and #$F0                ; Anything in the high nibble?
+    bne .bail               ; Yes, keep it
+    lda AddResult+0         ; Reget the value
+    and #$0F                ; Strip off the high nibble
+    ora #$A0                ; Set to our blank character
+    sta AddResult+0         ; Save again
+
+.bail
     rts
