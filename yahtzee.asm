@@ -179,6 +179,8 @@ StartFrame: subroutine
     beq .noplay
 
     clearBit StatusPlayHand, StatusBits
+    lda #ScorePhaseCalcUpper
+    sta ScorePhase
 
     ldy OffsetIntoScoreList     ; The address
     lda score_low,y             ; Slow already filled?
@@ -1230,8 +1232,10 @@ StartNewGame: subroutine
     lda #ActiveAreaScores
     sta ActiveArea
 
-    jsr StartNewRound
+    lda #ScorePhaseCalcUpper
+    sta ScorePhase
 
+    jsr StartNewRound
     jmp StartFrame
 
 StartNewRound: subroutine

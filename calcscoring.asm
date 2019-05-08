@@ -454,8 +454,13 @@ LGrandTotalValues
     .byte <score_low_LLowerTotal, <score_high_LLowerTotal
 
 CalcSubtotals: subroutine
-        sed
+        lda ScorePhase
+        cmp #ScorePhaseNothing
+        bne .calc
+        jmp .noreset
 
+.calc
+        sed
         lda ScorePhase
         cmp #ScorePhaseCalcUpper
         bne .tryLower
@@ -495,12 +500,21 @@ CalcSubtotals: subroutine
         jmp .done
 
 .tryCalcGrandTotal
+        cmp #ScorePhaseCalcGrandTotal
+        bne .tryClearLeading
         AddWordColumn LGrandTotalValues, LGrandTotal
+        jmp .done
+
+.tryClearLeading
+        cmp #ScorePhaseClearLeading
+        bne .done
+        lda #ScorePhaseNothing
+        jmp .noreset
 
 .done
         inc ScorePhase
         lda ScorePhase
-        cmp #6
+        cmp #8
         bcc .noreset
         lda #0
         sta ScorePhase

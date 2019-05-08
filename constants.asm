@@ -65,6 +65,8 @@ ScorePhaseCalcYahtzeeBonus  = 3
 ScorePhaseCalcUpperGrandTotal =  4
 ScorePhaseCalcLowerGrandTotal = 5
 ScorePhaseCalcGrandTotal = 6
+ScorePhaseClearLeading = 7
+ScorePhaseNothing = 100
 
 Unscored = $AA
 RollsPerHand = 3
