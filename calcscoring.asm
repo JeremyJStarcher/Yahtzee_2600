@@ -17,6 +17,40 @@
 ;;                                                                      ;;
 ;; See: ConvertSpacerNibble                                             ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    .align 128
+    IFCONST TESTMODE
+    ELSE
+TopSubtotalValues:
+    .byte 5
+    .byte <score_low_L1s, <score_high_L1s
+    .byte <score_low_L2s, <score_high_L2s
+    .byte <score_low_L3s, <score_high_L3s
+    .byte <score_low_L4s, <score_high_L4s
+    .byte <score_low_L5s, <score_high_L5s
+    .byte <score_low_L6s, <score_high_L6s
+
+LowerTotalValues:
+    .byte 6
+    .byte <score_low_L3k, <score_high_L3k
+    .byte <score_low_L4k, <score_high_L4k
+    .byte <score_low_LSmallStraight, <score_high_LSmallStraight
+    .byte <score_low_LLargeStraight, <score_high_LLargeStraight
+    .byte <score_low_LFullHouse, <score_high_LFullHouse
+    .byte <score_low_LYahtzee, <score_high_LYahtzee
+    .byte <score_low_LChance, <score_high_LChance
+
+LUpperTotalValues:
+    .byte 1
+    .byte <score_low_TopBonus, <score_high_TopBonus
+    .byte <score_low_TopSubtotal, <score_high_TopSubtotal
+
+LGrandTotalValues
+    .byte 1
+    .byte <score_low_LUpperTotal, <score_high_LUpperTotal
+    .byte <score_low_LLowerTotal, <score_high_LLowerTotal
+    ENDIF
+
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 CalcScoreslookupLow:
     .byte <Calculate_L1s
@@ -387,6 +421,14 @@ FinishedCalculations:
         rts
     ELSE
         ;; The game uses an indirect jump to get here.
+        lda ScoreAcc            ; Get the score
+        and #$F0                ; Anything in the high nibble?
+        bne .no                 ; Yes, keep it
+        lda ScoreAcc            ; Reget the value
+        and #$0F                ; Strip off the high nibble
+        ora #$A0                ; Set to our blank character
+        sta ScoreAcc            ; Save again
+.no
         jmp AfterCalc
     ENDIF
 
@@ -423,35 +465,6 @@ FinishedCalculations:
 
     IFCONST TESTMODE
     ELSE
-
-TopSubtotalValues:
-    .byte 5
-    .byte <score_low_L1s, <score_high_L1s
-    .byte <score_low_L2s, <score_high_L2s
-    .byte <score_low_L3s, <score_high_L3s
-    .byte <score_low_L4s, <score_high_L4s
-    .byte <score_low_L5s, <score_high_L5s
-    .byte <score_low_L6s, <score_high_L6s
-
-LowerTotalValues:
-    .byte 6
-    .byte <score_low_L3k, <score_high_L3k
-    .byte <score_low_L4k, <score_high_L4k
-    .byte <score_low_LSmallStraight, <score_high_LSmallStraight
-    .byte <score_low_LLargeStraight, <score_high_LLargeStraight
-    .byte <score_low_LFullHouse, <score_high_LFullHouse
-    .byte <score_low_LYahtzee, <score_high_LYahtzee
-    .byte <score_low_LChance, <score_high_LChance
-
-LUpperTotalValues:
-    .byte 1
-    .byte <score_low_TopBonus, <score_high_TopBonus
-    .byte <score_low_TopSubtotal, <score_high_TopSubtotal
-
-LGrandTotalValues
-    .byte 1
-    .byte <score_low_LUpperTotal, <score_high_LUpperTotal
-    .byte <score_low_LLowerTotal, <score_high_LLowerTotal
 
 CalcSubtotals: subroutine
         lda ScorePhase
