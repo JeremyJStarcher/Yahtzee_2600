@@ -493,16 +493,25 @@ CalcSubtotals: subroutine
         ;; Compare words, not just bytes, because the top hand subtotal
         ;; can actually be 105.
         ;; (6 * 5) + (5 * 5) + (4 * 5) + (3 * 5) + (2 * 5) + (1 *5)
-        ldx #0              ; The 'default' bonus
-        lda #$00            ; MSB
-        cmp score_high_TopSubtotal
-        bne .compareBonus
-        lda #$65
-        cmp score_low_TopSubtotal
-.compareBonus:
-        bcs .noTopBonus
+        ldx #$A0            ; The 'default' bonus
+        lda #$AA            ; "Blank" MSB
+        cmp score_high_TopSubtotal ; Does it match what we have?
+        beq .comparelsb   ; Then compare LSB
+
+        ldx #$35            ; MSB has a value? the word is graater than 63
+        jmp .saveTopBonus
+.comparelsb:
+        lda score_low_TopSubtotal
+        and #$F0            ; Just the top nibble
+        cmp #$A0            ; Our 'blank' character?
+        beq .saveTopBonus   ; Value is < 10
+
+        lda score_low_TopSubtotal
+        cmp #$63                ; Min score
+        bcc .saveTopBonus
+
         ldx #$35
-.noTopBonus
+.saveTopBonus
         stx score_low_TopBonus
         jmp .done
 
