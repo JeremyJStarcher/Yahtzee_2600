@@ -495,14 +495,18 @@ DiceRowScanLines = 4
         ;; {1} - The face offset
         ;; {2} - Which line of the dice
         ;; {3} - which shadow register
-
-        ldx #MaskedDieFace
-        lda #[1 << {1}]             ; Calculate the bitmask position
-        bit RerollDiceMask              ; Compare against the mask
-        bne .keepBlank              ; masked? Keep it
         ldx [RolledDice + {1}]      ; The value of the face
 
-.keepBlank:
+        lda #StatusBlinkOn
+        bit StatusBits
+        bne .dontmaskface
+
+        lda #[1 << {1}]             ; Calculate the bitmask position
+        bit RerollDiceMask          ; Compare against the mask
+        beq .dontmaskface           ; masked? Keep it
+        ldx #MaskedDieFace
+
+.dontmaskface:
         lda {3}                     ; Load the shadow register
         ora faceL{2}P{1},x          ; merge in the face bitmap
         sta {3}                     ; And re-save
