@@ -857,7 +857,7 @@ showDice: subroutine
     ;; We use shadow registers because we turn the PF   ;;
     ;; on and then off every scan line, keeping the     ;;
     ;; dice display oo just the left-hand side.         ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;A
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda MaskPF0
     and SPF0
     sta SPF0
