@@ -1193,6 +1193,10 @@ StartNewGame: subroutine
     sta score_low,x
     bne .clearScores
 
+    lda #0
+    sta StatusBits              ; Reset the game statuss
+    sta OffsetIntoScoreList     ; Reset te top line
+
     ; Continue into real prep
     lda #WaitingJoyPress
     sta GameState
