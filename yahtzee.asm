@@ -497,9 +497,9 @@ DiceRowScanLines = 4
         ;; {3} - which shadow register
         ldx [RolledDice + {1}]      ; The value of the face
 
-        lda #StatusBlinkOn
-        bit StatusBits
-        bne .dontmaskface
+       ; lda #StatusBlinkOn
+       ; bit StatusBits
+       ; bne .dontmaskface
 
         lda #[1 << {1}]             ; Calculate the bitmask position
         bit RerollDiceMask          ; Compare against the mask
