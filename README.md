@@ -3,6 +3,9 @@ Yahtzee for the 2600
 
 ![Screen shot 1](https://raw.githubusercontent.com/JeremyJStarcher/Yahtzee_2600/master/docs/screenshot1.png)
 
+
+[Play Online](https://jeremyjstarcher.github.io/Yahtzee_2600/)
+
 *Screen shot is from the Stella emulator*
 
 This version is playable, but there are a few features notworking yet.
